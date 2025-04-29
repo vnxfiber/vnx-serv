@@ -4,6 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Infraestrutura de Rede - VNX FIBER SERVICE</title>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX');
+    </script>
+    <meta name="description" content="Soluções completas em infraestrutura de rede para empresas e provedores de internet. Fibra óptica, servidores, datacenter e infraestrutura física.">
+    <meta name="keywords" content="infraestrutura de rede, fibra óptica, servidores, datacenter, redes estruturadas, VNX FIBER">
+    <!-- Open Graph para compartilhamento em redes sociais -->
+    <meta property="og:title" content="Infraestrutura de Rede - VNX FIBER SERVICE">
+    <meta property="og:description" content="Soluções completas em infraestrutura para redes de alta performance e confiabilidade">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://vnxfiber.com.br/servicos/infraestrutura-de-rede.html">
+    <meta property="og:image" content="https://vnxfiber.com.br/assets/infraestrutura-rede.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,16 +31,17 @@
     <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
     <link rel="stylesheet" href="../styles/main.css">
     <link rel="icon" href="../assets/favicon.ico" type="image/x-icon">
+    <link rel="preload" href="../assets/logo.svg" as="image">
 </head>
 <body>
     <!-- Header -->
     <header class="fixed-top">
-        <nav class="navbar navbar-expand-lg navbar-dark">
+        <nav class="navbar navbar-expand-lg navbar-dark" aria-label="Navegação principal">
             <div class="container">
                 <a class="navbar-brand" href="../index.html">
-                    <img src="../assets/logo.svg" alt="VNX FIBER SERVICE" height="60">
+                    <img src="../assets/logo.svg" alt="VNX FIBER SERVICE" width="180" height="60">
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
@@ -36,7 +53,7 @@
                             <a class="nav-link" href="../index.html#quem-somos">Quem Somos</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active" href="../index.html#servicos">Serviços</a>
+                            <a class="nav-link active" href="../index.html#servicos" aria-current="page">Serviços</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="../index.html#clientes">Clientes</a>
@@ -83,7 +100,7 @@
                     </p>
                 </div>
                 <div class="col-lg-6" data-aos="fade-left">
-                    <img src="../assets/infraestrutura-rede.svg" alt="Infraestrutura de Rede" class="img-fluid rounded shadow">
+                    <img src="../assets/infraestrutura-rede.svg" alt="Infraestrutura de Rede" class="img-fluid rounded shadow" width="540" height="360" loading="lazy">
                 </div>
             </div>
 
@@ -153,11 +170,11 @@
             <div class="row g-4">
                 <div class="col-lg-4 col-md-6">
                     <div class="footer-info">
-                        <img src="../assets/logo-white.svg" alt="VNX FIBER SERVICE" class="footer-logo mb-4" height="60">
+                        <img src="../assets/logo-white.svg" alt="VNX FIBER SERVICE" class="footer-logo mb-4" width="180" height="60">
                         <p>Soluções completas em telecomunicações para empresas de TI e provedores de internet.</p>
                         <div class="mt-4">
-                            <p><i class="fas fa-envelope me-2"></i> contato@vnxfiber.com.br</p>
-                            <p><i class="fas fa-phone me-2"></i> (98) 9 9988-2215</p>
+                            <p><i class="fas fa-envelope me-2" aria-hidden="true"></i> <a href="mailto:contato@vnxfiber.com.br" class="text-white">contato@vnxfiber.com.br</a></p>
+                            <p><i class="fas fa-phone me-2" aria-hidden="true"></i> <a href="tel:+5598999882215" class="text-white">(98) 9 9988-2215</a></p>
                         </div>
                     </div>
                 </div>
@@ -185,9 +202,9 @@
                     <h5>Redes Sociais</h5>
                     <p>Acompanhe nossas redes sociais e fique por dentro das novidades</p>
                     <div class="social-links">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://facebook.com/vnxfiber" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
+                        <a href="https://instagram.com/vnxfiber" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+                        <a href="https://wa.me/5598999882215" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
                     </div>
                 </div>
             </div>
