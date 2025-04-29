@@ -983,19 +983,22 @@ footer a:hover {
         padding-left: 15px;
         padding-right: 15px;
         padding-bottom: 15px;
-        width: 100%;
+        width: 100vw;
+        max-width: 100%;
         height: auto;
+        max-height: calc(100vh - 76px);
         background: var(--gradient-primary);
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         z-index: 1000;
-        max-width: 100%;
+        overflow-y: auto;
         overflow-x: hidden;
     }
     
     .navbar-nav {
-        max-width: 100%;
+        width: 100%;
         margin-left: 0 !important;
         margin-right: 0 !important;
+        padding-bottom: 20px;
     }
     
     .navbar-nav .nav-item {
@@ -1007,5 +1010,11 @@ footer a:hover {
         padding: 10px !important;
         width: 100%;
         display: block;
+    }
+
+    body {
+        overflow-x: hidden;
+        width: 100%;
+        position: relative;
     }
 } 
