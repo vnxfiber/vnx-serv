@@ -1,6 +1,6 @@
 ---
 description: 
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 - SEMPRE ATUALIZE O REPOSITORIO GIT APOS UMA ATULIZAÇÃO
