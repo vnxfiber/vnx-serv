@@ -1,0 +1,19 @@
+{
+  "name": "vnx-fiber-service",
+  "version": "1.0.0",
+  "description": "VNX FIBER SERVICE institutional website",
+  "main": "index.js",
+  "scripts": {
+    "start": "parcel index.html",
+    "build": "parcel build index.html"
+  },
+  "dependencies": {
+    "aos": "^2.3.4",
+    "bootstrap": "^5.3.2",
+    "@fortawesome/fontawesome-free": "^6.5.1",
+    "swiper": "^11.0.5"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.12.5"
+  }
+} 

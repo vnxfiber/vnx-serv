@@ -1,0 +1,63 @@
+/* Hero Section */
+.hero {
+    min-height: 100vh;
+    background: url('assets/hero-bg.svg') no-repeat center center;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-top: 80px;
+}
+
+/* About Section */
+.experience-badge {
+    position: absolute;
+    right: -30px;
+    bottom: 30px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    animation: pulse 2s infinite;
+}
+
+.experience-badge .years {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.experience-badge .text {
+    font-size: 0.9rem;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Remove the placeholder styles since we now have real images */
+.about-image-placeholder {
+    display: none;
+}
+
+/* Footer Style */
+.footer-logo {
+    margin-bottom: 1rem;
+    max-width: 180px;
+} 
