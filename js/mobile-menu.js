@@ -64,4 +64,23 @@ document.addEventListener('DOMContentLoaded', function() {
             document.querySelector('.navbar').classList.remove('navbar-scrolled');
         }
     });
+    
+    // Ajusta o modal de agendamento
+    const scheduleModal = document.getElementById('scheduleModal');
+    if (scheduleModal) {
+        scheduleModal.addEventListener('shown.bs.modal', function() {
+            // Ajusta o tamanho do modal em dispositivos móveis
+            if (window.innerWidth < 576) {
+                const modalDialog = this.querySelector('.modal-dialog');
+                modalDialog.style.margin = '0.5rem';
+                
+                // Garante que o modal esteja visível dentro da tela
+                const viewportHeight = window.innerHeight;
+                const modalContent = this.querySelector('.modal-content');
+                if (modalContent.offsetHeight > viewportHeight - 20) {
+                    modalContent.style.height = (viewportHeight - 20) + 'px';
+                }
+            }
+        });
+    }
 }); 
