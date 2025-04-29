@@ -644,54 +644,60 @@
 
     <!-- Modal de Agendamento -->
     <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header py-2">
                     <h5 class="modal-title" id="scheduleModalLabel">Agendar Atendimento</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body py-3">
                     <form id="schedule-form">
-                        <div class="mb-3">
-                            <label for="scheduleName" class="form-label">Nome</label>
-                            <input type="text" class="form-control" id="scheduleName" required>
+                        <div class="row g-2">
+                            <div class="col-md-6 mb-2">
+                                <label for="scheduleName" class="form-label small">Nome</label>
+                                <input type="text" class="form-control form-control-sm" id="scheduleName" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label for="scheduleEmail" class="form-label small">E-mail</label>
+                                <input type="email" class="form-control form-control-sm" id="scheduleEmail" required>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="scheduleEmail" class="form-label">E-mail</label>
-                            <input type="email" class="form-control" id="scheduleEmail" required>
+                        <div class="row g-2">
+                            <div class="col-md-6 mb-2">
+                                <label for="schedulePhone" class="form-label small">Telefone</label>
+                                <input type="tel" class="form-control form-control-sm" id="schedulePhone" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label for="scheduleService" class="form-label small">Serviço</label>
+                                <select class="form-select form-select-sm" id="scheduleService" required>
+                                    <option value="" selected disabled>Selecione um serviço</option>
+                                    <option value="infraestrutura">Infraestrutura de Rede</option>
+                                    <option value="isp">Serviços para ISP</option>
+                                    <option value="telefonia">Telefonia</option>
+                                    <option value="radio">Rádio e Comunicação</option>
+                                    <option value="consultoria">Consultoria</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="schedulePhone" class="form-label">Telefone</label>
-                            <input type="tel" class="form-control" id="schedulePhone" required>
+                        <div class="row g-2">
+                            <div class="col-md-6 mb-2">
+                                <label for="scheduleDate" class="form-label small">Data preferencial</label>
+                                <input type="date" class="form-control form-control-sm" id="scheduleDate" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label for="scheduleTime" class="form-label small">Horário</label>
+                                <input type="time" class="form-control form-control-sm" id="scheduleTime" required>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="scheduleDate" class="form-label">Data preferencial</label>
-                            <input type="date" class="form-control" id="scheduleDate" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="scheduleTime" class="form-label">Horário preferencial</label>
-                            <input type="time" class="form-control" id="scheduleTime" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="scheduleService" class="form-label">Serviço</label>
-                            <select class="form-select" id="scheduleService" required>
-                                <option value="" selected disabled>Selecione um serviço</option>
-                                <option value="infraestrutura">Infraestrutura de Rede</option>
-                                <option value="isp">Serviços para ISP</option>
-                                <option value="telefonia">Telefonia</option>
-                                <option value="radio">Rádio e Comunicação</option>
-                                <option value="consultoria">Consultoria</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="scheduleMessage" class="form-label">Mensagem (opcional)</label>
-                            <textarea class="form-control" id="scheduleMessage" rows="3"></textarea>
+                        <div class="mb-2">
+                            <label for="scheduleMessage" class="form-label small">Mensagem (opcional)</label>
+                            <textarea class="form-control form-control-sm" id="scheduleMessage" rows="2"></textarea>
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="submitScheduleForm()">Agendar</button>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="submitScheduleForm()">Agendar</button>
                 </div>
             </div>
         </div>
@@ -774,7 +780,46 @@
                     }
                 });
             });
+
+            // Ajusta o modal de agendamento
+            const scheduleModal = document.getElementById('scheduleModal');
+            if (scheduleModal) {
+                scheduleModal.addEventListener('shown.bs.modal', function() {
+                    // Ajusta o tamanho do modal em dispositivos móveis
+                    if (window.innerWidth < 576) {
+                        const modalDialog = this.querySelector('.modal-dialog');
+                        modalDialog.style.margin = '0.5rem';
+                        
+                        // Garante que o modal esteja visível dentro da tela
+                        const viewportHeight = window.innerHeight;
+                        const modalContent = this.querySelector('.modal-content');
+                        if (modalContent.offsetHeight > viewportHeight - 20) {
+                            modalContent.style.height = (viewportHeight - 20) + 'px';
+                        }
+                    }
+                });
+            }
         });
+    </script>
+    
+    <!-- Script para função de agendamento -->
+    <script>
+        function openScheduleModal() {
+            const scheduleModal = new bootstrap.Modal(document.getElementById('scheduleModal'));
+            scheduleModal.show();
+        }
+        
+        function submitScheduleForm() {
+            // Aqui você pode implementar a lógica para enviar o formulário
+            alert('Agendamento realizado com sucesso! Entraremos em contato para confirmar.');
+            
+            // Fecha o modal após o envio
+            const scheduleModal = bootstrap.Modal.getInstance(document.getElementById('scheduleModal'));
+            scheduleModal.hide();
+            
+            // Limpa o formulário
+            document.getElementById('schedule-form').reset();
+        }
     </script>
 </body>
 </html> 

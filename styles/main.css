@@ -936,7 +936,7 @@ footer a:hover {
     background: var(--gradient-primary);
     color: white;
     border-bottom: none;
-    padding: 1.5rem;
+    padding: 1rem;
 }
 
 .modal-header .btn-close {
@@ -950,12 +950,12 @@ footer a:hover {
 }
 
 .modal-body {
-    padding: 2rem;
+    padding: 1rem;
 }
 
 .modal-footer {
     border-top: none;
-    padding: 1.5rem 2rem;
+    padding: 1rem;
 }
 
 .btn-secondary {
@@ -969,9 +969,41 @@ footer a:hover {
     background: #d0d0d0;
 }
 
-/* Fix for navbar scrolled */
-.navbar-scrolled {
-    background: rgba(10, 61, 98, 0.95) !important;
+/* Estilos específicos para o modal de agendamento */
+#scheduleModal .form-label {
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+#scheduleModal .form-control-sm,
+#scheduleModal .form-select-sm {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+}
+
+#scheduleModal textarea {
+    min-height: 60px;
+}
+
+/* Ajustes para dispositivos móveis */
+@media (max-width: 576px) {
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+    
+    #scheduleModal .modal-body {
+        padding: 0.75rem;
+    }
+    
+    #scheduleModal .row {
+        margin-left: -5px;
+        margin-right: -5px;
+    }
+    
+    #scheduleModal [class*="col-"] {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
 }
 
 /* Mobile Menu Fixes */
