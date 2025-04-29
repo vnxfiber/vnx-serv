@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800px" height="600px" viewBox="0 0 800 600" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Serviços para ISP</title>
+    <defs>
+        <linearGradient x1="0%" y1="0%" x2="100%" y2="100%" id="linearGradient-1">
+            <stop stop-color="#0d6efd" offset="0%"></stop>
+            <stop stop-color="#0a58ca" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Servicos-ISP" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect fill="#F5F7FA" x="0" y="0" width="800" height="600"></rect>
+        <g id="ISP-Services" transform="translate(100, 100)">
+            <!-- Central Server Rack -->
+            <rect id="rack" fill="#343a40" x="240" y="120" width="120" height="300" rx="5"></rect>
+            
+            <!-- Server Units -->
+            <rect id="server1" fill="#495057" x="250" y="140" width="100" height="40" rx="2"></rect>
+            <rect id="server1-detail1" fill="#6c757d" x="260" y="150" width="60" height="5" rx="1"></rect>
+            <rect id="server1-detail2" fill="#6c757d" x="260" y="160" width="60" height="5" rx="1"></rect>
+            <circle id="server1-light" fill="#4caf50" cx="330" cy="155" r="5"></circle>
+            
+            <rect id="server2" fill="#495057" x="250" y="190" width="100" height="40" rx="2"></rect>
+            <rect id="server2-detail1" fill="#6c757d" x="260" y="200" width="60" height="5" rx="1"></rect>
+            <rect id="server2-detail2" fill="#6c757d" x="260" y="210" width="60" height="5" rx="1"></rect>
+            <circle id="server2-light" fill="#4caf50" cx="330" cy="205" r="5"></circle>
+            
+            <rect id="server3" fill="#495057" x="250" y="240" width="100" height="40" rx="2"></rect>
+            <rect id="server3-detail1" fill="#6c757d" x="260" y="250" width="60" height="5" rx="1"></rect>
+            <rect id="server3-detail2" fill="#6c757d" x="260" y="260" width="60" height="5" rx="1"></rect>
+            <circle id="server3-light" fill="#4caf50" cx="330" cy="255" r="5"></circle>
+            
+            <rect id="server4" fill="#495057" x="250" y="290" width="100" height="40" rx="2"></rect>
+            <rect id="server4-detail1" fill="#6c757d" x="260" y="300" width="60" height="5" rx="1"></rect>
+            <rect id="server4-detail2" fill="#6c757d" x="260" y="310" width="60" height="5" rx="1"></rect>
+            <circle id="server4-light" fill="#ffc107" cx="330" cy="305" r="5"></circle>
+            
+            <rect id="server5" fill="#495057" x="250" y="340" width="100" height="40" rx="2"></rect>
+            <rect id="server5-detail1" fill="#6c757d" x="260" y="350" width="60" height="5" rx="1"></rect>
+            <rect id="server5-detail2" fill="#6c757d" x="260" y="360" width="60" height="5" rx="1"></rect>
+            <circle id="server5-light" fill="#4caf50" cx="330" cy="355" r="5"></circle>
+            
+            <!-- OLT -->
+            <rect id="OLT" fill="#0d6efd" x="400" y="180" width="150" height="80" rx="5"></rect>
+            <text font-family="Arial" font-size="18" font-weight="bold" fill="#FFFFFF" x="455" y="225">OLT</text>
+            <circle id="OLT-light1" fill="#4caf50" cx="420" cy="200" r="5"></circle>
+            <circle id="OLT-light2" fill="#4caf50" cx="440" cy="200" r="5"></circle>
+            <circle id="OLT-light3" fill="#4caf50" cx="460" cy="200" r="5"></circle>
+            <circle id="OLT-light4" fill="#ffc107" cx="480" cy="200" r="5"></circle>
+            <circle id="OLT-light5" fill="#4caf50" cx="500" cy="200" r="5"></circle>
+            <circle id="OLT-light6" fill="#4caf50" cx="520" cy="200" r="5"></circle>
+            
+            <!-- Connections to OLT -->
+            <path id="ServerToOLT" stroke="#0d6efd" stroke-width="3" d="M350,220 L400,220"></path>
+            
+            <!-- ONUs -->
+            <rect id="ONU1" fill="#0a58ca" x="130" y="80" width="60" height="30" rx="3"></rect>
+            <text font-family="Arial" font-size="10" font-weight="bold" fill="#FFFFFF" x="145" y="100">ONU</text>
+            
+            <rect id="ONU2" fill="#0a58ca" x="500" y="80" width="60" height="30" rx="3"></rect>
+            <text font-family="Arial" font-size="10" font-weight="bold" fill="#FFFFFF" x="515" y="100">ONU</text>
+            
+            <rect id="ONU3" fill="#0a58ca" x="130" y="290" width="60" height="30" rx="3"></rect>
+            <text font-family="Arial" font-size="10" font-weight="bold" fill="#FFFFFF" x="145" y="310">ONU</text>
+            
+            <rect id="ONU4" fill="#0a58ca" x="500" y="290" width="60" height="30" rx="3"></rect>
+            <text font-family="Arial" font-size="10" font-weight="bold" fill="#FFFFFF" x="515" y="310">ONU</text>
+            
+            <!-- Fiber connections -->
+            <path id="Fiber1" stroke="#0d6efd" stroke-width="2" stroke-dasharray="5,3" d="M400,180 C300,120 200,100 130,95"></path>
+            <path id="Fiber2" stroke="#0d6efd" stroke-width="2" stroke-dasharray="5,3" d="M550,180 C600,140 550,110 500,95"></path>
+            <path id="Fiber3" stroke="#0d6efd" stroke-width="2" stroke-dasharray="5,3" d="M400,260 C300,280 200,300 130,305"></path>
+            <path id="Fiber4" stroke="#0d6efd" stroke-width="2" stroke-dasharray="5,3" d="M550,260 C600,280 550,290 500,305"></path>
+            
+            <!-- Client devices -->
+            <!-- Home 1 -->
+            <rect id="Home1" fill="#e9ecef" x="50" y="40" width="40" height="40" rx="0"></rect>
+            <polygon id="Roof1" fill="#6c757d" points="45,40 70,15 95,40"></polygon>
+            <rect id="Door1" fill="#495057" x="65" y="60" width="10" height="20"></rect>
+            <line id="Connection1" stroke="#0d6efd" stroke-width="1" x1="90" y1="80" x2="130" y2="90"></line>
+            
+            <!-- Office 1 -->
+            <rect id="Office1" fill="#e9ecef" x="550" y="30" width="50" height="60" rx="0"></rect>
+            <rect id="OfficeWindow1" fill="#adb5bd" x="560" y="40" width="10" height="15"></rect>
+            <rect id="OfficeWindow2" fill="#adb5bd" x="580" y="40" width="10" height="15"></rect>
+            <rect id="OfficeWindow3" fill="#adb5bd" x="560" y="65" width="10" height="15"></rect>
+            <rect id="OfficeWindow4" fill="#adb5bd" x="580" y="65" width="10" height="15"></rect>
+            <line id="Connection2" stroke="#0d6efd" stroke-width="1" x1="550" y1="80" x2="500" y2="90"></line>
+            
+            <!-- Home 2 -->
+            <rect id="Home2" fill="#e9ecef" x="50" y="350" width="40" height="40" rx="0"></rect>
+            <polygon id="Roof2" fill="#6c757d" points="45,350 70,325 95,350"></polygon>
+            <rect id="Door2" fill="#495057" x="65" y="370" width="10" height="20"></rect>
+            <line id="Connection3" stroke="#0d6efd" stroke-width="1" x1="90" y1="350" x2="130" y2="310"></line>
+            
+            <!-- Office 2 -->
+            <rect id="Office2" fill="#e9ecef" x="550" y="330" width="50" height="60" rx="0"></rect>
+            <rect id="OfficeWindow5" fill="#adb5bd" x="560" y="340" width="10" height="15"></rect>
+            <rect id="OfficeWindow6" fill="#adb5bd" x="580" y="340" width="10" height="15"></rect>
+            <rect id="OfficeWindow7" fill="#adb5bd" x="560" y="365" width="10" height="15"></rect>
+            <rect id="OfficeWindow8" fill="#adb5bd" x="580" y="365" width="10" height="15"></rect>
+            <line id="Connection4" stroke="#0d6efd" stroke-width="1" x1="550" y1="330" x2="500" y2="310"></line>
+            
+            <!-- Internet Cloud -->
+            <ellipse id="Cloud" fill="#e9ecef" cx="300" cy="30" rx="60" ry="30"></ellipse>
+            <text font-family="Arial" font-size="14" font-weight="bold" fill="#495057" x="270" y="35">Internet</text>
+            <path id="CloudConnect" stroke="#0d6efd" stroke-width="3" d="M300,60 L300,120"></path>
+        </g>
+    </g>
+</svg> 
