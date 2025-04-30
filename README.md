@@ -150,5 +150,25 @@ Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalh
 
 VNX FIBER SERVICE - [contato@vnxfiberservice.com.br](mailto:contato@vnxfiberservice.com.br)
 
+## Geração de Ícones e Favicons
+
+O site utiliza ícones em SVG para melhor qualidade e escalabilidade. Para gerar as versões em PNG para melhor compatibilidade com todos os navegadores, siga os passos:
+
+1. Instale o Node.js se ainda não tiver instalado
+2. Instale a biblioteca sharp:
+   ```
+   npm install sharp
+   ```
+3. Execute o script de conversão:
+   ```
+   node convert-icons.js
+   ```
+
+Isso irá gerar todas as versões necessárias dos ícones em PNG a partir dos arquivos SVG presentes na pasta `assets/icons/`.
+
+Se você não tiver Node.js, pode usar ferramentas online como:
+- [SVGOMG](https://jakearchibald.github.io/svgomg/) para otimizar os SVGs
+- [RealFaviconGenerator](https://realfavicongenerator.net/) para gerar os favicons a partir de um arquivo de imagem
+
 ---
 Desenvolvido com ❤️ para VNX FIBER SERVICE 

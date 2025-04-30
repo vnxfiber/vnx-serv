@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <linearGradient x1="0%" y1="0%" x2="100%" y2="100%" id="logoGradient">
+            <stop stop-color="#0a3d62" offset="0%"></stop>
+            <stop stop-color="#3498db" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="0%" y1="0%" x2="100%" y2="100%" id="accentLogoGradient">
+            <stop stop-color="#2ecc71" offset="0%"></stop>
+            <stop stop-color="#1abc9c" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    
+    <!-- Background -->
+    <rect width="32" height="32" rx="5" fill="#0a3d62"/>
+    
+    <!-- Icon -->
+    <g transform="translate(2, 6)">
+        <!-- Fiber cable shape -->
+        <path d="M0,10 C5,2.5 15,2.5 20,10 C25,17.5 15,17.5 20,10" stroke="url(#logoGradient)" stroke-width="3" fill="none" stroke-linecap="round"/>
+        
+        <!-- Data flow -->
+        <circle cx="5" cy="7.5" r="2" fill="url(#accentLogoGradient)">
+            <animate attributeName="cx" from="0" to="20" dur="2s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" from="1" to="0.2" dur="2s" repeatCount="indefinite"/>
+        </circle>
+    </g>
+    
+    <!-- VNX Text -->
+    <text x="3" y="28" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="8" font-weight="bold">VNX</text>
+</svg> 

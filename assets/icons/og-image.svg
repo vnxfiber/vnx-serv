@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200px" height="630px" viewBox="0 0 1200 630" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <linearGradient x1="0%" y1="0%" x2="100%" y2="100%" id="logoGradient">
+            <stop stop-color="#0a3d62" offset="0%"></stop>
+            <stop stop-color="#3498db" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="0%" y1="0%" x2="100%" y2="100%" id="accentLogoGradient">
+            <stop stop-color="#2ecc71" offset="0%"></stop>
+            <stop stop-color="#1abc9c" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="0%" y1="0%" x2="100%" y2="100%" id="backgroundGradient">
+            <stop stop-color="#0a3d62" offset="0%"></stop>
+            <stop stop-color="#0f5283" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    
+    <!-- Background -->
+    <rect width="1200" height="630" fill="url(#backgroundGradient)"/>
+    
+    <!-- Icon -->
+    <g transform="translate(300, 150)">
+        <!-- Fiber cable shape -->
+        <path d="M0,100 C50,25 150,25 200,100 C250,175 150,175 200,100" stroke="url(#logoGradient)" stroke-width="20" fill="none" stroke-linecap="round"/>
+        
+        <!-- Data flow -->
+        <circle cx="50" cy="75" r="15" fill="url(#accentLogoGradient)">
+            <animate attributeName="cx" from="0" to="200" dur="2s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" from="1" to="0.2" dur="2s" repeatCount="indefinite"/>
+        </circle>
+    </g>
+    
+    <!-- Text -->
+    <g transform="translate(350, 400)" fill="#FFFFFF">
+        <text font-family="Arial, sans-serif" font-size="80" font-weight="bold" letter-spacing="2">
+            <tspan x="0" y="0">VNX FIBER</tspan>
+        </text>
+        <text font-family="Arial, sans-serif" font-size="40" font-weight="normal" letter-spacing="1">
+            <tspan x="50" y="60">Soluções em Telecomunicações</tspan>
+        </text>
+    </g>
+    
+    <!-- Decorative elements -->
+    <circle cx="100" cy="100" r="50" fill="#3498db" opacity="0.1"/>
+    <circle cx="1100" cy="500" r="80" fill="#2ecc71" opacity="0.1"/>
+    <path d="M0,580 C200,550 400,650 600,580 C800,510 1000,610 1200,580" stroke="#3498db" stroke-width="5" fill="none" opacity="0.2"/>
+</svg> 
