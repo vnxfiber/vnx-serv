@@ -1,0 +1,204 @@
+:root {
+    --primary-color: #0a3d62;
+    --secondary-color: #3498db;
+    --accent-color: #2ecc71;
+    --dark-color: #1e272e;
+    --light-color: #f8f9fa;
+    --text-color: #2d3436;
+    --gradient-primary: linear-gradient(135deg, #0a3d62, #3498db);
+}
+
+body {
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-color);
+    padding-top: 76px;
+    line-height: 1.6;
+    background-color: #f8f9fa;
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+/* Common Animations */
+@keyframes pulse-bg {
+    0% {
+        opacity: 0.4;
+    }
+    50% {
+        opacity: 0.8;
+    }
+    100% {
+        opacity: 0.4;
+    }
+}
+
+@keyframes move-bg {
+    0% {
+        background-position: 20% 30%;
+    }
+    25% {
+        background-position: 80% 20%;
+    }
+    50% {
+        background-position: 60% 80%;
+    }
+    75% {
+        background-position: 30% 70%;
+    }
+    100% {
+        background-position: 20% 30%;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/* Common Button Styles */
+.btn-primary {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: white;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 0.7rem 1.5rem;
+    box-shadow: 0 4px 8px rgba(46, 204, 113, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(46, 204, 113, 0.4);
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+/* Form Elements */
+.form-control {
+    padding: 0.8rem 1.2rem;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 2px 6px rgba(46, 204, 113, 0.2);
+}
+
+/* Appointments Button */
+.appointment-button {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--accent-color);
+    color: white;
+    border-radius: 50px;
+    padding: 0.8rem 1.5rem;
+    font-weight: 600;
+    z-index: 99;
+    box-shadow: 0 5px 15px rgba(46, 204, 113, 0.5);
+    transition: all 0.3s ease;
+    border: none;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+}
+
+.appointment-button i {
+    margin-right: 8px;
+    font-size: 1.1rem;
+}
+
+.appointment-button:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(46, 204, 113, 0.6);
+}
+
+.appointment-button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50px;
+    background: var(--accent-color);
+    z-index: -1;
+    animation: pulse 2s infinite;
+}
+
+/* Animation Classes */
+.animate__animated {
+    animation-duration: 1s;
+}
+
+.animate__fadeIn {
+    animation-name: fadeIn;
+}
+
+.animate__fadeOut {
+    animation-name: fadeOut;
+}
+
+/* Contact Info */
+.contact-info {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 12px;
+    height: 100%;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.contact-info h3 {
+    color: var(--primary-color);
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+.contact-info p {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.contact-info i {
+    margin-right: 1rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gradient-primary);
+    color: white;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 8px rgba(10, 61, 98, 0.25);
+    transition: all 0.3s ease;
+}
+
+.contact-info p:hover i {
+    transform: scale(1.1);
+    box-shadow: 0 6px 12px rgba(10, 61, 98, 0.35);
+} 
