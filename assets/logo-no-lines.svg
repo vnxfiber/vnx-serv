@@ -38,10 +38,10 @@
         
         @keyframes glow {
             from {
-                filter: drop-shadow(0 0 1px rgba(255, 255, 255, var(--glow-opacity-start)));
+                filter: drop-shadow(0 0 1px rgba(var(--primary-color), var(--glow-opacity-start)));
             }
             to {
-                filter: drop-shadow(0 0 2px rgba(255, 255, 255, var(--glow-opacity-end)));
+                filter: drop-shadow(0 0 2px rgba(var(--primary-color), var(--glow-opacity-end)));
             }
         }
         
