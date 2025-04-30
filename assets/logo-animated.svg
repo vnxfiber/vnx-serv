@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="280" height="90" viewBox="0 0 280 90" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        .text { font-family: Arial, sans-serif; fill: #ffffff; }
+        .main-text { 
+            font-size: 32px; 
+            font-weight: bold;
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+        .sub-text { 
+            font-size: 18px;
+            opacity: 1;
+        }
+        .fiber-line { 
+            stroke: #ffffff; 
+            stroke-width: 1.5;
+            stroke-dasharray: 150;
+            stroke-dashoffset: 150;
+            animation: drawLine 3s ease-out forwards;
+        }
+        .fiber-line:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+        .fiber-line:nth-child(3) {
+            animation-delay: 1s;
+        }
+        
+        /* Pulse effect for fiber lines */
+        .pulse {
+            animation: pulse 3s infinite;
+            transform-origin: center;
+            transform-box: fill-box;
+            fill: rgba(255, 255, 255, 0.8);
+            r: 2.5;
+        }
+        .pulse:nth-child(2) { animation-delay: 0.2s; }
+        .pulse:nth-child(3) { animation-delay: 0.4s; }
+        .pulse:nth-child(4) { animation-delay: 0.6s; }
+        .pulse:nth-child(5) { animation-delay: 0.8s; }
+        
+        @keyframes drawLine {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+        
+        @keyframes glow {
+            from {
+                filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.4));
+            }
+            to {
+                filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.7));
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                r: 1.5;
+                opacity: 0.6;
+            }
+            50% {
+                r: 2.5;
+                opacity: 0.8;
+            }
+            100% {
+                r: 1.5;
+                opacity: 0.6;
+            }
+        }
+    </style>
+    
+    <!-- Por último, o texto ficará em cima dos efeitos -->
+    <g class="text-zone">
+        <!-- Company name -->
+        <text x="140" y="42" class="text main-text" text-anchor="middle">VNX</text>
+        <text x="140" y="68" class="text sub-text" text-anchor="middle">FIBER SERVICE</text>
+    </g>
+    
+    <!-- Definimos primeiro as camadas de fundo (efeitos animados) -->
+    <!-- Zona de animação centralizada exatamente sob o texto VNX -->
+    <g class="animation-zone" transform="translate(0, 5)">
+        <!-- Efeitos de fibra óptica centralizados -->
+        <path class="fiber-line" d="M40,40 C80,38 110,42 140,40 S170,38 200,40" fill="none"/>
+        <path class="fiber-line" d="M50,45 C90,43 120,47 140,45 S160,43 190,45" fill="none" opacity="0.7"/>
+        <path class="fiber-line" d="M60,35 C100,33 130,37 140,35 S150,33 180,35" fill="none" opacity="0.7"/>
+        
+        <!-- Light pulses on fiber centralizados e concentrados mais próximos do texto -->
+        <circle class="pulse" cx="110" cy="40" r="2.5"/>
+        <circle class="pulse" cx="125" cy="38" r="2.5"/>
+        <circle class="pulse" cx="140" cy="40" r="2.5"/>
+        <circle class="pulse" cx="155" cy="42" r="2.5"/>
+        <circle class="pulse" cx="170" cy="40" r="2.5"/>
+    </g>
+</svg> 

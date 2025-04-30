@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Administração VNX</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <!-- Custom Admin CSS (Consider creating this file later) -->
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}"> -->
+    <style>
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #0a3d62; /* Azul VNX */
+            color: #fff;
+            padding-top: 1rem;
+            position: fixed;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar .logo {
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .sidebar .logo img {
+            max-width: 80%;
+            height: auto;
+        }
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            width: 20px; /* Align icons */
+            text-align: center;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .sidebar .user-info {
+             margin-top: auto; /* Push to bottom */
+             padding: 1rem 1.5rem;
+             border-top: 1px solid rgba(255, 255, 255, 0.2);
+             font-size: 0.9rem;
+        }
+        .sidebar .user-info a {
+            color: #ffc107; /* Yellow accent for logout */
+            text-decoration: none;
+        }
+        .main-content {
+            margin-left: 250px; /* Same as sidebar width */
+            padding: 2rem;
+            flex-grow: 1;
+            overflow-y: auto; /* Allow content scrolling */
+        }
+        .page-header {
+             margin-bottom: 2rem;
+             padding-bottom: 1rem;
+             border-bottom: 1px solid #dee2e6;
+        }
+         .page-header h1 {
+             color: #0a3d62;
+         }
+        .table th {
+            background-color: #e9ecef;
+            color: #0a3d62;
+            font-weight: 600;
+        }
+        .table td .badge {
+            font-size: 0.85em;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+         .details-link {
+             color: #0a3d62;
+             text-decoration: none;
+         }
+         .details-link:hover {
+             text-decoration: underline;
+         }
+         .empty-state {
+             text-align: center;
+             padding: 4rem 1rem;
+             background-color: #fff;
+             border-radius: 8px;
+             margin-top: 2rem;
+         }
+         .empty-state img {
+             max-width: 150px;
+             margin-bottom: 1.5rem;
+             opacity: 0.7;
+         }
+         .empty-state p {
+             color: #6c757d;
+             font-size: 1.1rem;
+         }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo">
+             <!-- Make sure the logo path is correct -->
+            <a href="{{ url_for('admin_dashboard') }}"><img src="{{ url_for('static', filename='assets/logo-white.svg') }}" alt="VNX Logo"></a>
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{{ url_for('admin_dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_candidatos') }}">
+                    <i class="fas fa-users"></i> Candidatos
+                </a>
+            </li>
+            <!-- Add more navigation items here -->
+        </ul>
+         <div class="user-info">
+            <small>Logado como: {{ user }}</small><br>
+            <a href="{{ url_for('admin_logout') }}"><i class="fas fa-sign-out-alt"></i> Sair</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="page-header d-flex justify-content-between align-items-center">
+            <h1>Dashboard</h1>
+            <!-- Optional: Add buttons or actions here -->
+        </header>
+
+        <!-- Summary Cards (Example) -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-white bg-primary">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-users me-2"></i>Total de Candidatos</h5>
+                        <p class="card-text fs-3">{{ profissionais|length }}</p>
+                        <a href="{{ url_for('admin_candidatos') }}" class="text-white stretched-link">Ver lista</a>
+                    </div>
+                </div>
+            </div>
+            <!-- Add more summary cards as needed -->
+             <div class="col-md-4">
+                <div class="card text-white bg-success">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-check-circle me-2"></i>Novos Hoje (Exemplo)</h5>
+                        <p class="card-text fs-3">0</p> <!-- Placeholder -->
+                        <small>Funcionalidade a implementar</small>
+                    </div>
+                </div>
+            </div>
+             <div class="col-md-4">
+                <div class="card text-white bg-info">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-map-marker-alt me-2"></i>Principais Regiões (Ex.)</h5>
+                        <p class="card-text fs-3">MA</p> <!-- Placeholder -->
+                         <small>Funcionalidade a implementar</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Candidates Table -->
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Candidatos Recentes (Últimos 5)</h4>
+            </div>
+            <div class="card-body">
+                {% if profissionais %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Nome / Razão Social</th>
+                                    <th>Contato</th>
+                                    <th>Localização</th>
+                                    <th>Especialidades</th>
+                                    <th>Data Cadastro</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Loop through recent professionals (adjust slicing as needed) -->
+                                {% for prof in profissionais | sort(attribute='id', reverse=True) | list | slice(0, 5) %}
+                                <tr>
+                                    <td>{{ prof.nome_completo }}</td>
+                                    <td>
+                                        <i class="fas fa-envelope me-1 text-muted"></i> {{ prof.email }}<br>
+                                        <i class="fab fa-whatsapp me-1 text-success"></i> {{ prof.whatsapp }}
+                                    </td>
+                                    <td>{{ prof.cidade_estado }}</td>
+                                    <td>
+                                        {% set especialidades_list = prof.especialidades.split(',') %}
+                                        {% for esp in especialidades_list %}
+                                            <span class="badge bg-secondary">{{ esp.strip() }}</span>
+                                        {% endfor %}
+                                    </td>
+                                    <td>{{ prof.data_cadastro.strftime('%d/%m/%Y %H:%M') if prof.data_cadastro else 'N/A' }}</td>
+                                    <td>
+                                        <!-- Link to a future detail page -->
+                                         <a href="{{ url_for('admin_view_candidato', candidato_id=prof.id) }}" class="btn btn-sm btn-outline-primary" title="Ver Detalhes">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <!-- Add delete button or other actions here -->
+                                        <button class="btn btn-sm btn-outline-danger" title="Excluir (Implementar)" disabled>
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                     <div class="text-center mt-3">
+                        <a href="{{ url_for('admin_candidatos') }}" class="btn btn-outline-primary">Ver todos os candidatos</a>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <!-- Make sure the image path is correct -->
+                        <img src="{{ url_for('static', filename='assets/empty-state.svg') }}" alt="Sem dados">
+                        <p>Nenhum candidato cadastrado ainda.</p>
+                        <a href="/trabalhe-conosco.html" target="_blank" class="btn btn-primary">Ir para a página de cadastro</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

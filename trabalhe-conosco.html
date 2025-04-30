@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Trabalhe Conosco - VNX FIBER SERVICE</title>
+    <!-- Google Analytics (Adaptar ID se necessário) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX');
+    </script>
+    <meta name="description" content="Junte-se à equipe de parceiros técnicos da VNX FIBER SERVICE. Oportunidades para especialistas em telecomunicações, TI e ISP.">
+    <meta name="keywords" content="trabalhe conosco, vagas telecom, vagas TI, parceiro técnico, ISP, fibra óptica, VNX FIBER SERVICE">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Trabalhe Conosco - VNX FIBER SERVICE">
+    <meta property="og:description" content="Seja um parceiro técnico da VNX e conecte-se a novas oportunidades.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://vnxfiber.com.br/trabalhe-conosco.html">
+    <meta property="og:image" content="assets/icons/og-image.svg">
+    <!-- Favicons e ícones -->
+    <link rel="icon" href="https://placehold.co/32x32" type="image/png">
+    <link rel="apple-touch-icon" href="https://placehold.co/180x180" type="image/png">
+    <meta name="theme-color" content="#0a3d62">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <!-- AOS -->
+    <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <!-- Swiper -->
+    <link href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/logo.css">
+    <style>
+        /* Estilos específicos para a página Trabalhe Conosco */
+        body {
+            margin: 0;
+            padding-top: 0 !important;
+        }
+        .main-banner {
+            padding: 60px 0;
+            background: linear-gradient(rgba(10, 61, 98, 0.85), rgba(10, 61, 98, 0.85)), url('assets/images/banner-trabalhe-conosco.jpg') no-repeat center center;
+            background-size: cover;
+            color: #fff;
+            text-align: center;
+        }
+        .main-banner h1 {
+             color: #fff; /* Ensure heading is white */
+        }
+        .main-banner .lead {
+             color: rgba(255, 255, 255, 0.85); /* Lighter text for description */
+        }
+        .section-title {
+            color: #0a3d62; /* Azul principal */
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        .section-subtitle {
+            color: #495057;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+        .benefit-item, .area-item {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+        .benefit-item:hover, .area-item:hover {
+            transform: translateY(-5px);
+        }
+        .benefit-item i, .area-item i {
+            font-size: 1.5rem;
+            color: #0d6efd; /* Azul Bootstrap */
+            margin-right: 15px;
+            width: 30px; /* Largura fixa para alinhamento */
+            text-align: center;
+        }
+        .form-section {
+            background-color: #e9ecef;
+            padding: 60px 0;
+        }
+        .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+        .form-check-input:checked {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        .btn-submit {
+            background-color: #0a3d62;
+            border-color: #0a3d62;
+            color: #fff;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .btn-submit:hover {
+            background-color: #08304e;
+            border-color: #08304e;
+            color: #fff;
+        }
+        .list-group-item {
+            border: none;
+            padding-left: 0;
+        }
+        .list-group-item i {
+            color: #0d6efd;
+            margin-right: 10px;
+        }
+        .area-item img {
+            width: 40px; /* Adjust SVG size */
+            height: 40px;
+            margin-right: 15px;
+            opacity: 0.8;
+        }
+        .area-item h5 {
+             margin-bottom: 0.25rem; /* Slightly reduce space below heading */
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <!-- Main Banner Section -->
+        <section id="main-banner" class="main-banner text-center">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-9">
+                         <a href="index.html" class="d-block mb-4">
+                            <img src="./assets/logo-animated.svg" alt="VNX FIBER SERVICE" width="280" height="90" data-aos="fade-down">
+                        </a>
+                        <h1 class="display-5 fw-bold section-title" data-aos="fade-up">Seja um Parceiro Técnico da VNX FIBER SERVICE</h1>
+                        <p class="lead" data-aos="fade-up" data-aos-delay="100">
+                            Estamos construindo uma base sólida de profissionais e empresas parceiras para atender demandas técnicas em Telecom, TI e ISP. Cadastre-se e faça parte!
+                        </p>
+                        <a href="#cadastro-form" class="btn btn-primary btn-lg mt-3" data-aos="fade-up" data-aos-delay="200">
+                            <i class="fas fa-user-plus me-2"></i>Quero me cadastrar como parceiro
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Áreas de Atuação -->
+        <section id="areas-atuacao" class="py-5 bg-white">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="section-title" data-aos="fade-up">Áreas de Atuação e Serviços Procurados</h2>
+                    <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Procuramos especialistas nas seguintes áreas:</p>
+                </div>
+                <div class="row">
+                    <!-- Coluna 1 -->
+                    <div class="col-lg-6">
+                        <div class="area-item" data-aos="fade-right">
+                            <i class="fas fa-wave-square"></i>
+                            <div>
+                                <h5 class="fw-bold">Fibra Óptica</h5>
+                                <small class="text-muted">Instalação, projetos GPON/EPON, fusão, certificação, redundância.</small>
+                            </div>
+                        </div>
+                        <div class="area-item" data-aos="fade-right" data-aos-delay="50">
+                            <i class="fas fa-server"></i>
+                            <div>
+                                <h5 class="fw-bold">Servidores e TI Corporativa</h5>
+                                <small class="text-muted">Windows Server, Linux, AD, DNS, Virtualização (Proxmox, VMware), Backup.</small>
+                            </div>
+                        </div>
+                        <div class="area-item" data-aos="fade-right" data-aos-delay="100">
+                            <i class="fas fa-network-wired"></i>
+                            <div>
+                                <h5 class="fw-bold">Infraestrutura Física</h5>
+                                <small class="text-muted">Cabeamento estruturado, montagem de racks, energia, climatização.</small>
+                            </div>
+                        </div>
+                        <div class="area-item" data-aos="fade-right" data-aos-delay="150">
+                            <i class="fas fa-wifi"></i>
+                            <div>
+                                <h5 class="fw-bold">Wi-Fi Corporativo</h5>
+                                <small class="text-muted">Controladoras, roaming, VLANs, cobertura indoor/outdoor, alta densidade.</small>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Coluna 2 -->
+                    <div class="col-lg-6">
+                        <div class="area-item" data-aos="fade-left">
+                            <i class="fas fa-broadcast-tower"></i>
+                            <div>
+                                <h5 class="fw-bold">Soluções para ISPs</h5>
+                                <small class="text-muted">OLTs/ONUs, controle de banda, CGNAT/IPv6, CRM, billing, monitoramento.</small>
+                            </div>
+                        </div>
+                        <div class="area-item" data-aos="fade-left" data-aos-delay="50">
+                            <i class="fas fa-phone-volume"></i>
+                            <div>
+                                <h5 class="fw-bold">Telefonia e VoIP</h5>
+                                <small class="text-muted">Asterisk, 3CX, FreePBX, URA, PABX IP, DID, billing.</small>
+                            </div>
+                        </div>
+                        <div class="area-item" data-aos="fade-left" data-aos-delay="100">
+                            <i class="fas fa-satellite-dish"></i>
+                            <div>
+                                <h5 class="fw-bold">Rádio e Comunicação Sem Fio</h5>
+                                <small class="text-muted">Enlaces PTP/PMP, instalação de torres, homologação, alta disponibilidade.</small>
+                            </div>
+                        </div>
+                        <div class="area-item" data-aos="fade-left" data-aos-delay="150">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            <div>
+                                <h5 class="fw-bold">Consultoria Especializada</h5>
+                                <small class="text-muted">Diagnóstico de redes, planejamento ISP, viabilidade, outorga SCM, Anatel.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Benefícios -->
+        <section id="beneficios" class="py-5 bg-light">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="section-title" data-aos="fade-up">Benefícios para Nossos Parceiros</h2>
+                    <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Veja as vantagens de se juntar à nossa rede de profissionais:</p>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 col-lg-4 mb-4" data-aos="zoom-in">
+                        <div class="benefit-item h-100">
+                            <i class="fas fa-handshake"></i>
+                            <p class="mb-0">Parcerias com uma empresa ativa e reconhecida no mercado.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4 mb-4" data-aos="zoom-in" data-aos-delay="100">
+                        <div class="benefit-item h-100">
+                            <i class="fas fa-briefcase"></i>
+                            <p class="mb-0">Receba demandas de serviços compatíveis com sua expertise.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4 mb-4" data-aos="zoom-in" data-aos-delay="200">
+                        <div class="benefit-item h-100">
+                            <i class="fas fa-dollar-sign"></i>
+                            <p class="mb-0">Atuação sob demanda com remuneração justa e transparente.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4 mb-4" data-aos="zoom-in" data-aos-delay="300">
+                        <div class="benefit-item h-100">
+                            <i class="fas fa-headset"></i>
+                            <p class="mb-0">Relacionamento contínuo e suporte técnico da nossa equipe.</p>
+                        </div>
+                    </div>
+                     <div class="col-md-6 col-lg-4 mb-4" data-aos="zoom-in" data-aos-delay="400">
+                        <div class="benefit-item h-100">
+                            <i class="fas fa-sync-alt"></i>
+                            <p class="mb-0">Potencial para contratos recorrentes e projetos de longo prazo.</p>
+                        </div>
+                    </div>
+                     <div class="col-md-6 col-lg-4 mb-4" data-aos="zoom-in" data-aos-delay="500">
+                        <div class="benefit-item h-100">
+                            <i class="fas fa-network-wired"></i>
+                            <p class="mb-0">Acesso a projetos desafiadores e tecnologicamente relevantes.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Formulário de Cadastro -->
+        <section id="cadastro-form" class="form-section">
+            <div class="container">
+                <div class="text-center mb-5">
+                     <h2 class="section-title" data-aos="fade-up">Cadastre-se Agora</h2>
+                    <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Preencha o formulário abaixo para entrar na nossa base de parceiros técnicos.</p>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <form id="partner-form" action="#" method="POST"> <!-- Substituir action pela URL do endpoint de envio -->
+                            <!-- Nome Completo -->
+                            <div class="mb-3" data-aos="fade-up">
+                                <label for="nomeCompleto" class="form-label fw-bold">Nome Completo / Razão Social (MEI/Empresa)</label>
+                                <input type="text" class="form-control form-control-lg" id="nomeCompleto" name="nomeCompleto" required>
+                            </div>
+
+                            <!-- Cidade/Estado -->
+                            <div class="row mb-3" data-aos="fade-up" data-aos-delay="50">
+                                <div class="col-md-6">
+                                    <label for="estado" class="form-label fw-bold">Estado</label>
+                                    <select class="form-select form-select-lg" id="estado" name="estado" required>
+                                        <option value="">Selecione o estado</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="cidade" class="form-label fw-bold">Cidade</label>
+                                    <select class="form-select form-select-lg" id="cidade" name="cidade" required disabled>
+                                        <option value="">Selecione a cidade</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Especialidades Técnicas -->
+                            <div class="mb-4" data-aos="fade-up" data-aos-delay="100">
+                                <label class="form-label fw-bold">Principais Especialidades Técnicas (selecione todas que se aplicam)</label>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" value="Fibra Óptica" id="espFibra" name="especialidades[]">
+                                            <label class="form-check-label" for="espFibra">Fibra Óptica (Instalação, Fusão, GPON)</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" value="Servidores TI" id="espServidores" name="especialidades[]">
+                                            <label class="form-check-label" for="espServidores">Servidores e TI Corporativa (Windows, Linux, AD, Virt.)</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" value="Infraestrutura Fisica" id="espInfra" name="especialidades[]">
+                                            <label class="form-check-label" for="espInfra">Infraestrutura Física (Cabeamento, Racks, Energia)</label>
+                                        </div>
+                                         <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" value="Wi-Fi Corporativo" id="espWifi" name="especialidades[]">
+                                            <label class="form-check-label" for="espWifi">Wi-Fi Corporativo (Controladoras, Roaming)</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" value="Solucoes ISP" id="espISP" name="especialidades[]">
+                                            <label class="form-check-label" for="espISP">Soluções para ISPs (OLT, ONU, CGNAT, IPv6)</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" value="Telefonia VoIP" id="espVoIP" name="especialidades[]">
+                                            <label class="form-check-label" for="espVoIP">Telefonia e VoIP (Asterisk, 3CX, PABX IP)</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" value="Radio Comunicacao" id="espRadio" name="especialidades[]">
+                                            <label class="form-check-label" for="espRadio">Rádio e Comunicação Sem Fio (Enlaces, Torres)</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" value="Consultoria" id="espConsultoria" name="especialidades[]">
+                                            <label class="form-check-label" for="espConsultoria">Consultoria Especializada (Redes, ISP, Anatel)</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Experiência e Certificações -->
+                            <div class="mb-3" data-aos="fade-up" data-aos-delay="150">
+                                <label for="experiencia" class="form-label fw-bold">Resumo da Experiência e Certificações Relevantes</label>
+                                <textarea class="form-control" id="experiencia" name="experiencia" rows="4" placeholder="Descreva brevemente sua experiência, tempo de atuação, principais projetos e certificações (ex: CCNA, ITIL, Furukawa FCP)..."></textarea>
+                            </div>
+
+                             <!-- Contato -->
+                            <div class="row mb-3">
+                                <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
+                                    <label for="whatsapp" class="form-label fw-bold">WhatsApp (com DDD)</label>
+                                    <input type="tel" class="form-control form-control-lg" id="whatsapp" name="whatsapp" placeholder="(XX) XXXXX-XXXX" required>
+                                </div>
+                                <div class="col-md-6" data-aos="fade-up" data-aos-delay="250">
+                                    <label for="email" class="form-label fw-bold">E-mail</label>
+                                    <input type="email" class="form-control form-control-lg" id="email" name="email" required>
+                                </div>
+                            </div>
+
+                            <!-- Links (Opcional) -->
+                            <div class="mb-4" data-aos="fade-up" data-aos-delay="300">
+                                <label for="links" class="form-label fw-bold">Link para Portfólio, LinkedIn ou Instagram Técnico (Opcional)</label>
+                                <input type="url" class="form-control" id="links" name="links" placeholder="https://...">
+                            </div>
+
+                            <!-- Consentimento LGPD (Exemplo) -->
+                             <div class="form-check mb-4" data-aos="fade-up" data-aos-delay="350">
+                                <input class="form-check-input" type="checkbox" value="" id="consentimentoLGPD" required>
+                                <label class="form-check-label" for="consentimentoLGPD">
+                                    Concordo com o uso dos meus dados para contato sobre oportunidades de parceria, conforme a <a href="politica-de-privacidade.html" target="_blank">Política de Privacidade</a>.
+                                </label>
+                            </div>
+
+
+                            <!-- Botão de Envio -->
+                            <div class="text-center" data-aos="fade-up" data-aos-delay="400">
+                                <button type="submit" class="btn btn-submit btn-lg">
+                                    <i class="fas fa-paper-plane me-2"></i>Cadastrar Agora e Receber Oportunidades
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal de Sucesso -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="successModalLabel">Cadastro Realizado!</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <i class="fas fa-check-circle text-success" style="font-size: 3rem;" aria-hidden="true"></i>
+                    <h4 class="mt-3">Cadastro efetuado com sucesso!</h4>
+                    <p class="mb-0">Agradecemos seu interesse em fazer parte da nossa rede de parceiros. Entraremos em contato em breve!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal" autofocus>Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-5">
+        <div class="container">
+            <div class="row gy-4">
+                <div class="col-lg-4 col-md-6">
+                    <img src="./assets/logo-animated.svg" alt="VNX FIBER SERVICE Logo Branco" class="footer-logo mb-3" width="280" height="90">
+                    <p class="text-white-50">Soluções completas em telecomunicações, infraestrutura de rede, serviços para ISP, telefonia e comunicação sem fio.</p>
+                    <div class="social-icons mt-3">
+                        <a href="#" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <h5 class="text-white mb-3">Navegação</h5>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="index.html">Página Inicial</a></li>
+                        <li><a href="#areas-atuacao">Áreas de Atuação</a></li>
+                        <li><a href="#beneficios">Benefícios</a></li>
+                        <li><a href="#cadastro-form">Cadastre-se</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                     <h5 class="text-white mb-3">Contato</h5>
+                    <ul class="list-unstyled footer-contact">
+                        <li><i class="fas fa-map-marker-alt me-2"></i> São Luís - MA, Brasil</li>
+                        <li><i class="fas fa-phone-alt me-2"></i> <a href="tel:+5598999882215">(98) 99988-2215</a></li>
+                        <li><i class="fas fa-envelope me-2"></i> <a href="mailto:contato@vnxfiber.com.br">contato@vnxfiber.com.br</a></li>
+                    </ul>
+                </div>
+                 <div class="col-lg-3 col-md-6">
+                    <h5 class="text-white mb-3">Legal</h5>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="termos-de-uso.html">Termos de Uso</a></li>
+                        <li><a href="politica-de-privacidade.html">Política de Privacidade</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4" style="border-top: 1px solid rgba(255, 255, 255, 0.1);">
+            <div class="text-center text-white-50">
+                &copy; <span id="current-year"></span> VNX FIBER SERVICE. Todos os direitos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Botão Flutuante WhatsApp -->
+    <a href="https://wa.me/5598999882215?text=Olá!%20Gostaria%20de%20mais%20informações%20sobre%20os%20serviços%20da%20VNX%20FIBER%20SERVICE." class="whatsapp-float" target="_blank" aria-label="Fale conosco pelo WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="scripts/logo-handler.js"></script>
+    
+    <!-- Script para carregar estados e cidades -->
+    <script>
+        // Debug para verificar carregamento
+        console.log('Script iniciado');
+
+        // Inicialização do Supabase
+        const { createClient } = supabase;
+        const supabaseClient = createClient(
+            'https://cwrxdjfmxntmplwdbnpg.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3cnhkamZteG50bXBsd2RibnBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwMDI0MzksImV4cCI6MjA2MTU3ODQzOX0.-kFUUiLn2plnEdopteCdxcixyY3pI5O-K-hIk1IL61s'
+        );
+
+        // Array de estados brasileiros
+        const estados = [
+            { id: 'AC', nome: 'Acre' },
+            { id: 'AL', nome: 'Alagoas' },
+            { id: 'AP', nome: 'Amapá' },
+            { id: 'AM', nome: 'Amazonas' },
+            { id: 'BA', nome: 'Bahia' },
+            { id: 'CE', nome: 'Ceará' },
+            { id: 'DF', nome: 'Distrito Federal' },
+            { id: 'ES', nome: 'Espírito Santo' },
+            { id: 'GO', nome: 'Goiás' },
+            { id: 'MA', nome: 'Maranhão' },
+            { id: 'MT', nome: 'Mato Grosso' },
+            { id: 'MS', nome: 'Mato Grosso do Sul' },
+            { id: 'MG', nome: 'Minas Gerais' },
+            { id: 'PA', nome: 'Pará' },
+            { id: 'PB', nome: 'Paraíba' },
+            { id: 'PR', nome: 'Paraná' },
+            { id: 'PE', nome: 'Pernambuco' },
+            { id: 'PI', nome: 'Piauí' },
+            { id: 'RJ', nome: 'Rio de Janeiro' },
+            { id: 'RN', nome: 'Rio Grande do Norte' },
+            { id: 'RS', nome: 'Rio Grande do Sul' },
+            { id: 'RO', nome: 'Rondônia' },
+            { id: 'RR', nome: 'Roraima' },
+            { id: 'SC', nome: 'Santa Catarina' },
+            { id: 'SP', nome: 'São Paulo' },
+            { id: 'SE', nome: 'Sergipe' },
+            { id: 'TO', nome: 'Tocantins' }
+        ];
+
+        // Função para carregar os estados
+        function carregarEstados() {
+            console.log('Iniciando carregamento de estados');
+            const selectEstado = document.getElementById('estado');
+            
+            if (!selectEstado) {
+                console.error('Elemento select estado não encontrado');
+                return;
+            }
+
+            console.log('Select estado encontrado');
+            selectEstado.innerHTML = '<option value="">Selecione o estado</option>';
+            
+            estados.forEach(estado => {
+                const option = document.createElement('option');
+                option.value = estado.id;
+                option.text = estado.nome;
+                selectEstado.appendChild(option);
+            });
+
+            console.log('Estados carregados com sucesso');
+        }
+
+        // Função para carregar as cidades
+        async function carregarCidades(estadoId) {
+            console.log('Carregando cidades para o estado:', estadoId);
+            try {
+                const selectCidade = document.getElementById('cidade');
+                selectCidade.innerHTML = '<option value="">Selecione a cidade</option>';
+                
+                if (!estadoId) {
+                    selectCidade.disabled = true;
+                    return;
+                }
+
+                // Adicionar indicador de carregamento
+                selectCidade.innerHTML = '<option value="">Carregando cidades...</option>';
+                selectCidade.disabled = true;
+
+                const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estadoId}/municipios?orderBy=nome`);
+                const cidades = await response.json();
+                
+                // Limpar o select e adicionar a opção padrão
+                selectCidade.innerHTML = '<option value="">Selecione a cidade</option>';
+                
+                cidades.forEach(cidade => {
+                    const option = document.createElement('option');
+                    option.value = cidade.id;
+                    option.text = cidade.nome;
+                    selectCidade.appendChild(option);
+                });
+                
+                selectCidade.disabled = false;
+                console.log(`${cidades.length} cidades carregadas`);
+            } catch (error) {
+                console.error('Erro ao carregar cidades:', error);
+                const selectCidade = document.getElementById('cidade');
+                selectCidade.innerHTML = '<option value="">Erro ao carregar cidades</option>';
+                alert('Erro ao carregar as cidades. Por favor, tente novamente.');
+            }
+        }
+
+        // Função para enviar o formulário
+        async function enviarFormulario(formData) {
+            try {
+                // Desabilitar o botão de envio e mostrar loading
+                const submitButton = document.querySelector('button[type="submit"]');
+                const originalButtonText = submitButton.innerHTML;
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+
+                // Pegar todos os checkboxes marcados de especialidades
+                const especialidades = Array.from(document.querySelectorAll('input[name="especialidades[]"]:checked'))
+                    .map(checkbox => checkbox.value);
+
+                const estadoSelect = document.getElementById('estado');
+                const estadoSigla = estadoSelect.value;
+                const estadoNome = estadoSelect.options[estadoSelect.selectedIndex].text;
+
+                // Preparar dados para envio
+                const dados = {
+                    nome_completo: formData.get('nomeCompleto'),
+                    estado: estadoSigla,
+                    cidade: document.getElementById('cidade').options[document.getElementById('cidade').selectedIndex].text,
+                    especialidades: especialidades,
+                    experiencia: formData.get('experiencia'),
+                    whatsapp: formData.get('whatsapp'),
+                    email: formData.get('email'),
+                    portfolio_link: formData.get('links') || null
+                };
+
+                console.log('Dados a serem enviados:', dados);
+
+                // Enviar para o Supabase
+                const { data, error } = await supabaseClient
+                    .from('parceiros_tecnicos')
+                    .insert([dados]);
+
+                if (error) {
+                    console.error('Erro detalhado:', error);
+                    throw error;
+                }
+
+                // Mostrar modal de sucesso
+                const successModal = new bootstrap.Modal(document.getElementById('successModal'), {
+                    keyboard: true,
+                    focus: true
+                });
+                
+                // Limpar formulário antes de mostrar o modal
+                document.getElementById('partner-form').reset();
+                document.getElementById('cidade').disabled = true;
+
+                // Mostrar o modal
+                successModal.show();
+
+                // Focar no botão de fechar do modal
+                document.querySelector('#successModal .btn-success').focus();
+
+                return true;
+            } catch (error) {
+                console.error('Erro ao cadastrar:', error);
+                let mensagemErro = 'Ocorreu um erro ao realizar o cadastro. ';
+                
+                if (error.message && error.message.includes('too long for type')) {
+                    mensagemErro += 'Um dos campos excede o tamanho máximo permitido.';
+                } else if (error.message && error.message.includes('violates not-null')) {
+                    mensagemErro += 'Por favor, preencha todos os campos obrigatórios.';
+                } else {
+                    mensagemErro += 'Por favor, tente novamente.';
+                }
+                
+                alert(mensagemErro);
+                return false;
+            } finally {
+                // Restaurar o botão de envio
+                const submitButton = document.querySelector('button[type="submit"]');
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Cadastrar Agora e Receber Oportunidades';
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM carregado, iniciando setup');
+            
+            // Inicializar AOS
+            AOS.init({
+                duration: 800,
+                once: true
+            });
+            
+            // Carregar estados ao iniciar a página
+            carregarEstados();
+            
+            // Listener para mudança de estado
+            const selectEstado = document.getElementById('estado');
+            if (selectEstado) {
+                selectEstado.addEventListener('change', (e) => {
+                    console.log('Estado selecionado:', e.target.value);
+                    carregarCidades(e.target.value);
+                });
+            }
+
+            // Adicionar máscara para WhatsApp
+            const whatsappInput = document.getElementById('whatsapp');
+            if (whatsappInput) {
+                whatsappInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length <= 11) {
+                        value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
+                        value = value.replace(/(\d)(\d{4})$/, '$1-$2');
+                    }
+                    e.target.value = value;
+                });
+            }
+
+            // Manipular envio do formulário
+            const form = document.getElementById('partner-form');
+            if (form) {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    console.log('Formulário submetido');
+                    
+                    if (!form.checkValidity()) {
+                        e.stopPropagation();
+                        form.classList.add('was-validated');
+                        return;
+                    }
+
+                    // Verificar se pelo menos uma especialidade foi selecionada
+                    const especialidades = document.querySelectorAll('input[name="especialidades[]"]:checked');
+                    if (especialidades.length === 0) {
+                        alert('Por favor, selecione pelo menos uma especialidade.');
+                        return;
+                    }
+
+                    const formData = new FormData(form);
+                    await enviarFormulario(formData);
+                });
+            }
+
+            // Configurar o modal de sucesso
+            const successModal = document.getElementById('successModal');
+            if (successModal) {
+                successModal.addEventListener('shown.bs.modal', function () {
+                    document.querySelector('#successModal .btn-success').focus();
+                });
+
+                successModal.addEventListener('hidden.bs.modal', function () {
+                    // Rolar para o topo da página
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
+
+            // Adicionar smooth scroll para links internos
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const href = this.getAttribute('href');
+                    // Evita o scroll para links que são apenas '#' ou usados por componentes JS
+                    if (href === '#' || href.startsWith('#!') || this.dataset.bsToggle) return;
+
+                    const targetElement = document.querySelector(href);
+                    if(targetElement) {
+                        e.preventDefault();
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            // Atualizar o ano no rodapé
+            const yearElement = document.getElementById('current-year');
+            if (yearElement) {
+                yearElement.textContent = new Date().getFullYear();
+            }
+
+            console.log('Setup concluído');
+        });
+    </script>
+</body>
+</html> 

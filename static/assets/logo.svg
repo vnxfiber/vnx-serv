@@ -24,7 +24,7 @@
     </g>
     
     <!-- Text -->
-    <g transform="translate(60, 25)" fill="#FFFFFF">
+    <g transform="translate(60, 25)" fill="#0a3d62">
         <text font-family="Arial, sans-serif" font-size="18" font-weight="bold" letter-spacing="1">
             <tspan x="0" y="0">VNX</tspan>
         </text>

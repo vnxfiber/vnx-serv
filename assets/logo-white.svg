@@ -1,27 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="200px" height="60px" viewBox="0 0 200 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Icon -->
-    <g transform="translate(10, 10)">
-        <!-- Fiber cable shape -->
-        <path d="M0,20 C10,5 30,5 40,20 C50,35 30,35 40,20" stroke="#FFFFFF" stroke-width="4" fill="none" stroke-linecap="round"/>
-        
-        <!-- Data flow -->
-        <circle cx="10" cy="15" r="3" fill="#2ecc71">
-            <animate attributeName="cx" from="0" to="40" dur="2s" repeatCount="indefinite"/>
-            <animate attributeName="opacity" from="1" to="0.2" dur="2s" repeatCount="indefinite"/>
-        </circle>
-    </g>
+<svg width="280" height="90" viewBox="0 0 280 90" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        .text { font-family: Arial, sans-serif; fill: #ffffff; }
+        .main-text { font-size: 32px; font-weight: bold; }
+        .sub-text { font-size: 18px; }
+        .fiber-line { stroke: #ffffff; stroke-width: 2; }
+    </style>
     
-    <!-- Text -->
-    <g transform="translate(60, 25)" fill="#FFFFFF">
-        <text font-family="Arial, sans-serif" font-size="18" font-weight="bold" letter-spacing="1">
-            <tspan x="0" y="0">VNX</tspan>
-        </text>
-        <text font-family="Arial, sans-serif" font-size="12" font-weight="normal" letter-spacing="0.5">
-            <tspan x="0" y="18">FIBER SERVICE</tspan>
-        </text>
-    </g>
+    <!-- Fiber optic cable design -->
+    <path class="fiber-line" d="M30,45 C50,45 60,25 80,25 S110,65 130,65" fill="none"/>
+    <path class="fiber-line" d="M35,50 C55,50 65,30 85,30 S115,70 135,70" fill="none" opacity="0.7"/>
+    <path class="fiber-line" d="M25,40 C45,40 55,20 75,20 S105,60 125,60" fill="none" opacity="0.7"/>
     
-    <!-- Underline accent -->
-    <line x1="60" y1="45" x2="180" y2="45" stroke="#2ecc71" stroke-width="2" stroke-linecap="round"/>
+    <!-- Company name -->
+    <text x="140" y="45" class="text main-text" text-anchor="middle">VNX</text>
+    <text x="140" y="70" class="text sub-text" text-anchor="middle">FIBER SERVICE</text>
 </svg> 
