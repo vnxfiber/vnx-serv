@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .logo-text { animation: fadeIn 1s ease-in; }
+        .logo-icon { animation: fadeIn 0.5s ease-in; }
+    </style>
+    <g class="logo-icon">
+        <circle cx="30" cy="30" r="28" stroke="#0a3d62" stroke-width="4"/>
+        <path d="M42 22L27 37l-9-9" stroke="#0a3d62" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g class="logo-text" fill="#0a3d62">
+        <path d="M70 20h5v30h-5zM85 20h20v5H90v7h12v5H90v8h15v5H85zM115 20h5l12 20.5V20h5v30h-5l-12-20.5V50h-5z"/>
+    </g>
+</svg> 

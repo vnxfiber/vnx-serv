@@ -1,8 +1,101 @@
-# VNX FIBER SERVICE - Site Institucional
+# VNX FIBER SERVICE - Sistema de Gestão de Parceiros Técnicos
 
-Site institucional moderno e responsivo para a VNX FIBER SERVICE, empresa especializada em soluções de telecomunicações para provedores de internet e empresas de TI.
+Este sistema permite gerenciar os cadastros de parceiros técnicos da VNX FIBER SERVICE, incluindo um formulário público de cadastro e uma dashboard administrativa protegida.
 
-![Preview do Site](assets/site-preview.jpg)
+## Estrutura do Sistema
+
+- `trabalhe-conosco.html`: Formulário público de cadastro de parceiros técnicos
+- `dashboard-admin.html`: Dashboard administrativa para gestão dos parceiros (requer autenticação)
+- `login.html`: Página de login para acesso à dashboard
+- `auth.js`: Módulo de autenticação
+- `assets/`: Diretório com arquivos estáticos (imagens, etc)
+
+## Configuração do Supabase
+
+1. Crie uma conta no [Supabase](https://supabase.com)
+2. Crie um novo projeto
+3. Crie uma tabela `parceiros_tecnicos` com a seguinte estrutura:
+
+```sql
+create table parceiros_tecnicos (
+  id uuid default uuid_generate_v4() primary key,
+  nome_completo text not null,
+  estado text not null,
+  cidade text not null,
+  especialidades text[] not null,
+  experiencia text,
+  whatsapp text not null,
+  email text not null,
+  portfolio_link text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Habilitar RLS (Row Level Security)
+alter table parceiros_tecnicos enable row level security;
+
+-- Política para inserção pública (qualquer um pode se cadastrar)
+create policy "Permitir inserção pública"
+  on parceiros_tecnicos for insert
+  with check (true);
+
+-- Política para leitura/deleção apenas por usuários autenticados
+create policy "Permitir leitura/deleção apenas por usuários autenticados"
+  on parceiros_tecnicos for all
+  using (auth.role() = 'authenticated');
+```
+
+4. Em "Authentication > Settings", habilite "Email Auth" e configure o domínio permitido
+
+5. Em "Authentication > Users", crie um usuário administrativo
+
+6. Em "Settings > API", copie a URL e a chave anon para configurar nos arquivos:
+   - Atualize a URL e chave do Supabase em `auth.js`
+   - Atualize a URL e chave do Supabase em `trabalhe-conosco.html`
+
+## Configuração do Ambiente
+
+1. Configure um servidor web (Apache, Nginx, etc) para servir os arquivos estáticos
+
+2. Configure HTTPS para segurança (recomendado)
+
+3. Faça upload dos arquivos para o servidor
+
+4. Teste o acesso em:
+   - Formulário público: `https://seu-dominio.com/trabalhe-conosco.html`
+   - Dashboard admin: `https://seu-dominio.com/dashboard-admin.html`
+
+## Funcionalidades
+
+### Formulário Público (trabalhe-conosco.html)
+- Cadastro de dados pessoais
+- Seleção de especialidades técnicas
+- Seleção de estado/cidade
+- Upload de informações de contato
+- Validação de campos
+- Feedback visual de sucesso/erro
+
+### Dashboard Administrativa (dashboard-admin.html)
+- Login seguro
+- Visualização de todos os cadastros
+- Filtros por estado e especialidade
+- Detalhes completos de cada parceiro
+- Exportação para CSV
+- Exclusão de registros
+- Interface responsiva
+
+## Segurança
+
+- Autenticação via Supabase
+- Row Level Security (RLS) no banco de dados
+- CORS configurado apenas para domínios permitidos
+- Proteção contra SQL Injection
+- Validação de dados no frontend e backend
+
+## Suporte
+
+Para suporte técnico ou dúvidas, entre em contato:
+- Email: contato@vnxfiber.com.br
+- WhatsApp: (98) 99988-2215
 
 ## 🚀 Tecnologias Utilizadas
 

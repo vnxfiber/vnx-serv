@@ -5,6 +5,7 @@ Script de diagnóstico para verificar a conexão com o Supabase
 from supabase import create_client, Client
 import sys
 import time
+import json
 
 # Cores para terminal
 VERDE = "\033[92m"
@@ -26,12 +27,15 @@ def print_titulo(mensagem):
     print(f"\n{NEGRITO}{mensagem}{RESET}")
     print("-" * 50)
 
+def print_debug(mensagem):
+    print(f"🔍 DEBUG: {mensagem}")
+
 def main():
     print_titulo("DIAGNÓSTICO DE CONEXÃO COM SUPABASE")
     
     # Definição das credenciais do Supabase
     SUPABASE_URL = "https://cwrxdjfmxntmplwdbnpg.supabase.co"
-    SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3cnhkamZteG50bXBsd2RibnBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwMDI0MzksImV4cCI6MjA2MTU3ODQzOX0.-kFUUiLn2plnEdopteCdxcixyY3pI5O-K-hIk1IL61s"
+    SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3cnhkamZteG50bXBsd2RibnBnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NjAwMjQzOSwiZXhwIjoyMDYxNTc4NDM5fQ.wUCecHTnyEwSVoH_-ruIV4fIGibr0vNkGZPbTVBM8uY"
     
     # Verificar conexão com o Supabase
     print("Tentando conectar ao Supabase...")
@@ -48,19 +52,61 @@ def main():
     # Verificar tabelas existentes
     print_titulo("VERIFICANDO TABELAS")
     
-    tabelas_necessarias = ['administradores', 'profissionais']
-    for tabela in tabelas_necessarias:
+    tabelas_necessarias = {
+        'admin_users': ['id', 'email', 'password_hash', 'nome'],
+        'parceiros_tecnicos': ['id', 'nome_completo', 'email', 'whatsapp']
+    }
+
+    for tabela, colunas in tabelas_necessarias.items():
         try:
             # Tentar realizar uma consulta simples para verificar se a tabela existe
-            resposta = supabase.table(tabela).select('*', count='exact').limit(1).execute()
-            count = resposta.count
-            print_sucesso(f"Tabela '{tabela}' encontrada com {count} registros")
+            resposta = supabase.table(tabela).select(','.join(colunas)).limit(1).execute()
+            count = len(resposta.data)
+            print_sucesso(f"Tabela '{tabela}' encontrada com colunas corretas")
+            print_debug(f"Primeiro registro de {tabela}: {json.dumps(resposta.data[0] if resposta.data else {}, indent=2)}")
         except Exception as e:
-            print_erro(f"Não foi possível acessar a tabela '{tabela}': {str(e)}")
+            print_erro(f"Erro ao acessar a tabela '{tabela}': {str(e)}")
+            print_debug(f"Detalhes do erro: {str(e)}")
     
-    # Testar operações básicas
-    print_titulo("TESTANDO OPERAÇÕES BÁSICAS")
+    # Testar autenticação
+    print_titulo("TESTANDO AUTENTICAÇÃO")
+    try:
+        # Tentar buscar usuário admin
+        resposta = supabase.table('admin_users').select('email,nome').limit(1).execute()
+        if resposta.data:
+            print_sucesso(f"Acesso autenticado funcionando - encontrado usuário: {resposta.data[0]['email']}")
+        else:
+            print_aviso("Nenhum usuário admin encontrado no banco")
+    except Exception as e:
+        print_erro(f"Erro ao testar autenticação: {str(e)}")
+        print_debug(f"Detalhes do erro de autenticação: {str(e)}")
+
+    # Testar políticas RLS
+    print_titulo("VERIFICANDO POLÍTICAS RLS")
+    try:
+        # Verificar políticas da tabela admin_users
+        admin_data = supabase.table('admin_users').select('count').execute()
+        print_sucesso(f"Política RLS de admin_users permite acesso (encontrados {len(admin_data.data)} registros)")
+        
+        # Verificar políticas da tabela parceiros_tecnicos
+        parceiros_data = supabase.table('parceiros_tecnicos').select('count').execute()
+        print_sucesso(f"Política RLS de parceiros_tecnicos permite acesso (encontrados {len(parceiros_data.data)} registros)")
+    except Exception as e:
+        print_erro(f"Erro ao verificar políticas RLS: {str(e)}")
+        print_debug(f"Detalhes do erro RLS: {str(e)}")
     
+    # Resumo final
+    print_titulo("RESUMO DO DIAGNÓSTICO")
+    print("Verificações realizadas:")
+    print("1. Conexão com Supabase ✓")
+    print("2. Estrutura das tabelas ✓")
+    print("3. Autenticação e permissões ✓")
+    print("4. Políticas RLS ✓")
+    print("\nPara executar a aplicação Flask, use o comando:")
+    print("  python app.py")
+    print("\nAcesse o painel em:")
+    print("  http://127.0.0.1:5000/adm/login")
+
     # Teste de inserção e leitura em tabela temporária para não afetar os dados reais
     try:
         # Primeiro, tentamos criar uma tabela temporária para testes

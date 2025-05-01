@@ -1,0 +1,947 @@
+{% extends "adm/base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+        <div class="container-fluid">
+            <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Dashboard</h4>
+        <div class="d-flex align-items-center gap-2">
+            <div class="dropdown">
+                <a href="#" class="notification-icon-wrapper text-decoration-none" data-bs-toggle="dropdown" aria-expanded="false" id="notificationsDropdown">
+                    <i class="fas fa-bell fs-5 text-secondary position-relative">
+                        <span class="notification-badge" id="notificationBadge">0</span>
+                    </i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end notifications-dropdown p-0" style="width: 320px;" aria-labelledby="notificationsDropdown">
+                    <div class="dropdown-header d-flex justify-content-between align-items-center p-3 border-bottom">
+                        <h6 class="mb-0">Notificações</h6>
+                        <a href="#" class="text-muted text-decoration-none" onclick="markAllAsRead(); return false;">
+                            <small>Marcar todas como lidas</small>
+                        </a>
+                    </div>
+                    <div class="notifications-list" style="max-height: 400px; overflow-y: auto;" id="notificationsDropdownList">
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Carregando...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dropdown-footer border-top p-2 text-center">
+                        <a href="{{ url_for('admin.notifications') }}" class="text-decoration-none">
+                            <small>Ver todas</small>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-sm btn-outline-secondary" onclick="refreshDashboard()">
+                <i class="fas fa-sync-alt"></i> Atualizar
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-3">
+        <div class="col-md-3">
+            <div class="card stats-card h-100" data-card="total">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stats-number">{{ total_parceiros }}</div>
+                            <div class="stats-text">Total de Parceiros</div>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card h-100" data-card="pendentes">
+                        <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stats-number">{{ parceiros_pendentes }}</div>
+                            <div class="stats-text">Pendentes</div>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card h-100" data-card="aprovados">
+                        <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stats-number">{{ parceiros_aprovados }}</div>
+                            <div class="stats-text">Aprovados</div>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card h-100" data-card="novos">
+                        <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stats-number">{{ novos_parceiros_mes }}</div>
+                            <div class="stats-text">Novos este mês</div>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+    <!-- Filters -->
+    <div class="filter-section mb-3">
+        <div class="row g-2">
+            <div class="col-md-2">
+                <label class="form-label small">Status</label>
+                <select class="form-select form-select-sm" id="statusFilter">
+                    <option value="">Todos</option>
+                    <option value="pendente" {% if request.args.get('status') == 'pendente' %}selected{% endif %}>Pendente</option>
+                    <option value="aprovado" {% if request.args.get('status') == 'aprovado' %}selected{% endif %}>Aprovado</option>
+                    <option value="rejeitado" {% if request.args.get('status') == 'rejeitado' %}selected{% endif %}>Rejeitado</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small">Especialidade</label>
+                <select class="form-select form-select-sm" id="especialidadeFilter">
+                    <option value="">Todas</option>
+                    {% for especialidade in especialidades %}
+                    <option value="{{ especialidade }}" {% if request.args.get('especialidade') == especialidade %}selected{% endif %}>
+                        {{ especialidade }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small">Cidade</label>
+                <select class="form-select form-select-sm" id="cidadeFilter">
+                    <option value="">Todas</option>
+                    {% for cidade in cidades %}
+                    <option value="{{ cidade }}" {% if request.args.get('cidade') == cidade %}selected{% endif %}>
+                        {{ cidade }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small">Buscar</label>
+                <input type="text" class="form-control form-control-sm" id="searchInput" 
+                       placeholder="Nome, email..." 
+                       value="{{ request.args.get('search', '') }}">
+            </div>
+            <div class="col-md-1">
+                <label class="form-label small">&nbsp;</label>
+                <button class="btn btn-primary btn-sm w-100" onclick="aplicarFiltros()">
+                    <i class="fas fa-filter"></i>
+                </button>
+            </div>
+        </div>
+            </div>
+
+    <div class="row g-3 mb-3">
+        <!-- Charts -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header py-2">
+                    <h6 class="card-title mb-0">Cadastros por Mês</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="cadastrosChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header py-2">
+                    <h6 class="card-title mb-0">Distribuição por Status</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Partners Table -->
+    <div class="card">
+        <div class="card-header py-2">
+            <h6 class="card-title mb-0">Parceiros Técnicos</h6>
+        </div>
+        <div class="card-body p-0">
+                    {% if parceiros %}
+                    <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Cidade</th>
+                                    <th>Especialidades</th>
+                                    <th>Status</th>
+                            <th>Data de Cadastro</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for parceiro in parceiros %}
+                                <tr>
+                            <td>{{ parceiro.nome_completo|default(parceiro.nome, true)|default('Nome não informado', true) }}</td>
+                            <td>{{ parceiro.email|default('Email não informado', true) }}</td>
+                            <td>{{ parceiro.cidade|default('Cidade não informada', true) }}</td>
+                            <td class="especialidades-cell">
+                                {% if parceiro.especialidades %}
+                                    {% for esp in parceiro.especialidades %}
+                                        <span class="badge bg-info">{{ esp }}</span>
+                                        {% endfor %}
+                                {% else %}
+                                    <span class="text-muted small">Não informado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                <span class="status-badge status-{{ parceiro.status|default('pendente')|lower }}">
+                                    {{ parceiro.status|default('Pendente') }}
+                                        </span>
+                                    </td>
+                            <td>{{ parceiro.created_at|datetime }}</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{{ url_for('admin.view_partner', partner_id=parceiro.id) }}" 
+                                       class="btn btn-sm btn-info" title="Ver detalhes">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                    {% if not parceiro.status or parceiro.status == 'Pendente' %}
+                                    <button class="btn btn-sm btn-success" onclick="updatePartnerStatus('{{ parceiro.id }}', 'Aprovado')" title="Aprovar">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                    <button class="btn btn-sm btn-danger" onclick="updatePartnerStatus('{{ parceiro.id }}', 'Rejeitado')" title="Rejeitar">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                    {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-users fa-2x text-muted mb-2"></i>
+                <p class="text-muted mb-0">Nenhum parceiro técnico cadastrado ainda.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-card {
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        color: white;
+    }
+
+    .stats-card .stats-icon {
+        font-size: 2rem;
+        opacity: 0.8;
+    }
+
+    .stats-card .stats-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+
+    .stats-card .stats-text {
+        font-size: 0.8rem;
+        opacity: 0.9;
+    }
+
+    .filter-section {
+        background-color: white;
+        padding: 1rem;
+        border-radius: 15px;
+        margin-bottom: 1rem;
+    }
+
+    .table {
+        font-size: 0.85rem;
+    }
+
+    .table th {
+        font-weight: 600;
+        color: var(--primary-color);
+        border-top: none;
+    }
+
+    .table td {
+        vertical-align: middle;
+        padding: 0.5rem;
+    }
+
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .status-pendente {
+        background-color: var(--warning-color);
+        color: #000;
+    }
+
+    .status-aprovado {
+        background-color: var(--success-color);
+        color: #fff;
+    }
+
+    .status-rejeitado {
+        background-color: var(--danger-color);
+        color: #fff;
+    }
+
+    .badge.bg-info {
+        background-color: #17a2b8 !important;
+        color: white;
+        font-weight: normal;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+    }
+
+    .especialidades-cell {
+        max-width: 180px;
+        overflow: hidden;
+    }
+
+    .especialidades-cell .badge {
+        margin: 1px;
+        display: inline-block;
+        white-space: nowrap;
+    }
+
+    .btn-group .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .form-select, .form-control {
+        font-size: 0.85rem;
+        padding: 0.375rem 0.75rem;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 250px;
+    }
+
+    .notification-icon-wrapper {
+        position: relative;
+        cursor: pointer;
+        padding: 5px;
+    }
+
+    .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #ff4444;
+        color: white;
+        border-radius: 50%;
+        padding: 2px;
+        min-width: 18px;
+        height: 18px;
+        font-size: 11px;
+        font-weight: bold;
+        display: none;
+        text-align: center;
+        line-height: 14px;
+        border: 2px solid white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .notification-badge.show {
+        display: block;
+    }
+
+    /* Estilos para os toasts */
+    .toast-container {
+        z-index: 9999;
+    }
+
+    .toast {
+        min-width: 300px;
+        backdrop-filter: blur(10px);
+        border: none;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .toast .toast-header {
+        border-bottom: none;
+        padding: 0.5rem 1rem;
+    }
+
+    .toast .toast-body {
+        padding: 1rem;
+        background: white;
+        border-radius: 0 0 6px 6px;
+    }
+
+    .bg-success {
+        background-color: var(--success-color) !important;
+    }
+
+    .bg-danger {
+        background-color: var(--danger-color) !important;
+    }
+
+    .bg-warning {
+        background-color: var(--warning-color) !important;
+    }
+
+    .btn-close-white {
+        filter: brightness(0) invert(1);
+    }
+
+    /* Animação para os toasts */
+    .toast-container {
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .notifications-dropdown {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        border: none;
+        border-radius: 8px;
+    }
+
+    .notifications-dropdown .dropdown-header {
+        background: #f8f9fa;
+    }
+
+    .notifications-dropdown .notification-item {
+        padding: 0.75rem 1rem;
+        border-left: 3px solid transparent;
+        transition: all 0.2s ease;
+    }
+
+    .notifications-dropdown .notification-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .notifications-dropdown .notification-item.unread {
+        background-color: rgba(var(--bs-primary-rgb), 0.05);
+        border-left-color: var(--primary-color);
+    }
+
+    .notifications-dropdown .notification-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: var(--primary-color);
+    }
+
+    .notifications-dropdown .notification-message {
+        font-size: 0.8125rem;
+        color: #666;
+        margin-bottom: 0.25rem;
+    }
+
+    .notifications-dropdown .notification-time {
+        font-size: 0.75rem;
+        color: #999;
+    }
+
+    .notifications-dropdown .dropdown-footer {
+        background: #f8f9fa;
+    }
+
+    .notifications-dropdown .dropdown-footer a:hover {
+        text-decoration: underline !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+    // Inicialização das variáveis do template
+    const TEMPLATE_DATA = JSON.parse(`{
+        "cards": {
+            "total": {{ total_parceiros|tojson|safe }},
+            "pendentes": {{ parceiros_pendentes|tojson|safe }},
+            "aprovados": {{ parceiros_aprovados|tojson|safe }},
+            "novos": {{ novos_parceiros_mes|tojson|safe }}
+        },
+        "charts": {
+            "labels": {{ labels_meses|tojson|safe }},
+            "cadastros": {{ dados_cadastros_mes|tojson|safe }},
+            "status": {{ dados_status|tojson|safe }}
+        }
+    }`);
+
+    let cadastrosChart = null;
+    let statusChart = null;
+
+    // Função para atualizar os cards
+    function updateCards() {
+        try {
+            console.log('Dados dos cards:', TEMPLATE_DATA.cards);
+
+            // Atualizar cada card
+            Object.keys(TEMPLATE_DATA.cards).forEach(key => {
+                const cardElement = document.querySelector(`[data-card="${key}"] .stats-number`);
+                if (cardElement) {
+                    cardElement.textContent = TEMPLATE_DATA.cards[key];
+                } else {
+                    console.error(`Elemento não encontrado para o card: ${key}`);
+                }
+            });
+        } catch (error) {
+            console.error('Erro ao atualizar cards:', error);
+        }
+    }
+
+    // Função para inicializar os gráficos
+    function initCharts() {
+        try {
+            // Configurações padrão do Chart.js
+            if (typeof Chart !== 'undefined') {
+                Chart.defaults.font.size = 12;
+                Chart.defaults.color = '#666';
+            }
+
+            console.log('Dados dos gráficos:', {
+                labels: TEMPLATE_DATA.charts.labels,
+                cadastros: TEMPLATE_DATA.charts.cadastros,
+                status: TEMPLATE_DATA.charts.status
+            });
+
+            // Destruir gráficos existentes se houver
+            if (cadastrosChart) {
+                cadastrosChart.destroy();
+            }
+            if (statusChart) {
+                statusChart.destroy();
+            }
+
+            // Gráfico de Cadastros por Mês
+            const cadastrosCtx = document.getElementById('cadastrosChart');
+            if (cadastrosCtx) {
+                cadastrosChart = new Chart(cadastrosCtx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: TEMPLATE_DATA.charts.labels,
+                        datasets: [{
+                            label: 'Novos Cadastros',
+                            data: TEMPLATE_DATA.charts.cadastros,
+                            borderColor: '#0a3d62',
+                            backgroundColor: 'rgba(10, 61, 98, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        },
+                        animation: {
+                            duration: 1000
+                        }
+                    }
+                });
+            }
+
+            // Gráfico de Status
+            const statusCtx = document.getElementById('statusChart');
+            if (statusCtx) {
+                statusChart = new Chart(statusCtx.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Pendente', 'Aprovado', 'Rejeitado'],
+                        datasets: [{
+                            data: TEMPLATE_DATA.charts.status,
+                            backgroundColor: ['#ffd700', '#28a745', '#dc3545'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right'
+                            }
+                        },
+                        cutout: '70%',
+                        animation: {
+                            duration: 1000
+                        }
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Erro ao inicializar os gráficos:', error);
+        }
+    }
+
+    // Função para atualizar o badge de notificações
+    async function updateNotificationBadge() {
+        try {
+            const response = await fetch('/adm/notifications/count');
+            const data = await response.json();
+            
+            const badge = document.getElementById('notificationBadge');
+            if (badge) {
+                if (data.count > 0) {
+                    badge.textContent = data.count;
+                    badge.classList.add('show');
+                } else {
+                    badge.classList.remove('show');
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar badge:', error);
+        }
+    }
+
+    // Atualiza o badge quando a página carrega e a cada 30 segundos
+    document.addEventListener('DOMContentLoaded', () => {
+        updateCards();
+        initCharts();
+        updateNotificationBadge();
+        setInterval(updateNotificationBadge, 30000);
+    });
+
+    // Funções para ações da dashboard
+    async function refreshDashboard() {
+        try {
+            const response = await fetch(window.location.pathname + window.location.search);
+            if (response.ok) {
+                location.reload();
+            } else {
+                throw new Error('Erro ao atualizar dashboard');
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            alert('Erro ao atualizar os dados. Por favor, tente novamente.');
+        }
+    }
+
+    function aplicarFiltros() {
+        const status = document.getElementById('statusFilter')?.value || '';
+        const especialidade = document.getElementById('especialidadeFilter')?.value || '';
+        const cidade = document.getElementById('cidadeFilter')?.value || '';
+        const search = document.getElementById('searchInput')?.value || '';
+        
+        const params = new URLSearchParams();
+        if (status) params.append('status', status);
+        if (especialidade) params.append('especialidade', especialidade);
+        if (cidade) params.append('cidade', cidade);
+        if (search) params.append('search', search);
+        
+        window.location.href = `${window.location.pathname}?${params.toString()}`;
+    }
+
+    // Função para mostrar toast com auto-hide
+    function showToast(title, message, type = 'success') {
+        // Remove toasts anteriores
+        const existingToasts = document.querySelectorAll('.toast');
+        existingToasts.forEach(toast => toast.remove());
+
+        // Cria o novo toast
+        const toastHTML = `
+            <div class="toast-container position-fixed top-0 end-0 p-3">
+                <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header bg-${type} text-white">
+                        <strong class="me-auto">${title}</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Adiciona o toast ao documento
+        document.body.insertAdjacentHTML('beforeend', toastHTML);
+
+        // Remove o toast após 3 segundos
+        setTimeout(() => {
+            const toasts = document.querySelectorAll('.toast-container');
+            toasts.forEach(toast => toast.remove());
+        }, 3000);
+    }
+
+    // Atualiza a função updatePartnerStatus para usar o novo showToast
+    async function updatePartnerStatus(partnerId, newStatus) {
+        if (!confirm(`Deseja ${newStatus.toLowerCase()} este parceiro?`)) {
+            return;
+        }
+
+        try {
+            console.log('Atualizando status:', partnerId, newStatus);
+            
+            const formData = new FormData();
+            formData.append('status', newStatus);
+            
+            const response = await fetch(`/adm/parceiro/${partnerId}/status`, {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (response.ok) {
+                console.log('Status atualizado com sucesso');
+                showToast('Sucesso', `Parceiro ${newStatus.toLowerCase()} com sucesso!`);
+                // Atualiza a interface após 1 segundo para dar tempo de ver o toast
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+                // Atualiza o contador de notificações
+                updateNotificationBadge();
+            } else {
+                console.error('Erro ao atualizar status:', response);
+                showToast('Erro', 'Não foi possível atualizar o status.', 'danger');
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            showToast('Erro', 'Ocorreu um erro ao atualizar o status.', 'danger');
+        }
+    }
+
+    // Adicionar evento de tecla Enter no campo de busca
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    aplicarFiltros();
+                }
+            });
+        }
+    });
+
+    async function loadNotifications() {
+        const notificationsList = document.getElementById('notificationsDropdownList');
+        if (!notificationsList) {
+            console.error('Elemento notificationsDropdownList não encontrado');
+            return;
+        }
+
+        // Mostrar loading
+        notificationsList.innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+            </div>
+        `;
+
+        try {
+            console.log('Carregando notificações...');
+            const response = await fetch('/adm/notifications/recent');
+            const data = await response.json();
+            console.log('Resposta do servidor:', data);
+
+            if (!response.ok) {
+                throw new Error(data.error || `Erro ${response.status}: ${response.statusText}`);
+            }
+
+            if (data.notifications && Array.isArray(data.notifications)) {
+                if (data.notifications.length > 0) {
+                    notificationsList.innerHTML = data.notifications.map(notification => `
+                        <div class="notification-item ${notification.read ? '' : 'unread'}" data-id="${notification.id}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="notification-title">
+                                        <i class="fas fa-${notification.type === 'success' ? 'check-circle' : 
+                                                       notification.type === 'danger' ? 'times-circle' :
+                                                       notification.type === 'warning' ? 'exclamation-triangle' : 
+                                                       'info-circle'} me-2 text-${notification.type}"></i>
+                                        ${notification.title}
+                                    </div>
+                                    <div class="notification-message">${notification.message}</div>
+                                    <div class="notification-time">${formatNotificationDate(notification.created_at)}</div>
+                                </div>
+                                ${!notification.read ? `
+                                    <button class="btn btn-sm btn-link text-muted p-0" 
+                                            onclick="markAsRead('${notification.id}', event)"
+                                            title="Marcar como lida">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    notificationsList.innerHTML = `
+                        <div class="text-center py-4">
+                            <i class="fas fa-bell-slash fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0"><small>Nenhuma notificação</small></p>
+                        </div>
+                    `;
+                }
+            } else {
+                throw new Error('Formato de dados inválido');
+            }
+        } catch (error) {
+            console.error('Erro ao carregar notificações:', error);
+            
+            let errorMessage = 'Erro ao carregar notificações';
+            if (error.message.includes('401')) {
+                errorMessage = 'Sessão expirada. Por favor, faça login novamente.';
+                // Redirecionar para a página de login após 2 segundos
+                setTimeout(() => {
+                    window.location.href = '/adm/login';
+                }, 2000);
+            }
+            
+            notificationsList.innerHTML = `
+                <div class="text-center py-4">
+                    <i class="fas fa-exclamation-circle fa-2x text-danger mb-2"></i>
+                    <p class="text-danger mb-0"><small>${errorMessage}</small></p>
+                </div>
+            `;
+        }
+    }
+
+    function formatNotificationDate(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInMinutes = Math.floor((now - date) / (1000 * 60));
+        
+        if (diffInMinutes < 1) return 'Agora';
+        if (diffInMinutes < 60) return `${diffInMinutes}m atrás`;
+        
+        const diffInHours = Math.floor(diffInMinutes / 60);
+        if (diffInHours < 24) return `${diffInHours}h atrás`;
+        
+        const diffInDays = Math.floor(diffInHours / 24);
+        if (diffInDays < 7) return `${diffInDays}d atrás`;
+        
+        return date.toLocaleDateString('pt-BR');
+    }
+
+    async function markAsRead(notificationId, event) {
+        if (event) {
+            event.stopPropagation();
+        }
+        
+        try {
+            const response = await fetch('/adm/notifications/mark-read', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    notification_ids: [notificationId]
+                })
+            });
+
+            if (response.ok) {
+                const notification = document.querySelector(`.notification-item[data-id="${notificationId}"]`);
+                if (notification) {
+                    notification.classList.remove('unread');
+                    const button = notification.querySelector('button');
+                    if (button) button.remove();
+                }
+                updateNotificationBadge();
+            }
+        } catch (error) {
+            console.error('Erro ao marcar notificação como lida:', error);
+        }
+    }
+
+    async function markAllAsRead() {
+        try {
+            const response = await fetch('/adm/notifications/mark-read', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    notification_ids: []
+                })
+            });
+
+            if (response.ok) {
+                const notifications = document.querySelectorAll('.notification-item.unread');
+                notifications.forEach(notification => {
+                    notification.classList.remove('unread');
+                    const button = notification.querySelector('button');
+                    if (button) button.remove();
+                });
+                updateNotificationBadge();
+            }
+        } catch (error) {
+            console.error('Erro ao marcar todas as notificações como lidas:', error);
+        }
+    }
+
+    // Carregar notificações quando o dropdown é aberto
+    document.addEventListener('DOMContentLoaded', () => {
+        const dropdown = document.getElementById('notificationsDropdown');
+        if (dropdown) {
+            // Usar o evento show.bs.dropdown do Bootstrap
+            const dropdownMenu = dropdown.nextElementSibling;
+            if (dropdownMenu) {
+                dropdownMenu.addEventListener('show.bs.dropdown', () => {
+                    loadNotifications();
+                });
+            }
+            
+            // Também carregar ao clicar, para garantir
+            dropdown.addEventListener('click', (e) => {
+                loadNotifications();
+            });
+        }
+        
+        // Atualizar badge e carregar notificações iniciais
+        updateNotificationBadge();
+        setInterval(updateNotificationBadge, 30000);
+    });
+    </script>
+{% endblock %} 
