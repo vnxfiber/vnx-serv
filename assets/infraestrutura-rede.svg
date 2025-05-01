@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <!-- Fundo da imagem -->
+  <rect width="100%" height="100%" fill="#f8f9fa" rx="10" ry="10"/>
+  
+  <!-- Rack de servidores principal -->
+  <g transform="translate(350, 130)">
+    <!-- Gabinete rack -->
+    <rect x="-100" y="-20" width="200" height="300" rx="5" ry="5" fill="#e0e0e0" stroke="#ccc" stroke-width="2"/>
+    <rect x="-95" y="-15" width="190" height="290" rx="3" ry="3" fill="#f5f5f5" stroke="#ddd" stroke-width="1"/>
+    
+    <!-- Servidor 1 -->
+    <rect x="-90" y="0" width="180" height="35" rx="2" ry="2" fill="#0a3d62"/>
+    <!-- Botões e luzes -->
+    <circle cx="-70" cy="17" r="3" fill="#27ae60"/>
+    <circle cx="-60" cy="17" r="3" fill="#f39c12"/>
+    <rect x="-45" y="12" width="25" height="10" rx="2" ry="2" fill="#dee2e6"/>
+    <rect x="40" y="14" width="40" height="6" rx="1" ry="1" fill="#dee2e6"/>
+    
+    <!-- Servidor 2 -->
+    <rect x="-90" y="45" width="180" height="35" rx="2" ry="2" fill="#0a3d62"/>
+    <!-- Botões e luzes -->
+    <circle cx="-70" cy="62" r="3" fill="#27ae60"/>
+    <circle cx="-60" cy="62" r="3" fill="#e74c3c"/>
+    <rect x="-45" y="57" width="25" height="10" rx="2" ry="2" fill="#dee2e6"/>
+    <rect x="40" y="59" width="40" height="6" rx="1" ry="1" fill="#dee2e6"/>
+    
+    <!-- Servidor 3 -->
+    <rect x="-90" y="90" width="180" height="35" rx="2" ry="2" fill="#0a3d62"/>
+    <!-- Botões e luzes -->
+    <circle cx="-70" cy="107" r="3" fill="#27ae60"/>
+    <circle cx="-60" cy="107" r="3" fill="#27ae60"/>
+    <rect x="-45" y="102" width="25" height="10" rx="2" ry="2" fill="#dee2e6"/>
+    <rect x="40" y="104" width="40" height="6" rx="1" ry="1" fill="#dee2e6"/>
+    
+    <!-- Servidor de armazenamento -->
+    <rect x="-90" y="135" width="180" height="55" rx="2" ry="2" fill="#3c6382"/>
+    <!-- Drives de disco -->
+    <g>
+      <!-- Fileira 1 -->
+      <rect x="-80" y="145" width="20" height="15" rx="1" ry="1" fill="#dee2e6" stroke="#ccc"/>
+      <rect x="-55" y="145" width="20" height="15" rx="1" ry="1" fill="#dee2e6" stroke="#ccc"/>
+      <rect x="-30" y="145" width="20" height="15" rx="1" ry="1" fill="#dee2e6" stroke="#ccc"/>
+      <rect x="-5" y="145" width="20" height="15" rx="1" ry="1" fill="#dee2e6" stroke="#ccc"/>
+      <rect x="20" y="145" width="20" height="15" rx="1" ry="1" fill="#dee2e6" stroke="#ccc"/>
+      <rect x="45" y="145" width="20" height="15" rx="1" ry="1" fill="#dee2e6" stroke="#ccc"/>
+      
+      <!-- Fileira 2 -->
+      <rect x="-80" y="165" width="20" height="15" rx="1" ry="1" fill="#dee2e6" stroke="#ccc"/>
+      <rect x="-55" y="165" width="20" height="15" rx="1" ry="1" fill="#dee2e6" stroke="#ccc"/>
+      <rect x="-30" y="165" width="20" height="15" rx="1" ry="1" fill="#dee2e6" stroke="#ccc"/>
+      <rect x="-5" y="165" width="20" height="15" rx="1" ry="1" fill="#dee2e6" stroke="#ccc"/>
+      <rect x="20" y="165" width="20" height="15" rx="1" ry="1" fill="#dee2e6" stroke="#ccc"/>
+      <rect x="45" y="165" width="20" height="15" rx="1" ry="1" fill="#dee2e6" stroke="#ccc"/>
+    </g>
+    
+    <!-- Switch de rede -->
+    <rect x="-90" y="200" width="180" height="30" rx="2" ry="2" fill="#2c3e50"/>
+    <!-- Portas de rede -->
+    <g>
+      <rect x="-80" y="210" width="8" height="10" rx="1" ry="1" fill="#3498db"/>
+      <rect x="-68" y="210" width="8" height="10" rx="1" ry="1" fill="#3498db"/>
+      <rect x="-56" y="210" width="8" height="10" rx="1" ry="1" fill="#3498db"/>
+      <rect x="-44" y="210" width="8" height="10" rx="1" ry="1" fill="#3498db"/>
+      <rect x="-32" y="210" width="8" height="10" rx="1" ry="1" fill="#3498db"/>
+      <rect x="-20" y="210" width="8" height="10" rx="1" ry="1" fill="#3498db"/>
+      <rect x="-8" y="210" width="8" height="10" rx="1" ry="1" fill="#3498db"/>
+      <rect x="4" y="210" width="8" height="10" rx="1" ry="1" fill="#3498db"/>
+      <rect x="16" y="210" width="8" height="10" rx="1" ry="1" fill="#3498db"/>
+      <rect x="28" y="210" width="8" height="10" rx="1" ry="1" fill="#3498db"/>
+      <rect x="40" y="210" width="8" height="10" rx="1" ry="1" fill="#3498db"/>
+      <rect x="52" y="210" width="8" height="10" rx="1" ry="1" fill="#3498db"/>
+      <rect x="64" y="210" width="8" height="10" rx="1" ry="1" fill="#3498db"/>
+    </g>
+    
+    <!-- UPS/No-break -->
+    <rect x="-90" y="240" width="180" height="25" rx="2" ry="2" fill="#2c3e50"/>
+    <rect x="-80" y="245" width="160" height="15" rx="1" ry="1" fill="#34495e"/>
+    <circle cx="-70" cy="252" r="3" fill="#2ecc71"/>
+    <rect x="-60" y="249" width="30" height="6" rx="1" ry="1" fill="#eee"/>
+    <rect x="-20" y="249" width="90" height="6" rx="1" ry="1" fill="#eee"/>
+  </g>
+  
+  <!-- Estações de trabalho - Esquerda -->
+  <g transform="translate(150, 180)">
+    <!-- Computador 1 -->
+    <rect x="-40" y="0" width="80" height="60" rx="3" ry="3" fill="#3498db"/>
+    <rect x="-35" y="5" width="70" height="45" rx="2" ry="2" fill="#fff"/>
+    <rect x="-10" y="60" width="20" height="10" fill="#3498db"/>
+    <rect x="-30" y="70" width="60" height="5" rx="2" ry="2" fill="#3498db"/>
+    <!-- Teclado -->
+    <rect x="-30" y="80" width="60" height="15" rx="2" ry="2" fill="#ddd"/>
+    <rect x="-25" y="85" width="50" height="5" rx="1" ry="1" fill="#ccc"/>
+  </g>
+  
+  <!-- Roteador Wi-Fi - Direita -->
+  <g transform="translate(550, 230)">
+    <rect x="-25" y="-40" width="50" height="80" rx="5" ry="5" fill="#444"/>
+    <!-- Antenas -->
+    <line x1="-15" y1="-40" x2="-15" y2="-70" stroke="#555" stroke-width="3"/>
+    <line x1="0" y1="-40" x2="0" y2="-80" stroke="#555" stroke-width="3"/>
+    <line x1="15" y1="-40" x2="15" y2="-70" stroke="#555" stroke-width="3"/>
+    <!-- Luzes -->
+    <circle cx="-10" cy="-20" r="3" fill="#2ecc71"/>
+    <circle cx="0" cy="-20" r="3" fill="#3498db"/>
+    <circle cx="10" cy="-20" r="3" fill="#f1c40f"/>
+    <!-- Portas -->
+    <rect x="-18" y="10" width="36" height="20" rx="2" ry="2" fill="#333"/>
+    <rect x="-15" y="15" width="6" height="10" rx="1" ry="1" fill="#3498db"/>
+    <rect x="-5" y="15" width="6" height="10" rx="1" ry="1" fill="#3498db"/>
+    <rect x="5" y="15" width="6" height="10" rx="1" ry="1" fill="#3498db"/>
+  </g>
+  
+  <!-- Conexões de rede -->
+  <!-- Rack para estação de trabalho -->
+  <path d="M250,180 C300,160 320,160 350,160" stroke="#3498db" stroke-width="3" fill="none"/>
+  <!-- Rack para roteador -->
+  <path d="M450,160 C500,160 520,170 550,190" stroke="#3498db" stroke-width="3" fill="none"/>
+  
+  <!-- Título da imagem -->
+  <text x="400" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#0a3d62">Infraestrutura de Rede</text>
+</svg> 

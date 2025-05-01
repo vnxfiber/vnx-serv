@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200px" height="200px" viewBox="0 0 200 200" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Empty State</title>
+    <defs>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-1">
+            <stop stop-color="#F5F5F5" offset="0%"></stop>
+            <stop stop-color="#E0E0E0" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Empty-State" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <circle id="Background" fill="url(#linearGradient-1)" cx="100" cy="100" r="90"></circle>
+        <g id="Folder" transform="translate(50, 60)">
+            <path d="M90,20 L50,20 L40,10 L10,10 C4.5,10 0,14.5 0,20 L0,70 C0,75.5 4.5,80 10,80 L90,80 C95.5,80 100,75.5 100,70 L100,30 C100,24.5 95.5,20 90,20 Z" fill="#BDBDBD"></path>
+            <path d="M90,30 L10,30 C4.5,30 0,25.5 0,20 L0,70 C0,75.5 4.5,80 10,80 L90,80 C95.5,80 100,75.5 100,70 L100,40 C100,34.5 95.5,30 90,30 Z" fill="#E0E0E0"></path>
+        </g>
+        <g id="Search" transform="translate(110, 65)">
+            <circle id="Glass" stroke="#9E9E9E" stroke-width="5" fill="#FAFAFA" cx="20" cy="20" r="17.5"></circle>
+            <line x1="32" y1="32" x2="45" y2="45" id="Handle" stroke="#9E9E9E" stroke-width="5" stroke-linecap="round"></line>
+        </g>
+        <text x="100" y="150" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="#757575">Nenhum resultado encontrado</text>
+    </g>
+</svg> 

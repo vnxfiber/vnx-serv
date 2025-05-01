@@ -1,247 +1,362 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Administração VNX</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-    <!-- Custom Admin CSS (Consider creating this file later) -->
-    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}"> -->
-    <style>
-        body {
-            display: flex;
-            min-height: 100vh;
-            background-color: #f8f9fa;
-        }
-        .sidebar {
-            width: 250px;
-            background-color: #0a3d62; /* Azul VNX */
-            color: #fff;
-            padding-top: 1rem;
-            position: fixed;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-        .sidebar .logo {
-            padding: 1rem;
-            text-align: center;
-            margin-bottom: 1rem;
-        }
-        .sidebar .logo img {
-            max-width: 80%;
-            height: auto;
-        }
-        .sidebar .nav-link {
-            color: rgba(255, 255, 255, 0.8);
-            padding: 0.8rem 1.5rem;
-            display: flex;
-            align-items: center;
-        }
-        .sidebar .nav-link i {
-            margin-right: 10px;
-            width: 20px; /* Align icons */
-            text-align: center;
-        }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            color: #fff;
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-        .sidebar .user-info {
-             margin-top: auto; /* Push to bottom */
-             padding: 1rem 1.5rem;
-             border-top: 1px solid rgba(255, 255, 255, 0.2);
-             font-size: 0.9rem;
-        }
-        .sidebar .user-info a {
-            color: #ffc107; /* Yellow accent for logout */
-            text-decoration: none;
-        }
-        .main-content {
-            margin-left: 250px; /* Same as sidebar width */
-            padding: 2rem;
-            flex-grow: 1;
-            overflow-y: auto; /* Allow content scrolling */
-        }
-        .page-header {
-             margin-bottom: 2rem;
-             padding-bottom: 1rem;
-             border-bottom: 1px solid #dee2e6;
-        }
-         .page-header h1 {
-             color: #0a3d62;
-         }
-        .table th {
-            background-color: #e9ecef;
-            color: #0a3d62;
-            font-weight: 600;
-        }
-        .table td .badge {
-            font-size: 0.85em;
-            margin-right: 5px;
-            margin-bottom: 5px;
-        }
-         .details-link {
-             color: #0a3d62;
-             text-decoration: none;
-         }
-         .details-link:hover {
-             text-decoration: underline;
-         }
-         .empty-state {
-             text-align: center;
-             padding: 4rem 1rem;
-             background-color: #fff;
-             border-radius: 8px;
-             margin-top: 2rem;
-         }
-         .empty-state img {
-             max-width: 150px;
-             margin-bottom: 1.5rem;
-             opacity: 0.7;
-         }
-         .empty-state p {
-             color: #6c757d;
-             font-size: 1.1rem;
-         }
-    </style>
-</head>
-<body>
-    <!-- Sidebar -->
-    <nav class="sidebar">
-        <div class="logo">
-             <!-- Make sure the logo path is correct -->
-            <a href="{{ url_for('admin_dashboard') }}"><img src="{{ url_for('static', filename='assets/logo-white.svg') }}" alt="VNX Logo"></a>
-        </div>
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{{ url_for('admin_dashboard') }}">
-                    <i class="fas fa-tachometer-alt"></i> Dashboard
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('admin_candidatos') }}">
-                    <i class="fas fa-users"></i> Candidatos
-                </a>
-            </li>
-            <!-- Add more navigation items here -->
-        </ul>
-         <div class="user-info">
-            <small>Logado como: {{ user }}</small><br>
-            <a href="{{ url_for('admin_logout') }}"><i class="fas fa-sign-out-alt"></i> Sair</a>
-        </div>
-    </nav>
+{% extends "adm/base.html" %}
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <header class="page-header d-flex justify-content-between align-items-center">
-            <h1>Dashboard</h1>
-            <!-- Optional: Add buttons or actions here -->
-        </header>
+{% block title %}Dashboard - VNX Admin{% endblock %}
 
-        <!-- Summary Cards (Example) -->
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card text-white bg-primary">
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Dashboard</h1>
+            <p class="text-muted mb-0">Bem-vindo de volta!</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-light" data-bs-toggle="tooltip" title="Atualizar">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+            <button class="btn btn-light" data-bs-toggle="tooltip" title="Configurações">
+                <i class="fas fa-cog"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <!-- Cards de Estatísticas -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title"><i class="fas fa-users me-2"></i>Total de Candidatos</h5>
-                        <p class="card-text fs-3">{{ profissionais|length }}</p>
-                        <a href="{{ url_for('admin_candidatos') }}" class="text-white stretched-link">Ver lista</a>
-                    </div>
-                </div>
-            </div>
-            <!-- Add more summary cards as needed -->
-             <div class="col-md-4">
-                <div class="card text-white bg-success">
-                    <div class="card-body">
-                        <h5 class="card-title"><i class="fas fa-check-circle me-2"></i>Novos Hoje (Exemplo)</h5>
-                        <p class="card-text fs-3">0</p> <!-- Placeholder -->
-                        <small>Funcionalidade a implementar</small>
-                    </div>
-                </div>
-            </div>
-             <div class="col-md-4">
-                <div class="card text-white bg-info">
-                    <div class="card-body">
-                        <h5 class="card-title"><i class="fas fa-map-marker-alt me-2"></i>Principais Regiões (Ex.)</h5>
-                        <p class="card-text fs-3">MA</p> <!-- Placeholder -->
-                         <small>Funcionalidade a implementar</small>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-2">Total de Profissionais</p>
+                            <h3 class="mb-0">{{ profissionais|length }}</h3>
+                            <small class="text-success">
+                                <i class="fas fa-arrow-up"></i> 12% este mês
+                            </small>
+                        </div>
+                        <div class="icon-circle bg-primary-subtle text-primary">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Recent Candidates Table -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card">
+                    <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-2">Parceiros Técnicos</p>
+                            <h3 class="mb-0">{{ parceiros|length if parceiros else 0 }}</h3>
+                            <small class="text-warning">
+                                <i class="fas fa-minus"></i> Sem alteração
+                            </small>
+                        </div>
+                        <div class="icon-circle bg-success-subtle text-success">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card">
+                    <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-2">Vagas Abertas</p>
+                            <h3 class="mb-0">0</h3>
+                            <small class="text-danger">
+                                <i class="fas fa-arrow-down"></i> 3% este mês
+                            </small>
+                        </div>
+                        <div class="icon-circle bg-warning-subtle text-warning">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
         <div class="card">
-            <div class="card-header">
-                <h4 class="mb-0">Candidatos Recentes (Últimos 5)</h4>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-2">Taxa de Conversão</p>
+                            <h3 class="mb-0">65%</h3>
+                            <small class="text-success">
+                                <i class="fas fa-arrow-up"></i> 5% este mês
+                            </small>
+                        </div>
+                        <div class="icon-circle bg-info-subtle text-info">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
+        </div>
+
+        <!-- Tabela de Profissionais Recentes -->
+        <div class="col-xl-8">
+            <div class="card">
+                <div class="card-header bg-transparent border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Profissionais Recentes</h5>
+                        <a href="{{ url_for('listar_profissionais') }}" class="btn btn-sm btn-link text-primary">
+                            Ver Todos <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
                 {% if profissionais %}
                     <div class="table-responsive">
                         <table class="table table-hover align-middle">
                             <thead>
                                 <tr>
-                                    <th>Nome / Razão Social</th>
-                                    <th>Contato</th>
-                                    <th>Localização</th>
-                                    <th>Especialidades</th>
-                                    <th>Data Cadastro</th>
+                                        <th>Nome</th>
+                                        <th>Profissão</th>
+                                        <th>Disponibilidade</th>
+                                        <th>Status</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- Loop through recent professionals (adjust slicing as needed) -->
-                                {% for prof in profissionais | sort(attribute='id', reverse=True) | list | slice(0, 5) %}
-                                <tr>
-                                    <td>{{ prof.nome_completo }}</td>
-                                    <td>
-                                        <i class="fas fa-envelope me-1 text-muted"></i> {{ prof.email }}<br>
-                                        <i class="fab fa-whatsapp me-1 text-success"></i> {{ prof.whatsapp }}
+                                    {% for profissional in profissionais[:5] %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-circle bg-primary-subtle text-primary me-2">
+                                                    {{ profissional.nome[:1] }}
+                                                </div>
+                                                <div>
+                                                    <p class="mb-0 fw-medium">{{ profissional.nome }}</p>
+                                                    <small class="text-muted">{{ profissional.email }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{{ profissional.profissao }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if profissional.disponibilidade == 'integral' else 'warning' if profissional.disponibilidade == 'meio-periodo' else 'info' }}-subtle text-{{ 'success' if profissional.disponibilidade == 'integral' else 'warning' if profissional.disponibilidade == 'meio-periodo' else 'info' }}">
+                                                {{ profissional.disponibilidade }}
+                                            </span>
                                     </td>
-                                    <td>{{ prof.cidade_estado }}</td>
-                                    <td>
-                                        {% set especialidades_list = prof.especialidades.split(',') %}
-                                        {% for esp in especialidades_list %}
-                                            <span class="badge bg-secondary">{{ esp.strip() }}</span>
-                                        {% endfor %}
+                                        <td>
+                                            <span class="badge bg-success-subtle text-success">
+                                                <i class="fas fa-circle me-1 small"></i> Ativo
+                                            </span>
                                     </td>
-                                    <td>{{ prof.data_cadastro.strftime('%d/%m/%Y %H:%M') if prof.data_cadastro else 'N/A' }}</td>
-                                    <td>
-                                        <!-- Link to a future detail page -->
-                                         <a href="{{ url_for('admin_view_candidato', candidato_id=prof.id) }}" class="btn btn-sm btn-outline-primary" title="Ver Detalhes">
+                                        <td>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-sm btn-light" 
+                                                        data-bs-toggle="modal" data-bs-target="#detailsModal{{ profissional.id }}"
+                                                        title="Ver detalhes">
                                             <i class="fas fa-eye"></i>
-                                        </a>
-                                        <!-- Add delete button or other actions here -->
-                                        <button class="btn btn-sm btn-outline-danger" title="Excluir (Implementar)" disabled>
-                                            <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-light" title="Editar">
+                                                    <i class="fas fa-edit"></i>
                                         </button>
+                                            </div>
                                     </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
-                     <div class="text-center mt-3">
-                        <a href="{{ url_for('admin_candidatos') }}" class="btn btn-outline-primary">Ver todos os candidatos</a>
-                    </div>
                 {% else %}
                     <div class="empty-state">
-                        <!-- Make sure the image path is correct -->
                         <img src="{{ url_for('static', filename='assets/empty-state.svg') }}" alt="Sem dados">
-                        <p>Nenhum candidato cadastrado ainda.</p>
-                        <a href="/trabalhe-conosco.html" target="_blank" class="btn btn-primary">Ir para a página de cadastro</a>
+                            <p>Nenhum profissional cadastrado ainda.</p>
+                            <a href="{{ url_for('novo_profissional') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Cadastrar Profissional
+                            </a>
                     </div>
                 {% endif %}
+                </div>
             </div>
         </div>
 
-    </main>
+        <!-- Cards de Ações Rápidas e Atividade Recente -->
+        <div class="col-xl-4">
+            <div class="row g-3">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-transparent border-0">
+                            <h5 class="mb-0">Ações Rápidas</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('novo_profissional') }}" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>Novo Profissional
+                                </a>
+                                <a href="{{ url_for('admin_candidatos') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-users me-2"></i>Ver Parceiros Técnicos
+                                </a>
+                                <button class="btn btn-outline-secondary">
+                                    <i class="fas fa-file-export me-2"></i>Exportar Relatório
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card de Parceiros Técnicos Recentes -->
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-transparent border-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Parceiros Técnicos Recentes</h5>
+                                <a href="{{ url_for('admin_candidatos') }}" class="btn btn-sm btn-link text-primary">
+                                    Ver Todos <i class="fas fa-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            {% if parceiros %}
+                                <div class="timeline">
+                                    {% for parceiro in parceiros[:4] %}
+                                        <div class="timeline-item p-3">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="avatar-circle bg-primary-subtle text-primary me-2">
+                                                    {{ parceiro.nome_completo[:1].upper() if parceiro.nome_completo else "?" }}
+                                                </div>
+                                                <div>
+                                                    <span class="fw-medium">{{ parceiro.nome_completo }}</span>
+                                                    <span class="timeline-date text-muted">{{ parceiro.created_at.strftime('%d/%m/%Y') if parceiro.created_at else 'N/A' }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="ps-4">
+                                                <p class="mb-1"><i class="fas fa-map-marker-alt text-muted me-2"></i>{{ parceiro.cidade }}/{{ parceiro.estado }}</p>
+                                                <div>
+                                                    {% if parceiro.especialidades %}
+                                                        {% set especialidades_list = parceiro.especialidades %}
+                                                        {% if especialidades_list is string %}
+                                                            {% set especialidades_list = especialidades_list.replace('{', '').replace('}', '').split(',') %}
+                                                        {% endif %}
+                                                        {% for esp in especialidades_list[:2] %}
+                                                            <span class="badge bg-secondary-subtle text-secondary">{{ esp.strip().strip('"') }}</span>
+                                                        {% endfor %}
+                                                        {% if especialidades_list|length > 2 %}
+                                                            <small class="text-muted">+{{ especialidades_list|length - 2 }} mais</small>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <span class="text-muted">Sem especialidades</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="p-4 text-center">
+                                    <p class="text-muted mb-0">Nenhum parceiro técnico registrado recentemente.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <!-- Bootstrap JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html> 
+    <!-- Modais para detalhes dos profissionais -->
+    {% for profissional in profissionais %}
+        <div class="modal fade" id="detailsModal{{ profissional.id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Detalhes do Profissional</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Nome</label>
+                                <p class="mb-0">{{ profissional.nome }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Email</label>
+                                <p class="mb-0">{{ profissional.email }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Telefone</label>
+                                <p class="mb-0">{{ profissional.telefone }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Profissão</label>
+                                <p class="mb-0">{{ profissional.profissao }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Disponibilidade</label>
+                                <p class="mb-0">{{ profissional.disponibilidade }}</p>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-medium">Experiência</label>
+                                <p class="mb-0 white-space-pre-wrap">{{ profissional.experiencia | nl2br | safe }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Fechar</button>
+                        <button type="button" class="btn btn-primary">
+                            <i class="fas fa-edit me-2"></i>Editar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .avatar-circle {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 500;
+    }
+
+    .timeline {
+        position: relative;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-left: 1.5rem;
+        border-left: 2px solid #e9ecef;
+    }
+
+    .timeline-item:last-child {
+        border-left-color: transparent;
+    }
+
+    .timeline-date {
+        font-size: 0.875rem;
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    .btn-light {
+        background-color: #f8f9fa;
+        border-color: #f8f9fa;
+    }
+
+    .btn-light:hover {
+        background-color: #e9ecef;
+        border-color: #e9ecef;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Inicializa todos os tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
+{% endblock %} 

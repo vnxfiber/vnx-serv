@@ -1114,4 +1114,26 @@ footer a:hover {
             backdrop-filter: blur(5px);
         }
     }
+    
+    /* Centralizar a logo em dispositivos móveis */
+    .navbar > .container {
+        display: flex;
+        justify-content: center;
+    }
+    
+    .navbar-brand {
+        margin-right: 0;
+    }
+    
+    .navbar-toggler {
+        position: absolute;
+        right: 15px;
+    }
+}
+
+/* Esconder botão de agendamento em dispositivos móveis */
+@media (max-width: 768px) {
+    .appointment-button {
+        display: none;
+    }
 } 

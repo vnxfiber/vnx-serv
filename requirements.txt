@@ -1,3 +1,4 @@
 Flask>=2.0
 supabase>=1.0
-python-dotenv>=0.20 
+python-dotenv>=0.20
+Werkzeug>=2.0 
