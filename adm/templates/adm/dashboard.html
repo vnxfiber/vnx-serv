@@ -8,26 +8,108 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">Dashboard</h4>
         <div class="d-flex align-items-center gap-2">
+            <!-- Menu de Configurações do Usuário -->
             <div class="dropdown">
-                <a href="#" class="notification-icon-wrapper text-decoration-none" data-bs-toggle="dropdown" aria-expanded="false" id="notificationsDropdown">
-                    <i class="fas fa-bell fs-5 text-secondary position-relative">
-                        <span class="notification-badge" id="notificationBadge">0</span>
-                    </i>
-                </a>
-                <div class="dropdown-menu dropdown-menu-end notifications-dropdown p-0" style="width: 320px;" aria-labelledby="notificationsDropdown">
-                    <div class="dropdown-header d-flex justify-content-between align-items-center p-3 border-bottom">
-                        <h6 class="mb-0">Notificações</h6>
-                        <a href="#" class="text-muted text-decoration-none" onclick="markAllAsRead(); return false;">
-                            <small>Marcar todas como lidas</small>
-                        </a>
+                <button class="btn btn-link text-decoration-none position-relative p-2 user-settings-btn" 
+                        type="button"
+                        id="userSettingsDropdown"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar-sm bg-primary text-white rounded-circle me-2 d-flex align-items-center justify-content-center">
+                            {% set initials = session.get('user_name', 'U').split()|map('first')|join('')|upper %}
+                            <span class="fw-medium">{{ initials[:2] }}</span>
+                        </div>
+                        <span class="d-none d-md-inline text-dark">{{ session.get('user_name', 'Usuário') }}</span>
+                        <i class="fas fa-chevron-down ms-2 text-muted"></i>
                     </div>
-                    <div class="notifications-list" style="max-height: 400px; overflow-y: auto;" id="notificationsDropdownList">
-                        <div class="text-center py-4">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Carregando...</span>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end shadow-lg py-0" style="min-width: 280px;">
+                    <div class="p-3 border-bottom">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-md bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center">
+                                {% set initials = session.get('user_name', 'U').split()|map('first')|join('')|upper %}
+                                <span class="fw-medium">{{ initials[:2] }}</span>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">{{ session.get('user_name', 'Usuário') }}</h6>
+                                <small class="text-muted">{{ session.get('user_email', 'Email não informado') }}</small>
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="p-2">
+                        <h6 class="dropdown-header text-uppercase text-muted fw-semibold px-2 py-2">Configurações</h6>
+                        
+                        <a href="{{ url_for('admin.perfil') }}" class="dropdown-item px-3 py-2 rounded">
+                            <i class="fas fa-user-circle me-2 text-primary"></i>
+                            Meu Perfil
+                        </a>
+                        
+                        <a href="{{ url_for('admin.seguranca') }}" class="dropdown-item px-3 py-2 rounded">
+                            <i class="fas fa-shield-alt me-2 text-success"></i>
+                            Segurança
+                            {% if pending_security_updates %}
+                            <span class="badge bg-danger ms-2">!</span>
+                            {% endif %}
+                        </a>
+                        
+                        <a href="{{ url_for('admin.notificacoes_config') }}" class="dropdown-item px-3 py-2 rounded">
+                            <i class="fas fa-bell me-2 text-warning"></i>
+                            Notificações
+                        </a>
+                        
+                        <a href="{{ url_for('admin.aparencia') }}" class="dropdown-item px-3 py-2 rounded">
+                            <i class="fas fa-paint-brush me-2 text-info"></i>
+                            Aparência
+                        </a>
+                        
+                        <div class="dropdown-divider"></div>
+                        
+                        <h6 class="dropdown-header text-uppercase text-muted fw-semibold px-2 py-2">Sistema</h6>
+                        
+                        <a href="{{ url_for('admin.ajuda') }}" class="dropdown-item px-3 py-2 rounded">
+                            <i class="fas fa-question-circle me-2 text-primary"></i>
+                            Ajuda
+                        </a>
+                        
+                        <a href="{{ url_for('admin.feedback') }}" class="dropdown-item px-3 py-2 rounded">
+                            <i class="fas fa-comment-alt me-2 text-success"></i>
+                            Enviar Feedback
+                        </a>
+                        
+                        <div class="dropdown-divider"></div>
+                        
+                        <a href="{{ url_for('admin.logout') }}" class="dropdown-item px-3 py-2 rounded text-danger">
+                            <i class="fas fa-sign-out-alt me-2"></i>
+                            Sair
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="dropdown">
+                <button class="btn btn-link notification-icon-wrapper text-decoration-none position-relative p-2" 
+                        type="button"
+                        id="notificationsDropdown">
+                    <i class="fas fa-bell fs-5 text-secondary"></i>
+                        <span class="notification-badge" id="notificationBadge">0</span>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end notifications-dropdown shadow-lg p-0" 
+                    aria-labelledby="notificationsDropdown"
+                    style="min-width: 320px; max-width: 400px;">
+                    <div class="dropdown-header d-flex justify-content-between align-items-center p-3 border-bottom">
+                        <h6 class="mb-0">Notificações</h6>
+                        <button type="button" class="btn btn-link text-muted text-decoration-none p-0" onclick="markAllAsRead()">
+                            <small>Marcar todas como lidas</small>
+                        </button>
+                    </div>
+                        <div class="notifications-list" style="max-height: 400px; overflow-y: auto;" id="notificationsDropdownList">
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Carregando...</span>
+                                </div>
+                            </div>
+                        </div>
                     <div class="dropdown-footer border-top p-2 text-center">
                         <a href="{{ url_for('admin.notifications') }}" class="text-decoration-none">
                             <small>Ver todas</small>
@@ -35,7 +117,10 @@
                     </div>
                 </div>
             </div>
-            <button class="btn btn-sm btn-outline-secondary" onclick="refreshDashboard()">
+            <a href="{{ url_for('admin.criar_dados_teste') }}" class="btn btn-sm btn-outline-primary" onclick="return confirm('Deseja criar 10 registros de teste?')">
+                <i class="fas fa-plus"></i> Criar Dados de Teste
+            </a>
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="refreshDashboard()">
                 <i class="fas fa-sync-alt"></i> Atualizar
             </button>
         </div>
@@ -43,83 +128,116 @@
 
     <!-- Stats Cards -->
     <div class="row g-3 mb-3">
-        <div class="col-md-3">
-            <div class="card stats-card h-100" data-card="total">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="stats-number">{{ total_parceiros }}</div>
-                            <div class="stats-text">Total de Parceiros</div>
-                        </div>
-                        <div class="stats-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                    </div>
+        <!-- Total Parceiros Card -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card primary">
+                <div class="stats-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stats-content">
+                <div class="stats-title">Total de Parceiros</div>
+                <div class="stats-value" data-card="total">{{ total_parceiros }}</div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stats-card h-100" data-card="pendentes">
-                        <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="stats-number">{{ parceiros_pendentes }}</div>
-                            <div class="stats-text">Pendentes</div>
-                        </div>
-                        <div class="stats-icon">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                    </div>
+
+        <!-- Pendentes Card -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card warning">
+                <div class="stats-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stats-content">
+                <div class="stats-title">Pendentes</div>
+                <div class="stats-value" data-card="pendentes">{{ parceiros_pendentes }}</div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stats-card h-100" data-card="aprovados">
-                        <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="stats-number">{{ parceiros_aprovados }}</div>
-                            <div class="stats-text">Aprovados</div>
-                        </div>
-                        <div class="stats-icon">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                    </div>
+
+        <!-- Aprovados Card -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card success">
+                <div class="stats-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stats-content">
+                <div class="stats-title">Aprovados</div>
+                <div class="stats-value" data-card="aprovados">{{ parceiros_aprovados }}</div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stats-card h-100" data-card="novos">
-                        <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="stats-number">{{ novos_parceiros_mes }}</div>
-                            <div class="stats-text">Novos este mês</div>
+
+        <!-- Especialidade Principal Card -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card info">
+                <div class="stats-icon">
+                    <i class="fas fa-tools"></i>
+                </div>
+                <div class="stats-content">
+                <div class="stats-title">Especialidade Principal</div>
+                <div class="stats-value" data-card="especialidade">{{ especialidade_principal }}</div>
+            </div>
+        </div>
                         </div>
-                        <div class="stats-icon">
-                            <i class="fas fa-chart-line"></i>
                         </div>
+
+    <!-- Ranking de Especialidades -->
+    <div class="ranking-section mb-3">
+        <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center me-3">
+                <i class="fas fa-trophy text-warning me-2"></i>
+                <small class="text-muted">Top Especialidades:</small>
                     </div>
+            {% if especialidades_ranking and especialidades_ranking|length > 1 %}
+                <div class="ranking-container d-flex align-items-center">
+                    {% for esp in especialidades_ranking[1:6] %}
+                        <div class="ranking-item">
+                            {% if loop.index == 1 %}
+                            <span class="position silver">2º</span>
+                            {% elif loop.index == 2 %}
+                            <span class="position bronze">3º</span>
+                            {% else %}
+                            <span class="position">{{ loop.index + 1 }}º</span>
+                            {% endif %}
+                            {{ esp.nome }}
+                            <span class="total">{{ esp.total }}</span>
                         </div>
+                        {% if not loop.last %}
+                        <div class="ranking-separator"></div>
+                        {% endif %}
+                    {% endfor %}
                     </div>
+            {% else %}
+                <small class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Não há especialidades suficientes para exibir o ranking.
+                </small>
+            {% endif %}
                 </div>
             </div>
+            
+    <!-- Hidden data container for charts -->
+    <div id="chartsDataContainer" style="display: none;"
+         data-labels='{{ labels_especialidades|tojson|safe }}'
+         data-cadastros='{{ dados_especialidades|tojson|safe }}'
+         data-status='{{ dados_status|tojson|safe }}'>
+    </div>
 
     <!-- Filters -->
     <div class="filter-section mb-3">
         <div class="row g-2">
             <div class="col-md-2">
-                <label class="form-label small">Status</label>
-                <select class="form-select form-select-sm" id="statusFilter">
+                <label class="form-label">Status</label>
+                <select class="form-select" id="statusFilter">
                     <option value="">Todos</option>
-                    <option value="pendente" {% if request.args.get('status') == 'pendente' %}selected{% endif %}>Pendente</option>
-                    <option value="aprovado" {% if request.args.get('status') == 'aprovado' %}selected{% endif %}>Aprovado</option>
-                    <option value="rejeitado" {% if request.args.get('status') == 'rejeitado' %}selected{% endif %}>Rejeitado</option>
+                    <option value="Pendente" {% if request.args.get('status') == 'Pendente' %}selected{% endif %}>Pendente</option>
+                    <option value="Aprovado" {% if request.args.get('status') == 'Aprovado' %}selected{% endif %}>Aprovado</option>
+                    <option value="Rejeitado" {% if request.args.get('status') == 'Rejeitado' %}selected{% endif %}>Rejeitado</option>
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="form-label small">Especialidade</label>
-                <select class="form-select form-select-sm" id="especialidadeFilter">
+                <label class="form-label">Especialidade</label>
+                <select class="form-select" id="especialidadeFilter">
                     <option value="">Todas</option>
                     {% for especialidade in especialidades %}
                     <option value="{{ especialidade }}" {% if request.args.get('especialidade') == especialidade %}selected{% endif %}>
@@ -129,8 +247,8 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="form-label small">Cidade</label>
-                <select class="form-select form-select-sm" id="cidadeFilter">
+                <label class="form-label">Cidade</label>
+                <select class="form-select" id="cidadeFilter">
                     <option value="">Todas</option>
                     {% for cidade in cidades %}
                     <option value="{{ cidade }}" {% if request.args.get('cidade') == cidade %}selected{% endif %}>
@@ -140,14 +258,13 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="form-label small">Buscar</label>
-                <input type="text" class="form-control form-control-sm" id="searchInput" 
+                <label class="form-label">Buscar</label>
+                <input type="text" class="form-control" id="searchInput" 
                        placeholder="Nome, email..." 
                        value="{{ request.args.get('search', '') }}">
             </div>
             <div class="col-md-1">
-                <label class="form-label small">&nbsp;</label>
-                <button class="btn btn-primary btn-sm w-100" onclick="aplicarFiltros()">
+                <button class="btn btn-primary w-100" onclick="aplicarFiltros()">
                     <i class="fas fa-filter"></i>
                 </button>
             </div>
@@ -159,11 +276,11 @@
         <div class="col-md-6">
             <div class="card h-100">
                 <div class="card-header py-2">
-                    <h6 class="card-title mb-0">Cadastros por Mês</h6>
+                    <h6 class="card-title mb-0">Distribuição por Especialidade</h6>
                 </div>
                 <div class="card-body">
                     <div class="chart-container">
-                        <canvas id="cadastrosChart"></canvas>
+                        <canvas id="especialidadesChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -188,327 +305,1055 @@
             <h6 class="card-title mb-0">Parceiros Técnicos</h6>
         </div>
         <div class="card-body p-0">
-                    {% if parceiros %}
-                    <div class="table-responsive">
+            {% if parceiros %}
+            <div class="table-responsive">
                 <table class="table table-hover mb-0">
-                            <thead>
-                                <tr>
+                    <thead>
+                        <tr>
                             <th>Nome</th>
                             <th>Email</th>
                             <th>Cidade</th>
-                                    <th>Especialidades</th>
-                                    <th>Status</th>
+                            <th>Especialidades</th>
+                            <th>Status</th>
                             <th>Data de Cadastro</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for parceiro in parceiros %}
-                                <tr>
-                            <td>{{ parceiro.nome_completo|default(parceiro.nome, true)|default('Nome não informado', true) }}</td>
-                            <td>{{ parceiro.email|default('Email não informado', true) }}</td>
-                            <td>{{ parceiro.cidade|default('Cidade não informada', true) }}</td>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for parceiro in parceiros %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm bg-light rounded-circle me-2 d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-user text-secondary"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-medium">{{ parceiro.nome_completo|default(parceiro.nome)|default('Nome não informado') }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ parceiro.email|default('Email não informado') }}</td>
+                            <td>{{ parceiro.cidade|default('Cidade não informada') }}</td>
                             <td class="especialidades-cell">
                                 {% if parceiro.especialidades %}
                                     {% for esp in parceiro.especialidades %}
                                         <span class="badge bg-info">{{ esp }}</span>
-                                        {% endfor %}
+                                    {% endfor %}
                                 {% else %}
                                     <span class="text-muted small">Não informado</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                <span class="status-badge status-{{ parceiro.status|default('pendente')|lower }}">
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="status-badge status-{{ parceiro.status|default('Pendente')|lower }}">
                                     {{ parceiro.status|default('Pendente') }}
-                                        </span>
-                                    </td>
+                                </span>
+                            </td>
                             <td>{{ parceiro.created_at|datetime }}</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <a href="{{ url_for('admin.view_partner', partner_id=parceiro.id) }}" 
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{{ url_for('admin.view_partner', partner_id=parceiro.id) }}" 
                                        class="btn btn-sm btn-info" title="Ver detalhes">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                    {% if not parceiro.status or parceiro.status == 'Pendente' %}
-                                    <button class="btn btn-sm btn-success" onclick="updatePartnerStatus('{{ parceiro.id }}', 'Aprovado')" title="Aprovar">
-                                                <i class="fas fa-check"></i>
-                                            </button>
-                                    <button class="btn btn-sm btn-danger" onclick="updatePartnerStatus('{{ parceiro.id }}', 'Rejeitado')" title="Rejeitar">
-                                                <i class="fas fa-times"></i>
-                                            </button>
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if parceiro.whatsapp %}
+                                        {% set numero = parceiro.whatsapp|replace('(', '')|replace(')', '')|replace('-', '')|replace(' ', '') %}
+                                        <a href="https://wa.me/55{{ numero }}" 
+                                           target="_blank"
+                                           class="btn btn-sm btn-success whatsapp-link"
+                                           title="Contato via WhatsApp">
+                                            <i class="fab fa-whatsapp"></i>
+                                        </a>
                                     {% endif %}
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% else %}
+                                    {% if not parceiro.status or parceiro.status|lower == 'pendente' %}
+                                    <button class="btn btn-sm btn-success" onclick="updatePartnerStatus('{{ parceiro.id }}', 'Aprovado')" title="Aprovar">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="updatePartnerStatus('{{ parceiro.id }}', 'Rejeitado')" title="Rejeitar">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
             <div class="text-center py-4">
                 <i class="fas fa-users fa-2x text-muted mb-2"></i>
                 <p class="text-muted mb-0">Nenhum parceiro técnico cadastrado ainda.</p>
-                    </div>
-                    {% endif %}
-                </div>
             </div>
+            {% endif %}
         </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_css %}
 <style>
-    .stats-card {
-        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-        color: white;
+    :root {
+        --primary-color: #4F46E5;
+        --secondary-color: #6366F1;
+        --success-color: #10B981;
+        --warning-color: #F59E0B;
+        --danger-color: #EF4444;
+        --info-color: #3B82F6;
+        --light-color: #F3F4F6;
+        --dark-color: #1F2937;
     }
 
-    .stats-card .stats-icon {
-        font-size: 2rem;
-        opacity: 0.8;
+    .card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .stats-card .stats-number {
-        font-size: 1.5rem;
-        font-weight: bold;
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
 
-    .stats-card .stats-text {
-        font-size: 0.8rem;
-        opacity: 0.9;
+    .card-header {
+        background-color: transparent;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     }
 
-    .filter-section {
-        background-color: white;
-        padding: 1rem;
-        border-radius: 15px;
-        margin-bottom: 1rem;
+    .border-left-primary {
+        border-left: 4px solid var(--primary-color) !important;
+    }
+
+    .border-left-success {
+        border-left: 4px solid var(--success-color) !important;
+    }
+
+    .border-left-warning {
+        border-left: 4px solid var(--warning-color) !important;
+    }
+
+    .border-left-info {
+        border-left: 4px solid var(--info-color) !important;
+    }
+
+    .text-primary {
+        color: var(--primary-color) !important;
+    }
+
+    .text-success {
+        color: var(--success-color) !important;
+    }
+
+    .text-warning {
+        color: var(--warning-color) !important;
+    }
+
+    .text-info {
+        color: var(--info-color) !important;
+    }
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .btn-primary:hover {
+        background-color: var(--secondary-color);
+        border-color: var(--secondary-color);
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        letter-spacing: 0.025em;
+    }
+
+    .status-pendente {
+        background-color: #FEF3C7;
+        color: #92400E;
+    }
+
+    .status-aprovado {
+        background-color: #D1FAE5;
+        color: #065F46;
+    }
+
+    .status-rejeitado {
+        background-color: #FEE2E2;
+        color: #991B1B;
+    }
+
+    .badge.bg-info {
+        background-color: #EFF6FF !important;
+        color: #1E40AF;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
     }
 
     .table {
-        font-size: 0.85rem;
+        font-size: 0.925rem;
     }
 
     .table th {
         font-weight: 600;
-        color: var(--primary-color);
+        color: var(--dark-color);
+        background-color: var(--light-color);
         border-top: none;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
     }
 
     .table td {
         vertical-align: middle;
-        padding: 0.5rem;
+        padding: 1rem;
+        color: #4B5563;
     }
 
-    .status-badge {
-        padding: 4px 8px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 500;
-    }
-
-    .status-pendente {
-        background-color: var(--warning-color);
-        color: #000;
-    }
-
-    .status-aprovado {
-        background-color: var(--success-color);
-        color: #fff;
-    }
-
-    .status-rejeitado {
-        background-color: var(--danger-color);
-        color: #fff;
-    }
-
-    .badge.bg-info {
-        background-color: #17a2b8 !important;
-        color: white;
-        font-weight: normal;
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-size: 0.75rem;
-    }
-
-    .especialidades-cell {
-        max-width: 180px;
-        overflow: hidden;
-    }
-
-    .especialidades-cell .badge {
-        margin: 1px;
-        display: inline-block;
-        white-space: nowrap;
+    .avatar-sm {
+        width: 40px;
+        height: 40px;
+        background: #F3F4F6;
+        border-radius: 50%;
     }
 
     .btn-group .btn-sm {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.75rem;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        margin: 0 0.25rem;
     }
 
     .form-select, .form-control {
-        font-size: 0.85rem;
-        padding: 0.375rem 0.75rem;
+        border-radius: 0.5rem;
+        border: 1px solid #E5E7EB;
+        padding: 0.625rem 1rem;
+        font-size: 0.925rem;
+    }
+
+    .form-select:focus, .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
     }
 
     .chart-container {
         position: relative;
-        height: 250px;
+        height: 300px;
+        padding: 1rem;
     }
 
     .notification-icon-wrapper {
+        background-color: #F3F4F6;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         position: relative;
+        transition: all 0.2s ease;
         cursor: pointer;
-        padding: 5px;
+    }
+
+    .notification-icon-wrapper:hover {
+        background-color: #E5E7EB;
     }
 
     .notification-badge {
         position: absolute;
         top: -5px;
         right: -5px;
-        background: #ff4444;
+        background-color: var(--danger-color);
         color: white;
+        border: 2px solid white;
         border-radius: 50%;
-        padding: 2px;
         min-width: 18px;
         height: 18px;
         font-size: 11px;
-        font-weight: bold;
-        display: none;
-        text-align: center;
-        line-height: 14px;
-        border: 2px solid white;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 4px;
+        transform: scale(0);
+        transition: transform 0.2s ease;
     }
 
     .notification-badge.show {
-        display: block;
-    }
-
-    /* Estilos para os toasts */
-    .toast-container {
-        z-index: 9999;
-    }
-
-    .toast {
-        min-width: 300px;
-        backdrop-filter: blur(10px);
-        border: none;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .toast .toast-header {
-        border-bottom: none;
-        padding: 0.5rem 1rem;
-    }
-
-    .toast .toast-body {
-        padding: 1rem;
-        background: white;
-        border-radius: 0 0 6px 6px;
-    }
-
-    .bg-success {
-        background-color: var(--success-color) !important;
-    }
-
-    .bg-danger {
-        background-color: var(--danger-color) !important;
-    }
-
-    .bg-warning {
-        background-color: var(--warning-color) !important;
-    }
-
-    .btn-close-white {
-        filter: brightness(0) invert(1);
-    }
-
-    /* Animação para os toasts */
-    .toast-container {
-        animation: slideIn 0.3s ease-out;
-    }
-
-    @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
+        transform: scale(1);
     }
 
     .notifications-dropdown {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        border: none;
-        border-radius: 8px;
-    }
-
-    .notifications-dropdown .dropdown-header {
-        background: #f8f9fa;
-    }
-
-    .notifications-dropdown .notification-item {
-        padding: 0.75rem 1rem;
-        border-left: 3px solid transparent;
-        transition: all 0.2s ease;
-    }
-
-    .notifications-dropdown .notification-item:hover {
-        background-color: #f8f9fa;
-    }
-
-    .notifications-dropdown .notification-item.unread {
-        background-color: rgba(var(--bs-primary-rgb), 0.05);
-        border-left-color: var(--primary-color);
-    }
-
-    .notifications-dropdown .notification-title {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        z-index: 1000;
+        display: none;
+        min-width: 320px;
+        max-width: 400px;
+        padding: 0;
+        margin: 0.125rem 0 0;
         font-size: 0.875rem;
+        color: #1F2937;
+        text-align: left;
+        list-style: none;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    .notifications-dropdown.show {
+        display: block;
+        animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .notification-item {
+        padding: 1rem;
+        border-bottom: 1px solid #E5E7EB;
+        transition: background-color 0.2s ease;
+    }
+
+    .notification-item.unread {
+        background-color: #EFF6FF;
+    }
+
+    .notification-item:hover {
+        background-color: #F9FAFB;
+    }
+
+    .notification-item .notification-title {
+        font-weight: 600;
+        color: #1F2937;
+        margin-bottom: 0.25rem;
+    }
+
+    .notification-item .notification-message {
+        color: #6B7280;
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .notification-item .notification-time {
+        color: #9CA3AF;
+        font-size: 0.75rem;
+    }
+
+    .dropdown-footer {
+        padding: 0.5rem 1rem;
+        background-color: #F9FAFB;
+        border-bottom-left-radius: 1rem;
+        border-bottom-right-radius: 1rem;
+    }
+
+    .dropdown-footer a {
+        color: var(--primary-color);
+        font-weight: 500;
+    }
+
+    .dropdown-footer a:hover {
+        text-decoration: underline !important;
+    }
+
+    .filter-section {
+        background-color: white;
+        padding: 0.75rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    }
+
+    .filter-section .form-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        color: #6B7280;
         font-weight: 600;
         margin-bottom: 0.25rem;
+        letter-spacing: 0.025em;
+    }
+
+    .filter-section .form-select,
+    .filter-section .form-control {
+        font-size: 0.875rem;
+        padding: 0.375rem 0.75rem;
+        height: 32px;
+        border-radius: 0.375rem;
+    }
+
+    .filter-section .btn {
+        height: 32px;
+        padding: 0.375rem 0.75rem;
+        margin-top: 1.25rem;
+    }
+
+    .filter-section .row {
+        align-items: flex-end;
+    }
+
+    .pagination .page-link {
+        border-radius: 0.5rem;
+        margin: 0 0.25rem;
+        color: var(--primary-color);
+        border: 1px solid #E5E7EB;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .total-partners-stats {
+        background-color: #F9FAFB;
+        padding: 1rem;
+        border-radius: 1rem;
+    }
+
+    .total-partners-stats small {
+        color: #6B7280;
+    }
+
+    @keyframes badge-pulse {
+        0% { transform: scale(0.95); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    /* Estilos para os ícones dos cards */
+    .card .col-auto i {
+        font-size: 2rem;
+        background: linear-gradient(135deg, currentColor 0%, rgba(currentColor, 0.2) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        opacity: 0.9;
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover .col-auto i {
+        transform: scale(1.1);
+    }
+
+    /* Cores específicas para cada ícone */
+    .border-left-primary .col-auto i {
         color: var(--primary-color);
     }
 
-    .notifications-dropdown .notification-message {
-        font-size: 0.8125rem;
-        color: #666;
-        margin-bottom: 0.25rem;
+    .border-left-warning .col-auto i {
+        color: var(--warning-color);
     }
 
-    .notifications-dropdown .notification-time {
+    .border-left-success .col-auto i {
+        color: var(--success-color);
+    }
+
+    .border-left-info .col-auto i {
+        color: var(--info-color);
+    }
+
+    /* Ajuste do tamanho do texto nos cards */
+    .text-xs {
         font-size: 0.75rem;
-        color: #999;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+        color: #6B7280;
     }
 
-    .notifications-dropdown .dropdown-footer {
-        background: #f8f9fa;
+    .h5.mb-0 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1F2937;
     }
 
-    .notifications-dropdown .dropdown-footer a:hover {
-        text-decoration: underline !important;
+    /* Efeito de gradiente nos cards */
+    .card {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .card:hover::before {
+        opacity: 1;
+    }
+
+    /* Novo estilo para os cards de estatísticas */
+    .stats-card {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        position: relative;
+        overflow: hidden;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .stats-card.primary::before { background-color: var(--primary-color); }
+    .stats-card.warning::before { background-color: var(--warning-color); }
+    .stats-card.success::before { background-color: var(--success-color); }
+    .stats-card.info::before { background-color: var(--info-color); }
+
+    .stats-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .stats-card .stats-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .stats-card.primary .stats-icon {
+        background: rgba(79, 70, 229, 0.1);
+        color: var(--primary-color);
+    }
+
+    .stats-card.warning .stats-icon {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning-color);
+    }
+
+    .stats-card.success .stats-icon {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success-color);
+    }
+
+    .stats-card.info .stats-icon {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--info-color);
+    }
+
+    .stats-card .stats-icon i {
+        font-size: 1.25rem;
+    }
+
+    .stats-card .stats-content {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .stats-card .stats-title {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #6B7280;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .stats-card .stats-value {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #111827;
+        line-height: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Atualização do layout dos cards na grid */
+    .row.g-3 {
+        margin: -0.5rem;
+    }
+
+    .row.g-3 > [class*="col-"] {
+        padding: 0.5rem;
+    }
+
+    /* Novo estilo para o ranking em uma linha */
+    .ranking-section {
+        background: white;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .ranking-container {
+        overflow-x: auto;
+        white-space: nowrap;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
+    }
+
+    .ranking-container::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Opera */
+    }
+
+    .ranking-item {
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.875rem;
+        color: #4B5563;
+    }
+
+    .ranking-separator {
+        display: inline-block;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background-color: #E5E7EB;
+        margin: 0 0.75rem;
+    }
+
+    .ranking-item .position {
+        font-weight: 600;
+        color: #6B7280;
+        margin-right: 0.5rem;
+    }
+
+    .ranking-item .position.silver {
+        color: #71717A;
+    }
+
+    .ranking-item .position.bronze {
+        color: #92400E;
+    }
+
+    .ranking-item .total {
+        background: #EFF6FF;
+        color: #1E40AF;
+        padding: 0.25rem 0.5rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+
+    /* Estilos para o Menu de Configurações do Usuário */
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+    }
+
+    .avatar-md {
+        width: 48px;
+        height: 48px;
+    }
+
+    .user-settings-btn {
+        transition: all 0.2s ease;
+        border-radius: 0.5rem;
+    }
+
+    .user-settings-btn:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .dropdown-menu {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    .dropdown-item {
+        transition: all 0.2s ease;
+        border-radius: 0.5rem;
+    }
+
+    .dropdown-item:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+        transform: translateX(5px);
+    }
+
+    .dropdown-header {
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+    }
+
+    .dropdown-divider {
+        margin: 0.5rem 0;
+        opacity: 0.1;
+    }
+
+    /* Animação do ícone de seta */
+    .user-settings-btn[aria-expanded="true"] .fa-chevron-down {
+        transform: rotate(180deg);
+    }
+
+    .fa-chevron-down {
+        transition: transform 0.2s ease;
+    }
+
+    /* Badge de notificação */
+    .badge {
+        padding: 0.25em 0.5em;
+        font-size: 0.75em;
+        font-weight: 600;
     }
 </style>
 {% endblock %}
 
 {% block extra_js %}
-    <script>
-    // Inicialização das variáveis do template
-    const TEMPLATE_DATA = JSON.parse(`{
-        "cards": {
-            "total": {{ total_parceiros|tojson|safe }},
-            "pendentes": {{ parceiros_pendentes|tojson|safe }},
-            "aprovados": {{ parceiros_aprovados|tojson|safe }},
-            "novos": {{ novos_parceiros_mes|tojson|safe }}
-        },
-        "charts": {
-            "labels": {{ labels_meses|tojson|safe }},
-            "cadastros": {{ dados_cadastros_mes|tojson|safe }},
-            "status": {{ dados_status|tojson|safe }}
+<script>
+    // Função para obter dados do template a partir de data-attributes
+    function getTemplateData() {
+        // Obter dados dos cards do DOM
+        const cards = {
+            total: document.querySelector('[data-card="total"]')?.getAttribute('data-value') || 0,
+            pendentes: document.querySelector('[data-card="pendentes"]')?.getAttribute('data-value') || 0,
+            aprovados: document.querySelector('[data-card="aprovados"]')?.getAttribute('data-value') || 0,
+            especialidade: document.querySelector('[data-card="especialidade"]')?.getAttribute('data-value') || ''
+        };
+        
+        // Obter dados dos gráficos do DOM
+        const chartsContainer = document.getElementById('chartsDataContainer');
+        let charts = {
+            labels_especialidades: [],
+            dados_especialidades: [],
+            status: []
+        };
+        
+        if (chartsContainer) {
+            try {
+                charts = {
+                    labels_especialidades: JSON.parse(chartsContainer.getAttribute('data-labels') || '[]'),
+                    dados_especialidades: JSON.parse(chartsContainer.getAttribute('data-cadastros') || '[]'),
+                    status: JSON.parse(chartsContainer.getAttribute('data-status') || '[]')
+                };
+            } catch (e) {
+                console.error('Erro ao processar dados dos gráficos:', e);
+            }
         }
-    }`);
+        
+        return { cards, charts };
+    }
+    
+    // Função para obter configuração da paginação
+    function getPageConfig() {
+        const container = document.getElementById('paginationContainer');
+        if (!container) return { currentPage: 1, totalPages: 1, perPage: 10 };
+        
+        return {
+            currentPage: parseInt(container.getAttribute('data-current-page') || '1'),
+            totalPages: parseInt(container.getAttribute('data-total-pages') || '1'),
+            perPage: parseInt(container.getAttribute('data-per-page') || '10')
+        };
+    }
+    
+    // Modificar a função changePage para usar AJAX também
+    function changePage(newPage) {
+        const params = new URLSearchParams(window.location.search);
+        params.set('page', newPage.toString());
+        params.set('ajax', 'true');
+        
+        // Mostrar indicador de carregamento
+        const tableBody = document.querySelector('table tbody');
+        if (tableBody) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <p class="mt-2 mb-0">Carregando página ${newPage}...</p>
+                    </td>
+                </tr>
+            `;
+        }
+        
+        // Realizar a requisição AJAX
+        fetch(`${window.location.pathname}?${params.toString()}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar página');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Atualizar a tabela com os resultados
+                atualizarTabela(data);
+                
+                // Atualizar a URL sem recarregar a página
+                const paramsForUrl = new URLSearchParams(params);
+                paramsForUrl.delete('ajax'); // Remover o parâmetro ajax da URL final
+                const newUrl = `${window.location.pathname}?${paramsForUrl.toString()}`;
+                window.history.pushState({ path: newUrl }, '', newUrl);
+                
+                // Scroll para o centro da seção "Parceiros Técnicos"
+                let partnersCard = null;
+                
+                // Procurar pelo cabeçalho "Parceiros Técnicos"
+                const cardTitles = document.querySelectorAll('h6.card-title');
+                for(let i = 0; i < cardTitles.length; i++) {
+                    if(cardTitles[i].textContent.includes('Parceiros Técnicos')) {
+                        partnersCard = cardTitles[i].closest('.card');
+                        break;
+                    }
+                }
+                
+                // Se não encontrou pelo título, usar a tabela como fallback
+                if (!partnersCard) {
+                    // Encontrar o card que contém uma tabela
+                    const tables = document.querySelectorAll('table');
+                    for (let i = 0; i < tables.length; i++) {
+                        const card = tables[i].closest('.card');
+                        if (card) {
+                            partnersCard = card;
+                            break;
+                        }
+                    }
+                }
+                
+                if (partnersCard) {
+                    // Esperar um pouco para garantir que a tabela foi atualizada
+                    setTimeout(() => {
+                        partnersCard.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'center', 
+                            inline: 'nearest' 
+                        });
+                    }, 100);
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao mudar página:', error);
+                showToast('Erro', 'Não foi possível carregar a página. Tente novamente.', 'danger');
+                
+                // Restaurar tabela em caso de erro
+                if (tableBody) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center py-4">
+                                <i class="fas fa-exclamation-circle fa-2x text-danger mb-2"></i>
+                                <p class="text-danger mb-0">Erro ao carregar a página. Tente novamente.</p>
+                                <button class="btn btn-sm btn-outline-primary mt-3" onclick="changePage(${newPage})">
+                                    <i class="fas fa-sync-alt"></i> Tentar novamente
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+    }
+
+    function changePerPage(newPerPage) {
+        const params = new URLSearchParams(window.location.search);
+        params.set('per_page', newPerPage);
+        params.set('page', '1');
+        params.set('ajax', 'true');
+        
+        // Mostrar indicador de carregamento
+        const tableBody = document.querySelector('table tbody');
+        if (tableBody) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <p class="mt-2 mb-0">Atualizando visualização...</p>
+                    </td>
+                </tr>
+            `;
+        }
+        
+        // Realizar a requisição AJAX
+        fetch(`${window.location.pathname}?${params.toString()}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro ao atualizar visualização');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Atualizar a tabela com os resultados
+                atualizarTabela(data);
+                
+                // Atualizar a URL sem recarregar a página
+                const paramsForUrl = new URLSearchParams(params);
+                paramsForUrl.delete('ajax'); // Remover o parâmetro ajax da URL final
+                const newUrl = `${window.location.pathname}?${paramsForUrl.toString()}`;
+                window.history.pushState({ path: newUrl }, '', newUrl);
+                
+                // Scroll para o centro da seção "Parceiros Técnicos"
+                let partnersCard = null;
+                
+                // Procurar pelo cabeçalho "Parceiros Técnicos"
+                const cardTitles = document.querySelectorAll('h6.card-title');
+                for(let i = 0; i < cardTitles.length; i++) {
+                    if(cardTitles[i].textContent.includes('Parceiros Técnicos')) {
+                        partnersCard = cardTitles[i].closest('.card');
+                        break;
+                    }
+                }
+                
+                // Se não encontrou pelo título, usar a tabela como fallback
+                if (!partnersCard) {
+                    // Encontrar o card que contém uma tabela
+                    const tables = document.querySelectorAll('table');
+                    for (let i = 0; i < tables.length; i++) {
+                        const card = tables[i].closest('.card');
+                        if (card) {
+                            partnersCard = card;
+                            break;
+                        }
+                    }
+                }
+                
+                if (partnersCard) {
+                    // Esperar um pouco para garantir que a tabela foi atualizada
+                    setTimeout(() => {
+                        partnersCard.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'center', 
+                            inline: 'nearest' 
+                        });
+                    }, 100);
+                }
+                
+                // Mostrar mensagem de sucesso
+                showToast('Visualização atualizada', `Exibindo ${newPerPage} itens por página.`);
+            })
+            .catch(error => {
+                console.error('Erro ao mudar visualização:', error);
+                showToast('Erro', 'Não foi possível atualizar a visualização. Tente novamente.', 'danger');
+                
+                // Restaurar tabela em caso de erro
+                if (tableBody) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center py-4">
+                                <i class="fas fa-exclamation-circle fa-2x text-danger mb-2"></i>
+                                <p class="text-danger mb-0">Erro ao atualizar a visualização. Tente novamente.</p>
+                                <button class="btn btn-sm btn-outline-primary mt-3" onclick="changePerPage(${newPerPage})">
+                                    <i class="fas fa-sync-alt"></i> Tentar novamente
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+    }
+
+    // Função para navegar entre páginas (anterior/próxima)
+    function goToPage(currentPage, increment) {
+        const newPage = parseInt(currentPage) + increment;
+        changePage(newPage);
+    }
+    
+    // Renderiza a paginação dinamicamente
+    function renderPagination() {
+        const container = document.getElementById('paginationContainer');
+        if (!container) return;
+        
+        const { currentPage, totalPages } = getPageConfig();
+        let html = '';
+        
+        // Primeira página
+        html += `
+            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="javascript:void(0)" onclick="changePage(1)" aria-label="Primeira">
+                    <span aria-hidden="true">&laquo;&laquo;</span>
+                </a>
+            </li>
+        `;
+        
+        // Página anterior
+        html += `
+            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="javascript:void(0)" onclick="goToPage(${currentPage}, -1)" aria-label="Anterior">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        `;
+        
+        // Calcular range de páginas
+        let start = Math.max(currentPage - 2, 1);
+        let end = Math.min(start + 4, totalPages);
+        start = Math.max(end - 4, 1);
+        
+        // Elipse inicial se necessário
+        if (start > 1) {
+            html += `
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            `;
+        }
+        
+        // Páginas numeradas
+        for (let p = start; p <= end; p++) {
+            html += `
+                <li class="page-item ${p === currentPage ? 'active' : ''}">
+                    <a class="page-link" href="javascript:void(0)" onclick="changePage(${p})">${p}</a>
+                </li>
+            `;
+        }
+        
+        // Elipse final se necessário
+        if (end < totalPages) {
+            html += `
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            `;
+        }
+        
+        // Próxima página
+        html += `
+            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                <a class="page-link" href="javascript:void(0)" onclick="goToPage(${currentPage}, 1)" aria-label="Próxima">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        `;
+        
+        // Última página
+        html += `
+            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                <a class="page-link" href="javascript:void(0)" onclick="changePage(${totalPages})" aria-label="Última">
+                    <span aria-hidden="true">&raquo;&raquo;</span>
+                </a>
+            </li>
+        `;
+        
+        container.innerHTML = html;
+    }
 
     let cadastrosChart = null;
     let statusChart = null;
@@ -516,11 +1361,12 @@
     // Função para atualizar os cards
     function updateCards() {
         try {
+            const TEMPLATE_DATA = getTemplateData();
             console.log('Dados dos cards:', TEMPLATE_DATA.cards);
 
             // Atualizar cada card
             Object.keys(TEMPLATE_DATA.cards).forEach(key => {
-                const cardElement = document.querySelector(`[data-card="${key}"] .stats-number`);
+                const cardElement = document.querySelector(`[data-card="${key}"] .stats-value`);
                 if (cardElement) {
                     cardElement.textContent = TEMPLATE_DATA.cards[key];
                 } else {
@@ -535,6 +1381,8 @@
     // Função para inicializar os gráficos
     function initCharts() {
         try {
+            const TEMPLATE_DATA = getTemplateData();
+            
             // Configurações padrão do Chart.js
             if (typeof Chart !== 'undefined') {
                 Chart.defaults.font.size = 12;
@@ -542,8 +1390,8 @@
             }
 
             console.log('Dados dos gráficos:', {
-                labels: TEMPLATE_DATA.charts.labels,
-                cadastros: TEMPLATE_DATA.charts.cadastros,
+                labels: TEMPLATE_DATA.charts.labels_especialidades,
+                cadastros: TEMPLATE_DATA.charts.dados_especialidades,
                 status: TEMPLATE_DATA.charts.status
             });
 
@@ -555,30 +1403,24 @@
                 statusChart.destroy();
             }
 
-            // Gráfico de Cadastros por Mês
-            const cadastrosCtx = document.getElementById('cadastrosChart');
-            if (cadastrosCtx) {
-                cadastrosChart = new Chart(cadastrosCtx.getContext('2d'), {
-                    type: 'line',
+            // Gráfico de Distribuição por Especialidade
+            const especialidadesCtx = document.getElementById('especialidadesChart');
+            if (especialidadesCtx) {
+                cadastrosChart = new Chart(especialidadesCtx.getContext('2d'), {
+                    type: 'bar',
                     data: {
-                        labels: TEMPLATE_DATA.charts.labels,
+                        labels: TEMPLATE_DATA.charts.labels_especialidades,
                         datasets: [{
-                            label: 'Novos Cadastros',
-                            data: TEMPLATE_DATA.charts.cadastros,
-                            borderColor: '#0a3d62',
-                            backgroundColor: 'rgba(10, 61, 98, 0.1)',
-                            tension: 0.3,
-                            fill: true
+                            label: 'Número de Parceiros',
+                            data: TEMPLATE_DATA.charts.dados_especialidades,
+                            backgroundColor: 'rgba(78, 115, 223, 0.8)',
+                            borderColor: 'rgba(78, 115, 223, 1)',
+                            borderWidth: 1
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        },
                         scales: {
                             y: {
                                 beginAtZero: true,
@@ -587,8 +1429,17 @@
                                 }
                             }
                         },
-                        animation: {
-                            duration: 1000
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.parsed.y} parceiro(s)`;
+                                    }
+                                }
+                            }
                         }
                     }
                 });
@@ -600,11 +1451,20 @@
                 statusChart = new Chart(statusCtx.getContext('2d'), {
                     type: 'doughnut',
                     data: {
-                        labels: ['Pendente', 'Aprovado', 'Rejeitado'],
+                        labels: ['Pendentes', 'Aprovados', 'Rejeitados'],
                         datasets: [{
                             data: TEMPLATE_DATA.charts.status,
-                            backgroundColor: ['#ffd700', '#28a745', '#dc3545'],
-                            borderWidth: 0
+                            backgroundColor: [
+                                'rgba(255, 193, 7, 0.8)',
+                                'rgba(40, 167, 69, 0.8)',
+                                'rgba(220, 53, 69, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(255, 193, 7, 1)',
+                                'rgba(40, 167, 69, 1)',
+                                'rgba(220, 53, 69, 1)'
+                            ],
+                            borderWidth: 1
                         }]
                     },
                     options: {
@@ -612,12 +1472,15 @@
                         maintainAspectRatio: false,
                         plugins: {
                             legend: {
-                                position: 'right'
+                                position: 'bottom'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.label}: ${context.parsed} parceiro(s)`;
+                                    }
+                                }
                             }
-                        },
-                        cutout: '70%',
-                        animation: {
-                            duration: 1000
                         }
                     }
                 });
@@ -635,8 +1498,8 @@
             
             const badge = document.getElementById('notificationBadge');
             if (badge) {
-                if (data.count > 0) {
                     badge.textContent = data.count;
+                if (data.count > 0) {
                     badge.classList.add('show');
                 } else {
                     badge.classList.remove('show');
@@ -647,131 +1510,10 @@
         }
     }
 
-    // Atualiza o badge quando a página carrega e a cada 30 segundos
-    document.addEventListener('DOMContentLoaded', () => {
-        updateCards();
-        initCharts();
-        updateNotificationBadge();
-        setInterval(updateNotificationBadge, 30000);
-    });
-
-    // Funções para ações da dashboard
-    async function refreshDashboard() {
-        try {
-            const response = await fetch(window.location.pathname + window.location.search);
-            if (response.ok) {
-                location.reload();
-            } else {
-                throw new Error('Erro ao atualizar dashboard');
-            }
-        } catch (error) {
-            console.error('Erro:', error);
-            alert('Erro ao atualizar os dados. Por favor, tente novamente.');
-        }
-    }
-
-    function aplicarFiltros() {
-        const status = document.getElementById('statusFilter')?.value || '';
-        const especialidade = document.getElementById('especialidadeFilter')?.value || '';
-        const cidade = document.getElementById('cidadeFilter')?.value || '';
-        const search = document.getElementById('searchInput')?.value || '';
-        
-        const params = new URLSearchParams();
-        if (status) params.append('status', status);
-        if (especialidade) params.append('especialidade', especialidade);
-        if (cidade) params.append('cidade', cidade);
-        if (search) params.append('search', search);
-        
-        window.location.href = `${window.location.pathname}?${params.toString()}`;
-    }
-
-    // Função para mostrar toast com auto-hide
-    function showToast(title, message, type = 'success') {
-        // Remove toasts anteriores
-        const existingToasts = document.querySelectorAll('.toast');
-        existingToasts.forEach(toast => toast.remove());
-
-        // Cria o novo toast
-        const toastHTML = `
-            <div class="toast-container position-fixed top-0 end-0 p-3">
-                <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div class="toast-header bg-${type} text-white">
-                        <strong class="me-auto">${title}</strong>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
-                    </div>
-                    <div class="toast-body">
-                        ${message}
-                    </div>
-                </div>
-            </div>
-        `;
-
-        // Adiciona o toast ao documento
-        document.body.insertAdjacentHTML('beforeend', toastHTML);
-
-        // Remove o toast após 3 segundos
-        setTimeout(() => {
-            const toasts = document.querySelectorAll('.toast-container');
-            toasts.forEach(toast => toast.remove());
-        }, 3000);
-    }
-
-    // Atualiza a função updatePartnerStatus para usar o novo showToast
-    async function updatePartnerStatus(partnerId, newStatus) {
-        if (!confirm(`Deseja ${newStatus.toLowerCase()} este parceiro?`)) {
-            return;
-        }
-
-        try {
-            console.log('Atualizando status:', partnerId, newStatus);
-            
-            const formData = new FormData();
-            formData.append('status', newStatus);
-            
-            const response = await fetch(`/adm/parceiro/${partnerId}/status`, {
-                method: 'POST',
-                body: formData
-            });
-            
-            if (response.ok) {
-                console.log('Status atualizado com sucesso');
-                showToast('Sucesso', `Parceiro ${newStatus.toLowerCase()} com sucesso!`);
-                // Atualiza a interface após 1 segundo para dar tempo de ver o toast
-                setTimeout(() => {
-                    location.reload();
-                }, 1000);
-                // Atualiza o contador de notificações
-                updateNotificationBadge();
-            } else {
-                console.error('Erro ao atualizar status:', response);
-                showToast('Erro', 'Não foi possível atualizar o status.', 'danger');
-            }
-        } catch (error) {
-            console.error('Erro:', error);
-            showToast('Erro', 'Ocorreu um erro ao atualizar o status.', 'danger');
-        }
-    }
-
-    // Adicionar evento de tecla Enter no campo de busca
-    document.addEventListener('DOMContentLoaded', () => {
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    aplicarFiltros();
-                }
-            });
-        }
-    });
-
     async function loadNotifications() {
         const notificationsList = document.getElementById('notificationsDropdownList');
-        if (!notificationsList) {
-            console.error('Elemento notificationsDropdownList não encontrado');
-            return;
-        }
+        if (!notificationsList) return;
 
-        // Mostrar loading
         notificationsList.innerHTML = `
             <div class="text-center py-4">
                 <div class="spinner-border text-primary" role="status">
@@ -781,13 +1523,11 @@
         `;
 
         try {
-            console.log('Carregando notificações...');
             const response = await fetch('/adm/notifications/recent');
             const data = await response.json();
-            console.log('Resposta do servidor:', data);
 
             if (!response.ok) {
-                throw new Error(data.error || `Erro ${response.status}: ${response.statusText}`);
+                throw new Error(data.error || `Erro ${response.status}`);
             }
 
             if (data.notifications && Array.isArray(data.notifications)) {
@@ -820,49 +1560,20 @@
                     notificationsList.innerHTML = `
                         <div class="text-center py-4">
                             <i class="fas fa-bell-slash fa-2x text-muted mb-2"></i>
-                            <p class="text-muted mb-0"><small>Nenhuma notificação</small></p>
+                            <p class="text-muted mb-0">Nenhuma notificação</p>
                         </div>
                     `;
                 }
-            } else {
-                throw new Error('Formato de dados inválido');
             }
         } catch (error) {
             console.error('Erro ao carregar notificações:', error);
-            
-            let errorMessage = 'Erro ao carregar notificações';
-            if (error.message.includes('401')) {
-                errorMessage = 'Sessão expirada. Por favor, faça login novamente.';
-                // Redirecionar para a página de login após 2 segundos
-                setTimeout(() => {
-                    window.location.href = '/adm/login';
-                }, 2000);
-            }
-            
             notificationsList.innerHTML = `
                 <div class="text-center py-4">
                     <i class="fas fa-exclamation-circle fa-2x text-danger mb-2"></i>
-                    <p class="text-danger mb-0"><small>${errorMessage}</small></p>
+                    <p class="text-danger mb-0">Erro ao carregar notificações</p>
                 </div>
             `;
         }
-    }
-
-    function formatNotificationDate(dateString) {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffInMinutes = Math.floor((now - date) / (1000 * 60));
-        
-        if (diffInMinutes < 1) return 'Agora';
-        if (diffInMinutes < 60) return `${diffInMinutes}m atrás`;
-        
-        const diffInHours = Math.floor(diffInMinutes / 60);
-        if (diffInHours < 24) return `${diffInHours}h atrás`;
-        
-        const diffInDays = Math.floor(diffInHours / 24);
-        if (diffInDays < 7) return `${diffInDays}d atrás`;
-        
-        return date.toLocaleDateString('pt-BR');
     }
 
     async function markAsRead(notificationId, event) {
@@ -921,27 +1632,549 @@
         }
     }
 
-    // Carregar notificações quando o dropdown é aberto
-    document.addEventListener('DOMContentLoaded', () => {
-        const dropdown = document.getElementById('notificationsDropdown');
-        if (dropdown) {
-            // Usar o evento show.bs.dropdown do Bootstrap
-            const dropdownMenu = dropdown.nextElementSibling;
-            if (dropdownMenu) {
-                dropdownMenu.addEventListener('show.bs.dropdown', () => {
-                    loadNotifications();
-                });
-            }
+    function formatNotificationDate(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInMinutes = Math.floor((now - date) / (1000 * 60));
+        
+        if (diffInMinutes < 1) return 'Agora';
+        if (diffInMinutes < 60) return `${diffInMinutes}m atrás`;
+        
+        const diffInHours = Math.floor(diffInMinutes / 60);
+        if (diffInHours < 24) return `${diffInHours}h atrás`;
+        
+        const diffInDays = Math.floor(diffInHours / 24);
+        if (diffInDays < 7) return `${diffInDays}d atrás`;
+        
+        return date.toLocaleDateString('pt-BR');
+    }
+
+    // Atualiza a função updatePartnerStatus para usar o novo showToast
+    async function updatePartnerStatus(partnerId, newStatus) {
+        if (!confirm(`Deseja ${newStatus.toLowerCase()} este parceiro?`)) {
+            return;
+        }
+
+        try {
+            console.log('Atualizando status:', partnerId, newStatus);
             
-            // Também carregar ao clicar, para garantir
-            dropdown.addEventListener('click', (e) => {
-                loadNotifications();
+            const formData = new FormData();
+            formData.append('status', newStatus);
+            
+            const response = await fetch(`/adm/parceiro/${partnerId}/status`, {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (response.ok) {
+                console.log('Status atualizado com sucesso');
+                showToast('Sucesso', `Parceiro ${newStatus.toLowerCase()} com sucesso!`);
+                // Atualiza a interface após 1 segundo para dar tempo de ver o toast
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+                // Atualiza o contador de notificações
+                updateNotificationBadge();
+            } else {
+                console.error('Erro ao atualizar status:', response);
+                showToast('Erro', 'Não foi possível atualizar o status.', 'danger');
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            showToast('Erro', 'Ocorreu um erro ao atualizar o status.', 'danger');
+        }
+    }
+
+    // Adicionar evento de tecla Enter no campo de busca
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    aplicarFiltros();
+                }
             });
         }
+    });
+
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializa os gráficos e cards
+        updateCards();
+        initCharts();
         
-        // Atualizar badge e carregar notificações iniciais
+        // Inicializa o dropdown de notificações
+        const notificationDropdown = document.getElementById('notificationsDropdown');
+        if (notificationDropdown) {
+            notificationDropdown.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Remove o atributo data-bs-toggle para evitar conflito
+                notificationDropdown.removeAttribute('data-bs-toggle');
+                
+                const dropdownMenu = document.querySelector('.notifications-dropdown');
+                if (dropdownMenu) {
+                    const isExpanded = dropdownMenu.classList.contains('show');
+                    
+                    // Fecha todos os outros dropdowns
+                    document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+                        if (menu !== dropdownMenu) {
+                            menu.classList.remove('show');
+                        }
+                    });
+                    
+                    // Toggle do dropdown atual
+                    dropdownMenu.classList.toggle('show');
+                    notificationDropdown.setAttribute('aria-expanded', !isExpanded);
+                    
+                    // Carrega as notificações se o dropdown estiver abrindo
+                    if (!isExpanded) {
+                        loadNotifications();
+                    }
+                }
+            });
+        }
+
+        // Fecha o dropdown quando clicar fora
+        document.addEventListener('click', function(e) {
+            if (!notificationDropdown?.contains(e.target)) {
+                document.querySelectorAll('.notifications-dropdown.show').forEach(menu => {
+                    menu.classList.remove('show');
+                    notificationDropdown?.setAttribute('aria-expanded', 'false');
+                });
+            }
+        });
+
+        // Inicia a atualização do badge
         updateNotificationBadge();
         setInterval(updateNotificationBadge, 30000);
     });
-    </script>
+
+    // Atualiza a função refreshDashboard para usar o novo showToast
+    async function refreshDashboard() {
+        try {
+            const button = document.querySelector('button[onclick="refreshDashboard()"]');
+            const icon = button.querySelector('.fa-sync-alt');
+            
+            // Adiciona classe de rotação ao ícone
+            icon.classList.add('fa-spin');
+            button.disabled = true;
+
+            // Faz a requisição para atualizar
+            const response = await fetch(window.location.pathname + window.location.search);
+            if (!response.ok) throw new Error('Erro ao atualizar dashboard');
+
+            // Recarrega a página
+            window.location.reload();
+        } catch (error) {
+            console.error('Erro:', error);
+            showToast('Erro', 'Erro ao atualizar os dados. Por favor, tente novamente.', 'danger');
+            
+            // Remove a rotação do ícone em caso de erro
+            const icon = document.querySelector('.fa-sync-alt');
+            if (icon) icon.classList.remove('fa-spin');
+            
+            const button = document.querySelector('button[onclick="refreshDashboard()"]');
+            if (button) button.disabled = false;
+        }
+    }
+
+    function aplicarFiltros() {
+        // Obter valores dos filtros
+        const status = document.getElementById('statusFilter').value;
+        const especialidade = document.getElementById('especialidadeFilter').value;
+        const cidade = document.getElementById('cidadeFilter').value;
+        const search = document.getElementById('searchInput').value;
+        
+        // Mostrar indicador de carregamento
+        const tableBody = document.querySelector('table tbody');
+        if (tableBody) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <p class="mt-2 mb-0">Carregando resultados...</p>
+                    </td>
+                </tr>
+            `;
+        }
+        
+        // Criar parâmetros para a requisição AJAX
+        const params = new URLSearchParams(window.location.search);
+        params.delete('status');
+        params.delete('especialidade');
+        params.delete('cidade');
+        params.delete('search');
+        params.delete('page');
+        
+        if (status) params.set('status', status);
+        if (especialidade) params.set('especialidade', especialidade);
+        if (cidade) params.set('cidade', cidade);
+        if (search) params.set('search', search);
+        params.set('page', '1');
+        params.set('ajax', 'true'); // Indicar que é uma requisição AJAX
+        
+        // Realizar a requisição AJAX
+        fetch(`${window.location.pathname}?${params.toString()}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro ao filtrar parceiros');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Atualizar a tabela com os resultados
+                atualizarTabela(data);
+                
+                // Atualizar a URL para manter os filtros sem recarregar a página
+                const paramsForUrl = new URLSearchParams(params);
+                paramsForUrl.delete('ajax'); // Remover o parâmetro ajax da URL final
+                const newUrl = `${window.location.pathname}?${paramsForUrl.toString()}`;
+                window.history.pushState({ path: newUrl }, '', newUrl);
+                
+                // Scroll para o centro da seção "Parceiros Técnicos"
+                let partnersCard = null;
+                
+                // Procurar pelo cabeçalho "Parceiros Técnicos"
+                const cardTitles = document.querySelectorAll('h6.card-title');
+                for(let i = 0; i < cardTitles.length; i++) {
+                    if(cardTitles[i].textContent.includes('Parceiros Técnicos')) {
+                        partnersCard = cardTitles[i].closest('.card');
+                        break;
+                    }
+                }
+                
+                // Se não encontrou pelo título, usar a tabela como fallback
+                if (!partnersCard) {
+                    // Encontrar o card que contém uma tabela
+                    const tables = document.querySelectorAll('table');
+                    for (let i = 0; i < tables.length; i++) {
+                        const card = tables[i].closest('.card');
+                        if (card) {
+                            partnersCard = card;
+                            break;
+                        }
+                    }
+                }
+                
+                if (partnersCard) {
+                    // Esperar um pouco para garantir que a tabela foi atualizada
+                    setTimeout(() => {
+                        partnersCard.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'center', 
+                            inline: 'nearest' 
+                        });
+                    }, 100);
+                }
+                
+                // Mostrar mensagem de sucesso
+                showToast('Filtros aplicados', 'Os resultados foram atualizados.');
+            })
+            .catch(error => {
+                console.error('Erro ao filtrar:', error);
+                showToast('Erro', 'Não foi possível aplicar os filtros. Tente novamente.', 'danger');
+                
+                // Restaurar tabela em caso de erro
+                if (tableBody) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center py-4">
+                                <i class="fas fa-exclamation-circle fa-2x text-danger mb-2"></i>
+                                <p class="text-danger mb-0">Erro ao carregar os dados. Tente novamente.</p>
+                                <button class="btn btn-sm btn-outline-primary mt-3" onclick="aplicarFiltros()">
+                                    <i class="fas fa-sync-alt"></i> Tentar novamente
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+    }
+    
+    // Função para atualizar a tabela com os dados recebidos via AJAX
+    function atualizarTabela(data) {
+        // Atualizar os cards de estatísticas
+        if (data.stats) {
+            atualizarCards(data.stats);
+        }
+        
+        // Atualizar a tabela de parceiros
+        const tableBody = document.querySelector('table tbody');
+        if (tableBody) {
+            if (data.parceiros && data.parceiros.length > 0) {
+                tableBody.innerHTML = data.parceiros.map(parceiro => {
+                    const nome = parceiro.nome_completo || parceiro.nome || 'Nome não informado';
+                    const email = parceiro.email || 'Email não informado';
+                    const cidade = parceiro.cidade || 'Cidade não informada';
+                    
+                    // Formatação do WhatsApp
+                    const whatsappFormatted = parceiro.whatsapp ? formatarTelefone(parceiro.whatsapp) : '';
+                    const whatsapp = parceiro.whatsapp ? `
+                        <a href="https://wa.me/${formatWhatsApp(parceiro.whatsapp)}" 
+                           target="_blank"
+                           class="btn btn-sm btn-success whatsapp-link" 
+                           title="Contato via WhatsApp">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    ` : '';
+                    
+                    const especialidades = parceiro.especialidades && parceiro.especialidades.length > 0 
+                        ? parceiro.especialidades.map(esp => `<span class="badge bg-info">${esp}</span>`).join(' ')
+                        : '<span class="text-muted small">Não informado</span>';
+                    
+                    const status = parceiro.status || 'Pendente';
+                    const statusClass = `status-${status.toLowerCase()}`;
+                    
+                    const acoes = `
+                            <div class="btn-group">
+                                <a href="/adm/parceiro/${parceiro.id}" 
+                                   class="btn btn-sm btn-info" title="Ver detalhes">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                ${whatsapp}
+                            ${(!parceiro.status || parceiro.status.toLowerCase() === 'pendente') ? `
+                                    <button class="btn btn-sm btn-success" onclick="updatePartnerStatus('${parceiro.id}', 'Aprovado')" title="Aprovar">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="updatePartnerStatus('${parceiro.id}', 'Rejeitado')" title="Rejeitar">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                ` : ''}
+                        </div>
+                    `;
+
+                    return `
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm bg-light rounded-circle me-2 d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-user text-secondary"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-medium">${nome}</div>
+                                    </div>
+                            </div>
+                        </td>
+                            <td>${email}</td>
+                            <td>${cidade}</td>
+                            <td class="especialidades-cell">${especialidades}</td>
+                            <td>
+                                <span class="status-badge ${statusClass}">${status}</span>
+                            </td>
+                            <td>${formatarData(parceiro.created_at)}</td>
+                            <td>${acoes}</td>
+                    </tr>
+                    `;
+                }).join('');
+
+                // Adiciona evento de clique para todos os links de WhatsApp
+                document.querySelectorAll('.whatsapp-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const number = link.getAttribute('data-number');
+                        if (number) {
+                            openWhatsApp(number);
+                        }
+                    });
+                });
+            } else {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-4">
+                            <i class="fas fa-users fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0">Nenhum parceiro técnico encontrado com os filtros selecionados.</p>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+    }
+
+    // Função para formatar número de telefone
+    function formatarTelefone(numero) {
+        if (!numero) return '';
+        
+        // Remove todos os caracteres não numéricos
+        const cleaned = numero.replace(/\D/g, '');
+        
+        // Formata o número de acordo com o tamanho
+        if (cleaned.length === 11) {
+            return `(${cleaned.slice(0,2)}) ${cleaned.slice(2,7)}-${cleaned.slice(7)}`;
+        } else if (cleaned.length === 10) {
+            return `(${cleaned.slice(0,2)}) ${cleaned.slice(2,6)}-${cleaned.slice(6)}`;
+        }
+        
+        return numero; // Retorna o número original se não conseguir formatar
+    }
+
+    // Função para formatar número do WhatsApp
+    function formatWhatsApp(number) {
+        if (!number) return '';
+        
+        // Remove todos os caracteres não numéricos
+        let cleaned = number.replace(/\D/g, '');
+        
+        // Se o número não começar com 98 (DDD do Maranhão), adiciona
+        if (!cleaned.startsWith('98')) {
+            cleaned = '98' + cleaned;
+        }
+        
+        // Adiciona o código do país (55)
+        if (!cleaned.startsWith('55')) {
+            cleaned = '55' + cleaned;
+        }
+        
+        return cleaned;
+    }
+
+    // Função para abrir WhatsApp
+    function openWhatsApp(number) {
+        const formattedNumber = formatWhatsApp(number);
+        if (formattedNumber) {
+            // Adiciona uma mensagem padrão (opcional)
+            const message = "Olá! Estou entrando em contato através do sistema VNX.";
+            const encodedMessage = encodeURIComponent(message);
+            
+            // Cria o link do WhatsApp com a mensagem
+            const whatsappUrl = `https://api.whatsapp.com/send?phone=${formattedNumber}&text=${encodedMessage}`;
+            
+            // Abre em uma nova aba
+            window.open(whatsappUrl, '_blank');
+        } else {
+            showToast('Erro', 'Número de WhatsApp inválido', 'danger');
+        }
+    }
+    
+    // Funções auxiliares
+    function formatWhatsApp(whatsapp) {
+        // Remove caracteres não numéricos
+        return whatsapp.replace(/\D/g, '');
+    }
+    
+    function formatarData(dataString) {
+        const data = new Date(dataString);
+        return data.toLocaleDateString('pt-BR', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+    
+    function atualizarCards(stats) {
+        try {
+            console.log('Atualizando cards com dados:', stats);
+            
+            const cardElements = {
+                total: document.querySelector('[data-card="total"]'),
+                pendentes: document.querySelector('[data-card="pendentes"]'),
+                aprovados: document.querySelector('[data-card="aprovados"]'),
+                especialidade: document.querySelector('[data-card="especialidade"]')
+            };
+            
+            if (stats.total !== undefined && cardElements.total) {
+                cardElements.total.textContent = stats.total;
+            } else {
+                console.error('Elemento não encontrado para o card: total');
+            }
+            
+            if (stats.pendentes !== undefined && cardElements.pendentes) {
+                cardElements.pendentes.textContent = stats.pendentes;
+            } else {
+                console.error('Elemento não encontrado para o card: pendentes');
+            }
+            
+            if (stats.aprovados !== undefined && cardElements.aprovados) {
+                cardElements.aprovados.textContent = stats.aprovados;
+            } else {
+                console.error('Elemento não encontrado para o card: aprovados');
+            }
+            
+            if (stats.especialidade_principal !== undefined && cardElements.especialidade) {
+                cardElements.especialidade.textContent = stats.especialidade_principal;
+            } else {
+                console.error('Elemento não encontrado para o card: especialidade');
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar cards:', error);
+        }
+    }
+    
+    function atualizarPaginacao(pagination) {
+        const paginationContainer = document.getElementById('paginationContainer');
+        if (!paginationContainer) return;
+        
+        // Atualizar os atributos de dados
+        paginationContainer.setAttribute('data-current-page', pagination.current_page);
+        paginationContainer.setAttribute('data-total-pages', pagination.total_pages);
+        paginationContainer.setAttribute('data-per-page', pagination.per_page);
+        
+        // Renderizar a paginação
+        renderPagination();
+    }
+
+    // Função para mostrar toast com auto-hide
+    function showToast(title, message, type = 'success') {
+        // Remove toasts anteriores
+        const existingToasts = document.querySelectorAll('.toast');
+        existingToasts.forEach(toast => toast.remove());
+
+        // Cria o novo toast
+        const toastHTML = `
+            <div class="toast-container position-fixed top-0 end-0 p-3">
+                <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header bg-${type} text-white">
+                        <strong class="me-auto">${title}</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Adiciona o toast ao documento
+        document.body.insertAdjacentHTML('beforeend', toastHTML);
+
+        // Remove o toast após 3 segundos
+        setTimeout(() => {
+            const toasts = document.querySelectorAll('.toast-container');
+            toasts.forEach(toast => toast.remove());
+        }, 3000);
+    }
+
+    // Função para formatar número do WhatsApp
+    function formatWhatsApp(number) {
+        if (!number) return '';
+        
+        // Remove todos os caracteres não numéricos
+        let cleaned = number.replace(/\D/g, '');
+        
+        // Se o número não começar com 98 (DDD do Maranhão), adiciona
+        if (!cleaned.startsWith('98')) {
+            cleaned = '98' + cleaned;
+        }
+        
+        // Adiciona o código do país (55)
+        if (!cleaned.startsWith('55')) {
+            cleaned = '55' + cleaned;
+        }
+        
+        return cleaned;
+    }
+
+    // Função para abrir WhatsApp
+    function openWhatsApp(number) {
+        const formattedNumber = formatWhatsApp(number);
+        if (formattedNumber) {
+            window.open(`https://wa.me/${formattedNumber}`, '_blank');
+        }
+    }
+</script>
 {% endblock %} 
