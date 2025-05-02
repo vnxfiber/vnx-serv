@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M256 48C141.1 48 48 141.1 48 256s93.1 208 208 208 208-93.1 208-208S370.9 48 256 48zm0 398.7c-105.1 0-190.7-85.5-190.7-190.7S150.9 65.3 256 65.3 446.7 150.9 446.7 256 361.1 446.7 256 446.7z" fill="url(#gradient1)"/>
+    <path d="M256 96c-88.4 0-160 71.6-160 160s71.6 160 160 160 160-71.6 160-160S344.4 96 256 96zm0 302.9c-79 0-142.9-64-142.9-142.9S177 113.1 256 113.1 398.9 177 398.9 256 335 398.9 256 398.9z" fill="url(#gradient2)"/>
+    <path d="M256 144c-61.8 0-112 50.2-112 112s50.2 112 112 112 112-50.2 112-112S317.8 144 256 144zm0 206.9c-52.3 0-94.9-42.6-94.9-94.9S203.7 161.1 256 161.1s94.9 42.6 94.9 94.9S308.3 350.9 256 350.9z" fill="url(#gradient3)"/>
+    <circle cx="256" cy="256" r="64" fill="url(#gradient4)"/>
+    <defs>
+        <linearGradient id="gradient1" x1="48" y1="48" x2="464" y2="464" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#667eea"/>
+            <stop offset="100%" stop-color="#764ba2"/>
+        </linearGradient>
+        <linearGradient id="gradient2" x1="96" y1="96" x2="416" y2="416" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#667eea"/>
+            <stop offset="100%" stop-color="#764ba2"/>
+        </linearGradient>
+        <linearGradient id="gradient3" x1="144" y1="144" x2="368" y2="368" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#667eea"/>
+            <stop offset="100%" stop-color="#764ba2"/>
+        </linearGradient>
+        <linearGradient id="gradient4" x1="192" y1="192" x2="320" y2="320" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#667eea"/>
+            <stop offset="100%" stop-color="#764ba2"/>
+        </linearGradient>
+    </defs>
+</svg> 

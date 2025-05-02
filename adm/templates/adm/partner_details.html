@@ -136,7 +136,7 @@
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Informações do Parceiro</h5>
-                    <span class="status-badge status-{{ parceiro.status|default('pendente') }}">
+                    <span class="status-badge status-{{ parceiro.status|default('pendente')|lower }}">
                         {{ parceiro.status|default('Pendente')|title }}
                     </span>
                 </div>
@@ -157,7 +157,7 @@
                                     <a href="mailto:{{ parceiro.email }}" class="contact-link">
                                         <i class="fas fa-envelope"></i> {{ parceiro.email }}
                                     </a>
-                                    <a href="https://wa.me/{{ parceiro.whatsapp }}" target="_blank" class="contact-link">
+                                    <a href="https://wa.me/{{ parceiro.whatsapp|format_whatsapp }}" target="_blank" class="contact-link">
                                         <i class="fab fa-whatsapp"></i> {{ parceiro.whatsapp }}
                                     </a>
                                 </div>

@@ -1,0 +1,180 @@
+{% extends "adm/base.html" %}
+
+{% block title %}Configurações de Notificações{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bell text-warning me-2"></i>
+                        Configurações de Notificações
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('admin.atualizar_notificacoes') }}">
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-desktop me-2"></i>
+                                Notificações do Sistema
+                            </h6>
+                            <div class="form-check mb-2">
+                                <input type="checkbox" class="form-check-input" id="novos_parceiros" name="notificacoes[]" value="novos_parceiros" 
+                                    {% if preferences and 'novos_parceiros' in preferences.notification_preferences %}checked{% endif %}>
+                                <label class="form-check-label" for="novos_parceiros">
+                                    Notificar quando houver novos parceiros cadastrados
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input type="checkbox" class="form-check-input" id="atualizacoes_status" name="notificacoes[]" value="atualizacoes_status"
+                                    {% if preferences and 'atualizacoes_status' in preferences.notification_preferences %}checked{% endif %}>
+                                <label class="form-check-label" for="atualizacoes_status">
+                                    Notificar mudanças de status dos parceiros
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input type="checkbox" class="form-check-input" id="login_dispositivo" name="notificacoes[]" value="login_dispositivo"
+                                    {% if preferences and 'login_dispositivo' in preferences.notification_preferences %}checked{% endif %}>
+                                <label class="form-check-label" for="login_dispositivo">
+                                    Notificar login em novo dispositivo
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input type="checkbox" class="form-check-input" id="atividades_importantes" name="notificacoes[]" value="atividades_importantes"
+                                    {% if preferences and 'atividades_importantes' in preferences.notification_preferences %}checked{% endif %}>
+                                <label class="form-check-label" for="atividades_importantes">
+                                    Notificar atividades importantes no sistema
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-sliders-h me-2"></i>
+                                Preferências de Exibição
+                            </h6>
+                            <div class="form-check mb-2">
+                                <input type="checkbox" class="form-check-input" id="notif_popup" name="notificacoes[]" value="notif_popup"
+                                    {% if preferences and 'notif_popup' in preferences.notification_preferences %}checked{% endif %}>
+                                <label class="form-check-label" for="notif_popup">
+                                    Mostrar notificações pop-up
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input type="checkbox" class="form-check-input" id="sons_notificacao" name="notificacoes[]" value="sons_notificacao"
+                                    {% if preferences and 'sons_notificacao' in preferences.notification_preferences %}checked{% endif %}>
+                                <label class="form-check-label" for="sons_notificacao">
+                                    Ativar sons de notificação
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="notif_barra_lateral" name="notificacoes[]" value="notif_barra_lateral"
+                                    {% if preferences and 'notif_barra_lateral' in preferences.notification_preferences %}checked{% endif %}>
+                                <label class="form-check-label" for="notif_barra_lateral">
+                                    Mostrar contador na barra lateral
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>
+                                    Salvar Preferências
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-color: #0d6efd;
+        --primary-rgb: 13, 110, 253;
+        --dark-color: #212529;
+        --light-rgb: 248, 249, 250;
+    }
+
+    .card {
+        border: none;
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .card-header {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 1rem 1rem 0 0 !important;
+    }
+
+    .card-title {
+        color: var(--dark-color);
+        font-weight: 600;
+    }
+
+    .form-check-input {
+        cursor: pointer;
+        width: 1.2rem;
+        height: 1.2rem;
+        margin-top: 0.2rem;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .form-check-label {
+        cursor: pointer;
+        padding-left: 0.5rem;
+        font-size: 0.95rem;
+        color: var(--dark-color);
+    }
+
+    .btn-primary {
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(var(--primary-rgb), 0.15);
+    }
+
+    h6 {
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 1rem;
+    }
+
+    .text-muted {
+        color: #6c757d !important;
+    }
+
+    .mb-4 {
+        background: rgba(var(--light-rgb), 0.5);
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        margin-bottom: 2rem !important;
+    }
+
+    .mb-4:hover {
+        background: rgba(var(--light-rgb), 0.7);
+    }
+</style>
+{% endblock %} 

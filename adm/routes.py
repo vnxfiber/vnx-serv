@@ -1,6 +1,6 @@
 import os
 from functools import wraps
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify, Response
 from supabase import create_client, Client
 import logging
 import json
@@ -10,6 +10,10 @@ import hashlib
 import base64
 from .logger_config import setup_logger
 from config import Config
+import random
+import io
+import csv
+import pytz
 
 # Configuração do logger
 logger = setup_logger()
@@ -26,12 +30,27 @@ admin_bp = Blueprint('admin', __name__,
 def format_datetime(value):
     if not value:
         return ''
-    if isinstance(value, str):
-        try:
-            value = datetime.fromisoformat(value.replace('Z', '+00:00'))
-        except ValueError:
-            return value
-    return value.strftime('%d/%m/%Y %H:%M')
+    try:
+        if isinstance(value, str):
+            dt = datetime.fromisoformat(value.replace('Z', '+00:00'))
+        else:
+            dt = value
+        return dt.strftime('%d/%m/%Y %H:%M')
+    except Exception as e:
+        logger.error(f"Erro ao formatar data: {str(e)}")
+        return value
+
+@admin_bp.app_template_filter('todatetime')
+def to_datetime(value):
+    if not value:
+        return datetime.now(pytz.UTC)
+    try:
+        if isinstance(value, str):
+            return datetime.fromisoformat(value.replace('Z', '+00:00'))
+        return value
+    except Exception as e:
+        logger.error(f"Erro ao converter data: {str(e)}")
+        return datetime.now(pytz.UTC)
 
 @admin_bp.app_template_filter('nl2br')
 def nl2br(value):
@@ -49,6 +68,26 @@ def notification_icon(type):
         'info': 'info-circle'
     }
     return icons.get(type, 'info-circle')
+
+# Filtro para formatar o número do WhatsApp
+@admin_bp.app_template_filter('format_whatsapp')
+def format_whatsapp(number):
+    """Formata o número do WhatsApp para o formato internacional."""
+    if not number:
+        return ''
+    
+    # Remove todos os caracteres não numéricos
+    clean_number = ''.join(filter(str.isdigit, number))
+    
+    # Se o número começar com 0, remove o 0
+    if clean_number.startswith('0'):
+        clean_number = clean_number[1:]
+    
+    # Se não começar com 55 (código do Brasil), adiciona
+    if not clean_number.startswith('55'):
+        clean_number = '55' + clean_number
+    
+    return clean_number
 
 # Configuração do Supabase
 class SupabaseClient:
@@ -248,6 +287,7 @@ def login():
                     logger.info(f"Login bem-sucedido para o usuário: {email}")
                     session['user_id'] = user['id']
                     session['user_name'] = user['nome']
+                    session['user_email'] = user['email']
                     session['is_authenticated'] = True
                     return redirect(url_for('admin.dashboard'))
                 else:
@@ -276,210 +316,231 @@ def logout():
 @login_required
 def dashboard():
     # Inicializar variáveis com valores padrão
-    parceiros_data = []
-    total_parceiros = 0
-    parceiros_pendentes = 0
-    parceiros_aprovados = 0
-    parceiros_rejeitados = 0
-    novos_parceiros_mes = 0
-    ultimos_6_meses = []
-    dados_cadastros_mes = []
-    dados_status = [0, 0, 0]  # [pendentes, aprovados, rejeitados]
-    especialidades = []
-    cidades = []
-
-    supabase = SupabaseClient.get_client()
-    logger.debug(f"Iniciando dashboard - user_id: {session.get('user_id')}")
-
-    if not supabase:
-        logger.error("Cliente Supabase não está inicializado")
-        flash('Erro na conexão com o banco de dados.', 'danger')
-        return render_template('adm/dashboard.html',
-                             parceiros=parceiros_data,
-                             total_parceiros=total_parceiros,
-                             parceiros_pendentes=parceiros_pendentes,
-                             parceiros_aprovados=parceiros_aprovados,
-                             novos_parceiros_mes=novos_parceiros_mes,
-                             labels_meses=ultimos_6_meses,
-                             dados_cadastros_mes=dados_cadastros_mes,
-                             dados_status=dados_status,
-                             especialidades=especialidades,
-                             cidades=cidades,
-                             error_db=True,
-                             current_year=2024)
-
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    search = request.args.get('search', '')
+    status = request.args.get('status', '')
+    especialidade = request.args.get('especialidade', '')
+    cidade = request.args.get('cidade', '')
+    
+    # Verificar se é uma requisição AJAX
+    is_ajax = request.args.get('ajax', 'false') == 'true'
+    
     try:
-        # Aplicar filtros se existirem
-        status_filter = request.args.get('status')
-        especialidade_filter = request.args.get('especialidade')
-        cidade_filter = request.args.get('cidade')
-        search = request.args.get('search')
-
-        logger.debug(f"Filtros aplicados - Status: {status_filter}, Especialidade: {especialidade_filter}, Cidade: {cidade_filter}, Busca: {search}")
-
-        # Consulta base
+        supabase = SupabaseClient.get_client()
+        
+        # Verificar se os dados do usuário estão na sessão
+        user_id = session.get('user_id')
+        if user_id:
+            try:
+                # Buscar dados atualizados do usuário
+                user_response = supabase.table('admin_users').select("*").eq('id', user_id).limit(1).execute()
+                if user_response.data and len(user_response.data) > 0:
+                    user = user_response.data[0]
+                    session['user_name'] = user.get('nome', 'Usuário')
+                    session['user_email'] = user.get('email', '')
+            except Exception as user_error:
+                logger.error(f"Erro ao buscar dados do usuário: {str(user_error)}")
+                # Não interromper o fluxo se essa verificação falhar
+        
+        # Verificar novos cadastros desde o último acesso
+        if user_id and not is_ajax:
+            try:
+                # Buscar a última vez que o usuário verificou por novos cadastros
+                last_check_response = supabase.table('user_last_checks').select('*').eq('user_id', user_id).limit(1).execute()
+                last_check_time = None
+                
+                if last_check_response.data and len(last_check_response.data) > 0:
+                    last_check_time = last_check_response.data[0].get('last_check_time')
+                
+                # Se não houver registro anterior, criar um
+                if not last_check_time:
+                    # Registrar o acesso atual
+                    current_time = datetime.now().isoformat()
+                    supabase.table('user_last_checks').insert({
+                        'user_id': user_id,
+                        'last_check_time': current_time
+                    }).execute()
+                else:
+                    # Converter para datetime
+                    if isinstance(last_check_time, str):
+                        last_check_time = datetime.fromisoformat(last_check_time.replace('Z', '+00:00'))
+                    
+                    # Buscar parceiros cadastrados após a última verificação
+                    new_partners_response = supabase.table('parceiros_tecnicos').select('*').gt('created_at', last_check_time.isoformat()).execute()
+                    new_partners = new_partners_response.data or []
+                    
+                    # Se houver novos parceiros, criar notificação
+                    if new_partners and len(new_partners) > 0:
+                        create_notification(
+                            user_id=user_id,
+                            title='Novos Parceiros Cadastrados',
+                            message=f'{len(new_partners)} novos parceiros foram cadastrados desde seu último acesso.',
+                            type='info'
+                        )
+                    
+                    # Atualizar o timestamp da última verificação
+                    current_time = datetime.now().isoformat()
+                    supabase.table('user_last_checks').update({
+                        'last_check_time': current_time
+                    }).eq('user_id', user_id).execute()
+            except Exception as check_error:
+                logger.error(f"Erro ao verificar novos cadastros: {str(check_error)}")
+                # Não interromper o fluxo se essa verificação falhar
+        
+        # Iniciar com uma consulta básica
         query = supabase.table('parceiros_tecnicos').select("*")
         
-        # Aplicar filtros
-        if status_filter:
-            query = query.eq('status', status_filter)
-        if especialidade_filter:
-            query = query.contains('especialidades', [especialidade_filter])
-        if cidade_filter:
-            query = query.eq('cidade', cidade_filter)
+        # Aplicar filtros, se fornecidos
+        if status:
+            query = query.eq('status', status)
+        if especialidade:
+            query = query.contains('especialidades', [especialidade])
+        if cidade:
+            query = query.eq('cidade', cidade)
         if search:
-            query = query.or_(f"nome.ilike.%{search}%,email.ilike.%{search}%,cidade.ilike.%{search}%")
-
-        # Executar consulta
-        response = query.execute()
-        logger.debug(f"Resposta do Supabase (parceiros): {response}")
-
-        if not hasattr(response, 'data'):
-            logger.error("Resposta do Supabase não contém 'data'")
-            raise Exception("Formato de resposta inválido")
-
-        parceiros_data = response.data or []
-        logger.debug(f"Número de parceiros encontrados: {len(parceiros_data)}")
+            search_term = f"%{search}%".lower()
+            query = query.or_(f"nome.ilike.{search_term},email.ilike.{search_term}")
         
-        # Log detalhado dos dados de cada parceiro
-        for parceiro in parceiros_data:
-            logger.debug(f"Dados do parceiro: {json.dumps(parceiro, indent=2, ensure_ascii=False)}")
+        # Executar a consulta para obter o número total de registros
+        result = query.execute()
+        all_parceiros = result.data
+        total_records = len(all_parceiros)
         
-        # Garantir que todos os campos necessários existam e tenham valores padrão
-        for parceiro in parceiros_data:
-            if not parceiro.get('status'):
-                parceiro['status'] = 'Pendente'
-            if not parceiro.get('nome'):
-                parceiro['nome'] = parceiro.get('nome_completo', 'Nome não informado')
-            if not parceiro.get('email'):
-                parceiro['email'] = 'Email não informado'
-            if not parceiro.get('cidade'):
-                parceiro['cidade'] = 'Cidade não informada'
-            if not parceiro.get('especialidades') or not isinstance(parceiro['especialidades'], list):
-                parceiro['especialidades'] = []
-            if not parceiro.get('created_at'):
-                parceiro['created_at'] = datetime.now().isoformat()
+        # Calcular total de páginas
+        total_pages = max(1, (total_records + per_page - 1) // per_page)
         
-            parceiros_data.sort(key=lambda x: x.get('created_at', ''), reverse=True)
-
-        # Calcular estatísticas
-        total_parceiros = len(parceiros_data)
-        parceiros_pendentes = len([p for p in parceiros_data if p.get('status', '').lower() == 'pendente'])
-        parceiros_aprovados = len([p for p in parceiros_data if p.get('status', '').lower() == 'aprovado'])
-        parceiros_rejeitados = len([p for p in parceiros_data if p.get('status', '').lower() == 'rejeitado'])
-
-        logger.debug(f"Estatísticas calculadas:")
-        logger.debug(f"Total: {total_parceiros}")
-        logger.debug(f"Pendentes: {parceiros_pendentes}")
-        logger.debug(f"Aprovados: {parceiros_aprovados}")
-        logger.debug(f"Rejeitados: {parceiros_rejeitados}")
-
-        # Calcular novos parceiros este mês
-        inicio_mes = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        inicio_mes = inicio_mes.astimezone()  # Converter para timezone-aware
+        # Ajustar a página atual se estiver fora dos limites
+        page = min(max(1, page), total_pages)
         
-        novos_parceiros_mes = len([
-            p for p in parceiros_data 
-            if p.get('created_at') and 
-            datetime.fromisoformat(p.get('created_at').replace('Z', '+00:00')) >= inicio_mes
-        ])
-
-        # Preparar dados para o gráfico de cadastros por mês
-        meses_ptbr = {
-            'January': 'Janeiro',
-            'February': 'Fevereiro',
-            'March': 'Março',
-            'April': 'Abril',
-            'May': 'Maio',
-            'June': 'Junho',
-            'July': 'Julho',
-            'August': 'Agosto',
-            'September': 'Setembro',
-            'October': 'Outubro',
-            'November': 'Novembro',
-            'December': 'Dezembro'
-        }
+        # Calcular índices de início e fim para paginação
+        start_idx = (page - 1) * per_page
+        end_idx = min(start_idx + per_page, total_records)
         
-        # Calcular os últimos 6 meses corretamente
-        hoje = datetime.now()
-        ultimos_6_meses = []
-        dados_cadastros_mes = []
+        # Obter parceiros da página atual
+        parceiros = all_parceiros[start_idx:end_idx]
         
-        for i in range(5, -1, -1):
-            # Calcular o primeiro dia do mês
-            data = hoje.replace(day=1) - timedelta(days=1)  # Último dia do mês anterior
-            data = data.replace(day=1)  # Primeiro dia do mês
-            data = data - timedelta(days=30*i)  # Voltar i meses
-            
-            mes_en = data.strftime('%B')
-            mes_ptbr = meses_ptbr.get(mes_en, mes_en)
-            ultimos_6_meses.append(f"{mes_ptbr}/{data.strftime('%y')}")
-            
-            inicio_mes = data.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-            if i > 0:
-                fim_mes = (inicio_mes + timedelta(days=32)).replace(day=1) - timedelta(seconds=1)
-            else:
-                fim_mes = hoje  # Para o mês atual, usar a data atual como fim
-            
-            # Converter para timezone-aware
-            inicio_mes = inicio_mes.astimezone()
-            fim_mes = fim_mes.astimezone()
-            
-            count = len([
-                p for p in parceiros_data 
-                if p.get('created_at') and 
-                inicio_mes <= datetime.fromisoformat(p.get('created_at').replace('Z', '+00:00')) <= fim_mes
-            ])
-            dados_cadastros_mes.append(count)
-            logger.debug(f"Mês: {mes_ptbr}, Início: {inicio_mes}, Fim: {fim_mes}, Contagem: {count}")
-
-        # Coletar todas as especialidades únicas
-        especialidades = set()
-        for parceiro in parceiros_data:
-            if isinstance(parceiro.get('especialidades'), list):
-                especialidades.update(esp for esp in parceiro.get('especialidades') if esp)
-
-        especialidades = sorted(list(especialidades))
-        logger.debug(f"Especialidades encontradas: {especialidades}")
-
-        # Coletar todas as cidades únicas
-        cidades = sorted(list(set(p.get('cidade') for p in parceiros_data if p.get('cidade'))))
-        logger.debug(f"Cidades encontradas: {cidades}")
-
-        # Preparar dados para o gráfico de status
+        # Verificar e corrigir valores nulos em parceiros
+        for p in parceiros:
+            if not p.get('status'):
+                p['status'] = 'Pendente'
+            if not p.get('especialidades'):
+                p['especialidades'] = []
+            if not p.get('cidade'):
+                p['cidade'] = 'Não informada'
+            if not p.get('nome_completo'):
+                p['nome_completo'] = 'Nome não informado'
+            if not p.get('created_at'):
+                p['created_at'] = datetime.now().isoformat()
+        
+        # Contar parceiros por status
+        parceiros_pendentes = len([p for p in all_parceiros if not p.get('status') or p['status'] == 'Pendente'])
+        parceiros_aprovados = len([p for p in all_parceiros if p.get('status') == 'Aprovado'])
+        parceiros_rejeitados = len([p for p in all_parceiros if p.get('status') == 'Rejeitado'])
+        
+        # Calcular a especialidade mais comum
+        especialidades_count = {}
+        for p in all_parceiros:
+            if p.get('especialidades'):
+                for esp in p['especialidades']:
+                    if esp not in especialidades_count:
+                        especialidades_count[esp] = 0
+                    especialidades_count[esp] += 1
+        
+        # Encontrar a especialidade com mais ocorrências
+        especialidade_principal = "Nenhuma" if not especialidades_count else max(especialidades_count.items(), key=lambda x: x[1])[0]
+        
+        # Obter listas de especialidades e cidades para os filtros
+        especialidades = sorted(list(set([esp for p in all_parceiros if 'especialidades' in p and p['especialidades'] for esp in p['especialidades']])))
+        cidades = sorted(list(set([p['cidade'] for p in all_parceiros if 'cidade' in p and p['cidade']])))
+        
+        # Preparar dados para os gráficos
+        # 1. Gráfico de distribuição por especialidade
+        dados_especialidades = [especialidades_count.get(esp, 0) for esp in especialidades]
+        
+        # 2. Gráfico de distribuição por status
         dados_status = [parceiros_pendentes, parceiros_aprovados, parceiros_rejeitados]
-        logger.debug(f"Dados de status: Pendentes={parceiros_pendentes}, Aprovados={parceiros_aprovados}, Rejeitados={parceiros_rejeitados}")
+        
+        # Criar ranking de especialidades
+        especialidades_ranking = [
+            {"nome": esp, "total": total}
+            for esp, total in especialidades_count.items()
+        ]
+        especialidades_ranking.sort(key=lambda x: x["total"], reverse=True)
+        
+        # Obter informações do usuário logado da sessão
+        user_data = {
+            'nome': session.get('user_name', 'Usuário'),
+            'email': session.get('user_email', ''),
+            'id': session.get('user_id')
+        }
+
+        # Se for uma requisição AJAX, retornar JSON
+        if is_ajax:
+            return jsonify({
+                'parceiros': parceiros,
+                'stats': {
+                    'total': total_records,
+                    'pendentes': parceiros_pendentes,
+                    'aprovados': parceiros_aprovados,
+                    'rejeitados': parceiros_rejeitados,
+                    'especialidade_principal': especialidade_principal
+                },
+                'pagination': {
+                    'page': page,
+                    'per_page': per_page,
+                    'total_pages': total_pages,
+                    'total_records': total_records
+                }
+            })
 
         return render_template('adm/dashboard.html',
-                             parceiros=parceiros_data,
-                             total_parceiros=total_parceiros,
+                             current_user=user_data,
+                             pending_security_updates=False,  # Você pode ajustar isso conforme necessário
+                             parceiros=parceiros,
+                             page=page,
+                             per_page=per_page,
+                             total_pages=total_pages,
+                             total_parceiros=total_records,
                              parceiros_pendentes=parceiros_pendentes,
                              parceiros_aprovados=parceiros_aprovados,
-                             novos_parceiros_mes=novos_parceiros_mes,
-                             labels_meses=ultimos_6_meses,
-                             dados_cadastros_mes=dados_cadastros_mes,
-                             dados_status=dados_status,
+                             parceiros_rejeitados=parceiros_rejeitados,
+                             especialidade_principal=especialidade_principal,
                              especialidades=especialidades,
                              cidades=cidades,
-                             error_db=False,
-                             current_year=2024)
+                             labels_especialidades=especialidades,
+                             dados_especialidades=dados_especialidades,
+                             dados_status=dados_status,
+                             especialidades_ranking=especialidades_ranking)
 
     except Exception as e:
-        logger.error(f"Erro ao buscar dados dos parceiros: {str(e)}", exc_info=True)
-        flash(f'Erro ao carregar dados: {str(e)}', 'danger')
+        logger.error(f"Erro ao listar parceiros: {str(e)}", exc_info=True)
+        
+        if is_ajax:
+            return jsonify({
+                'error': 'Erro ao carregar dados',
+                'message': str(e)
+            }), 500
+            
+        flash('Erro ao carregar dados. Tente novamente.', 'danger')
+        
     return render_template('adm/dashboard.html',
-                         parceiros=parceiros_data,
-                             total_parceiros=total_parceiros,
-                             parceiros_pendentes=parceiros_pendentes,
-                             parceiros_aprovados=parceiros_aprovados,
-                             novos_parceiros_mes=novos_parceiros_mes,
-                             labels_meses=ultimos_6_meses,
-                             dados_cadastros_mes=dados_cadastros_mes,
-                             dados_status=dados_status,
-                             especialidades=especialidades,
-                             cidades=cidades,
-                             error_db=True,
-                         current_year=2024)
+                         parceiros=[],
+                         page=1, 
+                         total_pages=1,
+                         total_records=0,
+                         per_page=per_page,
+                         total_parceiros=0,
+                         parceiros_pendentes=0,
+                         parceiros_aprovados=0,
+                         parceiros_rejeitados=0,
+                         especialidade_principal="Nenhuma",
+                         especialidades=[],
+                         cidades=[],
+                         labels_especialidades=[],
+                         dados_especialidades=[],
+                         dados_status=[0, 0, 0],
+                         especialidades_ranking=[])
 
 @admin_bp.route('/parceiro/<partner_id>')
 @login_required
@@ -517,6 +578,15 @@ def update_status(partner_id):
             flash('Status inválido.', 'warning')
             return redirect(url_for('admin.dashboard'))
             
+        # Validar se o status é válido
+        valid_statuses = ['Pendente', 'Aprovado', 'Rejeitado']
+        new_status = new_status.capitalize()  # Garantir primeira letra maiúscula
+        
+        if new_status not in valid_statuses:
+            logger.warning(f"Status inválido fornecido: {new_status}")
+            flash('Status inválido fornecido.', 'warning')
+            return redirect(url_for('admin.dashboard'))
+            
         logger.debug(f"Atualizando status do parceiro {partner_id} para {new_status}")
         response = supabase.table('parceiros_tecnicos').update({'status': new_status}).eq('id', partner_id).execute()
         logger.debug(f"Resposta completa da atualização: {response}")
@@ -538,9 +608,9 @@ def update_status(partner_id):
         else:
             error_message = "Erro desconhecido ao atualizar status."
             if hasattr(response, 'error') and response.error:
-                error_message = f"Erro ao atualizar status: {response.error.message}"
+                error_message = f"Erro ao atualizar status: {response.error}"
             elif not response.data:
-                 error_message = "Nenhum dado retornado após a tentativa de atualização."
+                error_message = "Nenhum dado retornado após a tentativa de atualização."
             
             logger.error(error_message)
             flash(error_message, 'danger')
@@ -549,7 +619,7 @@ def update_status(partner_id):
         logger.error(f"Erro excepcional ao atualizar status: {str(e)}", exc_info=True)
         flash(f'Erro ao atualizar status: {str(e)}', 'danger')
         
-    return redirect(url_for('admin.dashboard')) 
+    return redirect(url_for('admin.dashboard'))
 
 # Rotas para aprovar/rejeitar parceiros
 @admin_bp.route('/aprovar-parceiro/<partner_id>', methods=['POST'])
@@ -557,6 +627,9 @@ def update_status(partner_id):
 def aprovar_parceiro(partner_id):
     try:
         supabase = SupabaseClient.get_client()
+        if not supabase:
+            raise Exception("Cliente Supabase não inicializado")
+            
         user_id = session.get('user_id')
         
         # Atualizar status do parceiro
@@ -567,15 +640,25 @@ def aprovar_parceiro(partner_id):
             
         if response.data:
             # Criar notificação
-            create_notification(
-                user_id=user_id,
-                title='Parceiro Aprovado',
-                message=f'O parceiro técnico foi aprovado com sucesso.',
-                type='success'
-            )
+            try:
+                create_notification(
+                    user_id=user_id,
+                    title='Parceiro Aprovado',
+                    message=f'O parceiro técnico foi aprovado com sucesso.',
+                    type='success'
+                )
+            except Exception as notif_error:
+                logger.error(f"Erro ao criar notificação: {str(notif_error)}")
+                # Não interromper o fluxo se a notificação falhar
+                
+            logger.info(f"Parceiro {partner_id} aprovado com sucesso")
             return jsonify({'success': True})
         else:
-            return jsonify({'success': False, 'error': 'Parceiro não encontrado'}), 404
+            error_message = "Erro ao aprovar parceiro"
+            if hasattr(response, 'error') and response.error:
+                error_message = f"Erro ao aprovar parceiro: {response.error}"
+            logger.error(error_message)
+            return jsonify({'success': False, 'error': error_message}), 500
     except Exception as e:
         logger.error(f"Erro ao aprovar parceiro: {str(e)}", exc_info=True)
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -585,6 +668,9 @@ def aprovar_parceiro(partner_id):
 def rejeitar_parceiro(partner_id):
     try:
         supabase = SupabaseClient.get_client()
+        if not supabase:
+            raise Exception("Cliente Supabase não inicializado")
+            
         user_id = session.get('user_id')
         
         # Atualizar status do parceiro
@@ -595,15 +681,25 @@ def rejeitar_parceiro(partner_id):
             
         if response.data:
             # Criar notificação
-            create_notification(
-                user_id=user_id,
-                title='Parceiro Rejeitado',
-                message=f'O parceiro técnico foi rejeitado.',
-                type='danger'
-            )
+            try:
+                create_notification(
+                    user_id=user_id,
+                    title='Parceiro Rejeitado',
+                    message=f'O parceiro técnico foi rejeitado.',
+                    type='warning'
+                )
+            except Exception as notif_error:
+                logger.error(f"Erro ao criar notificação: {str(notif_error)}")
+                # Não interromper o fluxo se a notificação falhar
+                
+            logger.info(f"Parceiro {partner_id} rejeitado com sucesso")
             return jsonify({'success': True})
         else:
-            return jsonify({'success': False, 'error': 'Parceiro não encontrado'}), 404
+            error_message = "Erro ao rejeitar parceiro"
+            if hasattr(response, 'error') and response.error:
+                error_message = f"Erro ao rejeitar parceiro: {response.error}"
+            logger.error(error_message)
+            return jsonify({'success': False, 'error': error_message}), 500
     except Exception as e:
         logger.error(f"Erro ao rejeitar parceiro: {str(e)}", exc_info=True)
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -691,6 +787,27 @@ def mark_notifications_read():
         logger.error(f"Erro ao marcar notificações como lidas: {str(e)}", exc_info=True)
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@admin_bp.route('/notifications/clear-all', methods=['POST'])
+@login_required
+def clear_all_notifications():
+    """Rota para limpar todas as notificações do usuário."""
+    try:
+        supabase = SupabaseClient.get_client()
+        user_id = session.get('user_id')
+        
+        # Deleta todas as notificações do usuário
+        supabase.table('notifications') \
+            .delete() \
+            .eq('user_id', user_id) \
+            .execute()
+        
+        # Se chegou aqui, a operação foi bem-sucedida
+        return jsonify({'status': 'success'}), 200
+            
+    except Exception as e:
+        logger.error(f"Erro ao limpar notificações: {str(e)}", exc_info=True)
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 @admin_bp.route('/notifications/recent')
 @login_required
 def get_recent_notifications():
@@ -757,4 +874,592 @@ def create_notification(user_id, title, message, type='info'):
         return True if response.data else False
     except Exception as e:
         logger.error(f"Erro ao criar notificação: {str(e)}", exc_info=True)
-        return False 
+        return False
+
+@admin_bp.route('/terms')
+def terms():
+    """Rota para exibir os termos de uso."""
+    current_date = datetime.now().strftime('%d/%m/%Y')
+    return render_template('adm/terms.html', current_date=current_date)
+
+@admin_bp.route('/criar-dados-teste')
+@login_required
+def criar_dados_teste():
+    try:
+        supabase = SupabaseClient.get_client()
+        if not supabase:
+            raise Exception("Cliente Supabase não inicializado")
+
+        # Dados de exemplo
+        estados_cidades = [
+            ('MA', 'São Luís'),
+            ('MA', 'Imperatriz'),
+            ('PI', 'Teresina'),
+            ('CE', 'Fortaleza'),
+            ('PE', 'Recife')
+        ]
+
+        especialidades_lista = [
+            ['Fibra Óptica', 'Servidores TI'],
+            ['Wi-Fi Corporativo', 'Infraestrutura Fisica'],
+            ['Solucoes ISP', 'Telefonia VoIP'],
+            ['Radio Comunicacao', 'Consultoria'],
+            ['Fibra Óptica', 'Consultoria', 'Solucoes ISP']
+        ]
+
+        status_opcoes = ['Pendente', 'Aprovado', 'Rejeitado']
+        
+        # Data base para simular cadastros em diferentes datas
+        data_base = datetime.now() - timedelta(days=60)
+
+        # Criar 10 registros
+        for i in range(10):
+            estado, cidade = estados_cidades[i % len(estados_cidades)]
+            especialidades = especialidades_lista[i % len(especialidades_lista)]
+            status = status_opcoes[i % len(status_opcoes)]
+            
+            # Simular diferentes datas de cadastro
+            data_cadastro = data_base + timedelta(days=i*6)
+            
+            dados = {
+                'nome_completo': f'Técnico Teste {i+1}',
+                'estado': estado,
+                'cidade': cidade,
+                'especialidades': especialidades,
+                'experiencia': f'Profissional com {random.randint(2, 15)} anos de experiência em {", ".join(especialidades)}.',
+                'whatsapp': f'(98) 9{random.randint(8000,9999)}-{random.randint(1000,9999)}',
+                'email': f'tecnico{i+1}@teste.com',
+                'portfolio_link': f'https://portfolio-tecnico{i+1}.com.br',
+                'status': status,
+                'created_at': data_cadastro.isoformat()
+            }
+
+            response = supabase.table('parceiros_tecnicos').insert(dados).execute()
+            logger.debug(f"Registro {i+1} criado: {response}")
+
+        flash('10 registros de teste criados com sucesso!', 'success')
+        return redirect(url_for('admin.dashboard'))
+
+    except Exception as e:
+        logger.error(f"Erro ao criar dados de teste: {str(e)}", exc_info=True)
+        flash(f'Erro ao criar dados de teste: {str(e)}', 'danger')
+        return redirect(url_for('admin.dashboard'))
+
+@admin_bp.route('/parceiros')
+@login_required
+def manage_partners():
+    try:
+        supabase = SupabaseClient.get_client()
+        if not supabase:
+            raise Exception("Cliente Supabase não inicializado")
+
+        # Parâmetros de paginação e filtros
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 10, type=int)
+        status_filter = request.args.get('status')
+        especialidade_filter = request.args.get('especialidade')
+        cidade_filter = request.args.get('cidade')
+        search = request.args.get('search')
+        sort_by = request.args.get('sort_by', 'created_at')
+        sort_order = request.args.get('sort_order', 'desc')
+
+        # Consulta base para contar total de registros
+        count_query = supabase.table('parceiros_tecnicos').select("count", count='exact')
+        
+        # Aplicar filtros na consulta de contagem
+        if status_filter:
+            count_query = count_query.eq('status', status_filter)
+        if especialidade_filter:
+            count_query = count_query.contains('especialidades', [especialidade_filter])
+        if cidade_filter:
+            count_query = count_query.eq('cidade', cidade_filter)
+        if search:
+            count_query = count_query.or_(f"nome_completo.ilike.%{search}%,email.ilike.%{search}%,cidade.ilike.%{search}%")
+            
+        # Executar consulta de contagem
+        count_response = count_query.execute()
+        total_records = count_response.count if hasattr(count_response, 'count') else 0
+        total_pages = (total_records + per_page - 1) // per_page
+        
+        # Ajustar página atual se necessário
+        page = max(1, min(page, total_pages or 1))
+        offset = (page - 1) * per_page
+
+        # Consulta principal com paginação
+        query = supabase.table('parceiros_tecnicos').select("*")
+        
+        # Aplicar filtros
+        if status_filter:
+            query = query.eq('status', status_filter)
+        if especialidade_filter:
+            query = query.contains('especialidades', [especialidade_filter])
+        if cidade_filter:
+            query = query.eq('cidade', cidade_filter)
+        if search:
+            query = query.or_(f"nome_completo.ilike.%{search}%,email.ilike.%{search}%,cidade.ilike.%{search}%")
+            
+        # Aplicar ordenação e paginação
+        query = query.order(sort_by, desc=(sort_order == 'desc'))
+        query = query.range(offset, offset + per_page - 1)
+
+        # Executar consulta
+        response = query.execute()
+        parceiros = response.data or []
+
+        # Coletar todas as especialidades e cidades únicas
+        all_data = supabase.table('parceiros_tecnicos').select("especialidades,cidade").execute()
+        especialidades = set()
+        cidades = set()
+        
+        if all_data.data:
+            for p in all_data.data:
+                if isinstance(p.get('especialidades'), list):
+                    especialidades.update(esp for esp in p.get('especialidades') if esp)
+                if p.get('cidade'):
+                    cidades.add(p.get('cidade'))
+
+        return render_template('adm/manage_partners.html',
+                             parceiros=parceiros,
+                             page=page,
+                             per_page=per_page,
+                             total_pages=total_pages,
+                             total_records=total_records,
+                             especialidades=sorted(list(especialidades)),
+                             cidades=sorted(list(cidades)),
+                             current_filters={
+                                 'status': status_filter,
+                                 'especialidade': especialidade_filter,
+                                 'cidade': cidade_filter,
+                                 'search': search,
+                                 'sort_by': sort_by,
+                                 'sort_order': sort_order
+                             })
+
+    except Exception as e:
+        logger.error(f"Erro ao gerenciar parceiros: {str(e)}", exc_info=True)
+        flash(f'Erro ao carregar dados: {str(e)}', 'danger')
+        return render_template('adm/manage_partners.html',
+                             parceiros=[],
+                             page=1,
+                             per_page=10,
+                             total_pages=1,
+                             total_records=0,
+                             especialidades=[],
+                             cidades=[],
+                             current_filters={})
+
+@admin_bp.route('/parceiros/exportar')
+@login_required
+def export_partners():
+    try:
+        supabase = SupabaseClient.get_client()
+        if not supabase:
+            raise Exception("Cliente Supabase não inicializado")
+
+        # Buscar todos os parceiros
+        response = supabase.table('parceiros_tecnicos').select("*").execute()
+        parceiros = response.data or []
+
+        # Criar CSV em memória
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        # Escrever cabeçalho
+        headers = ['ID', 'Nome Completo', 'Email', 'WhatsApp', 'Cidade', 'Estado', 
+                  'Especialidades', 'Status', 'Data de Cadastro', 'Última Atualização']
+        writer.writerow(headers)
+        
+        # Escrever dados
+        for p in parceiros:
+            writer.writerow([
+                p.get('id'),
+                p.get('nome_completo'),
+                p.get('email'),
+                p.get('whatsapp'),
+                p.get('cidade'),
+                p.get('estado'),
+                ', '.join(p.get('especialidades', [])),
+                p.get('status'),
+                p.get('created_at'),
+                p.get('updated_at')
+            ])
+        
+        # Preparar resposta
+        output.seek(0)
+        return Response(
+            output.getvalue(),
+            mimetype='text/csv',
+            headers={
+                'Content-Disposition': 'attachment; filename=parceiros_tecnicos.csv',
+                'Content-Type': 'text/csv; charset=utf-8'
+            }
+        )
+
+    except Exception as e:
+        logger.error(f"Erro ao exportar parceiros: {str(e)}", exc_info=True)
+        flash('Erro ao exportar dados dos parceiros.', 'danger')
+        return redirect(url_for('admin.manage_partners'))
+
+@admin_bp.route('/parceiro/<partner_id>/delete', methods=['DELETE'])
+@login_required
+def delete_partner(partner_id):
+    """Rota para deletar um parceiro individual."""
+    try:
+        logger.debug(f"Iniciando deleção do parceiro {partner_id}")
+        
+        supabase = SupabaseClient.get_client()
+        if not supabase:
+            raise Exception("Cliente Supabase não inicializado")
+            
+        # Verificar se o parceiro existe
+        response = supabase.table('parceiros_tecnicos').select("*").eq('id', partner_id).execute()
+        if not response.data:
+            logger.warning(f"Parceiro {partner_id} não encontrado")
+            return jsonify({'success': False, 'error': 'Parceiro não encontrado'}), 404
+            
+        # Deletar o parceiro
+        response = supabase.table('parceiros_tecnicos').delete().eq('id', partner_id).execute()
+        
+        if response.data:
+            logger.info(f"Parceiro {partner_id} deletado com sucesso")
+            
+            # Criar notificação
+            user_id = session.get('user_id')
+            create_notification(
+                user_id=user_id,
+                title='Parceiro Deletado',
+                message=f'O parceiro foi removido com sucesso.',
+                type='warning'
+            )
+            
+            return jsonify({'success': True})
+        else:
+            error_message = "Erro ao deletar parceiro"
+            if hasattr(response, 'error') and response.error:
+                error_message = f"Erro ao deletar parceiro: {response.error}"
+            logger.error(error_message)
+            return jsonify({'success': False, 'error': error_message}), 500
+            
+    except Exception as e:
+        logger.error(f"Erro ao deletar parceiro: {str(e)}", exc_info=True)
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@admin_bp.route('/parceiros/delete-batch', methods=['POST'])
+@login_required
+def delete_partners_batch():
+    """Rota para deletar múltiplos parceiros em lote."""
+    try:
+        logger.debug("Iniciando deleção em lote de parceiros")
+        
+        # Obter IDs dos parceiros do JSON da requisição
+        data = request.get_json()
+        partner_ids = data.get('partner_ids', [])
+        
+        if not partner_ids:
+            return jsonify({'success': False, 'error': 'Nenhum parceiro selecionado'}), 400
+            
+        logger.debug(f"IDs dos parceiros a serem deletados: {partner_ids}")
+        
+        supabase = SupabaseClient.get_client()
+        if not supabase:
+            raise Exception("Cliente Supabase não inicializado")
+            
+        # Deletar parceiros em lote
+        response = supabase.table('parceiros_tecnicos').delete().in_('id', partner_ids).execute()
+        
+        if response.data:
+            deleted_count = len(response.data)
+            logger.info(f"{deleted_count} parceiros deletados com sucesso")
+            
+            # Criar notificação
+            user_id = session.get('user_id')
+            create_notification(
+                user_id=user_id,
+                title='Parceiros Deletados',
+                message=f'{deleted_count} parceiros foram removidos com sucesso.',
+                type='warning'
+            )
+            
+            return jsonify({
+                'success': True,
+                'deleted_count': deleted_count
+            })
+        else:
+            error_message = "Erro ao deletar parceiros"
+            if hasattr(response, 'error') and response.error:
+                error_message = f"Erro ao deletar parceiros: {response.error}"
+            logger.error(error_message)
+            return jsonify({'success': False, 'error': error_message}), 500
+            
+    except Exception as e:
+        logger.error(f"Erro ao deletar parceiros em lote: {str(e)}", exc_info=True)
+        return jsonify({'success': False, 'error': str(e)}), 500 
+
+# Função para garantir que as tabelas necessárias existam
+def ensure_tables_exist():
+    """Verifica e cria as tabelas necessárias se não existirem."""
+    try:
+        supabase = SupabaseClient.get_client()
+        if not supabase:
+            logger.error("Cliente Supabase não está inicializado")
+            return False
+            
+        # Verificar e criar tabela user_last_checks se não existir
+        try:
+            # Verificar se a tabela existe executando uma consulta simples
+            supabase.table('user_last_checks').select('*').limit(1).execute()
+        except Exception as table_error:
+            # Se a tabela não existir, criar
+            if "relation \"user_last_checks\" does not exist" in str(table_error):
+                logger.info("Criando tabela user_last_checks...")
+                
+                # Usar SQL direto para criar a tabela
+                sql = """
+                CREATE TABLE IF NOT EXISTS user_last_checks (
+                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    user_id UUID NOT NULL,
+                    last_check_time TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                );
+                """
+                
+                supabase.rpc('exec_sql', {'query': sql}).execute()
+                logger.info("Tabela user_last_checks criada com sucesso")
+                
+        return True
+    except Exception as e:
+        logger.error(f"Erro ao verificar/criar tabelas: {str(e)}", exc_info=True)
+        return False
+
+# Variável para controlar se a inicialização já foi executada
+_initialization_done = False
+
+@admin_bp.before_request
+def initialize_app():
+    """Inicializa o aplicativo, garantindo que as tabelas necessárias existam."""
+    global _initialization_done
+    
+    # Executar apenas uma vez
+    if not _initialization_done:
+        ensure_tables_exist()
+        _initialization_done = True 
+
+# --- Rotas de Configuração do Usuário ---
+
+@admin_bp.route('/perfil')
+@login_required
+def perfil():
+    """Rota para exibir e editar o perfil do usuário."""
+    try:
+        supabase = SupabaseClient.get_client()
+        user_id = session.get('user_id')
+        
+        # Buscar dados atualizados do usuário
+        user_response = supabase.table('admin_users').select("*").eq('id', user_id).limit(1).execute()
+        if user_response.data and len(user_response.data) > 0:
+            user = user_response.data[0]
+            return render_template('adm/perfil.html', user=user)
+        else:
+            flash('Erro ao carregar dados do usuário.', 'danger')
+            return redirect(url_for('admin.dashboard'))
+            
+    except Exception as e:
+        logger.error(f"Erro ao carregar perfil: {str(e)}", exc_info=True)
+        flash('Erro ao carregar perfil.', 'danger')
+        return redirect(url_for('admin.dashboard'))
+
+@admin_bp.route('/seguranca')
+@login_required
+def seguranca():
+    """Rota para configurações de segurança."""
+    return render_template('adm/seguranca.html')
+
+@admin_bp.route('/notificacoes-config')
+@login_required
+def notificacoes_config():
+    """Rota para configurações de notificações."""
+    try:
+        user_id = session.get('user_id')
+        if not user_id:
+            flash('Usuário não autenticado.', 'danger')
+            return redirect(url_for('admin.login'))
+
+        supabase = SupabaseClient.get_client()
+        if not supabase:
+            raise Exception("Cliente Supabase não inicializado")
+        
+        # Buscar preferências do usuário
+        response = supabase.table('user_preferences').select("*").eq('user_id', user_id).limit(1).execute()
+        
+        # Se não existir preferências, criar um registro padrão
+        if not response.data:
+            default_preferences = {
+                'user_id': user_id,
+                'notification_preferences': ['novos_parceiros', 'atualizacoes_status', 'notif_popup', 'notif_barra_lateral'],
+                'theme': 'claro'
+            }
+            response = supabase.table('user_preferences').insert(default_preferences).execute()
+            preferences = default_preferences
+        else:
+            preferences = response.data[0]
+        
+        return render_template('adm/notificacoes_config.html', preferences=preferences)
+    except Exception as e:
+        logger.error(f"Erro ao carregar configurações de notificações: {str(e)}", exc_info=True)
+        flash('Erro ao carregar configurações.', 'danger')
+        return redirect(url_for('admin.dashboard'))
+
+@admin_bp.route('/atualizar-notificacoes', methods=['POST'])
+@login_required
+def atualizar_notificacoes():
+    """Rota para atualizar as preferências de notificação do usuário."""
+    try:
+        user_id = session.get('user_id')
+        if not user_id:
+            flash('Usuário não autenticado.', 'danger')
+            return redirect(url_for('admin.login'))
+
+        notificacoes = request.form.getlist('notificacoes[]')
+        logger.debug(f"Notificações recebidas: {notificacoes}")
+
+        supabase = SupabaseClient.get_client()
+        if not supabase:
+            raise Exception("Cliente Supabase não inicializado")
+
+        # Buscar preferências existentes
+        response = supabase.table('user_preferences').select("*").eq('user_id', user_id).limit(1).execute()
+        
+        if response.data:
+            # Atualizar preferências existentes
+            update_data = {
+                'notification_preferences': notificacoes,
+                'updated_at': datetime.now().isoformat()
+            }
+            response = supabase.table('user_preferences').update(update_data).eq('user_id', user_id).execute()
+        else:
+            # Criar novas preferências
+            insert_data = {
+                'user_id': user_id,
+                'notification_preferences': notificacoes,
+                'theme': 'claro'  # valor padrão
+            }
+            response = supabase.table('user_preferences').insert(insert_data).execute()
+
+        if response.data:
+            logger.info(f"Preferências de notificação atualizadas para o usuário {user_id}")
+            flash('Preferências de notificação atualizadas com sucesso!', 'success')
+        else:
+            error_message = "Erro desconhecido ao atualizar preferências."
+            if hasattr(response, 'error') and response.error:
+                error_message = f"Erro ao atualizar preferências: {response.error}"
+            raise Exception(error_message)
+
+    except Exception as e:
+        logger.error(f"Erro ao atualizar notificações: {str(e)}", exc_info=True)
+        flash('Erro ao atualizar preferências de notificação.', 'danger')
+
+    return redirect(url_for('admin.notificacoes_config'))
+
+@admin_bp.route('/aparencia')
+@login_required
+def aparencia():
+    """Rota para configurações de aparência."""
+    return render_template('adm/aparencia.html')
+
+@admin_bp.route('/ajuda')
+@login_required
+def ajuda():
+    """Rota para a página de ajuda."""
+    return render_template('adm/ajuda.html')
+
+@admin_bp.route('/feedback')
+@login_required
+def feedback():
+    """Rota para enviar feedback."""
+    return render_template('adm/feedback.html')
+
+@admin_bp.route('/atualizar-perfil', methods=['POST'])
+@login_required
+def atualizar_perfil():
+    try:
+        nome = request.form.get('nome')
+        email = request.form.get('email')
+        user_id = session.get('user_id')
+
+        if not all([nome, email, user_id]):
+            flash('Por favor, preencha todos os campos.', 'warning')
+            return redirect(url_for('admin.perfil'))
+
+        supabase = SupabaseClient.get_client()
+        if not supabase:
+            raise Exception("Cliente Supabase não inicializado")
+
+        # Atualizar dados do usuário
+        response = supabase.table('admin_users').update({
+            'nome': nome,
+            'email': email
+        }).eq('id', user_id).execute()
+
+        if response.data:
+            # Atualizar dados na sessão
+            session['user_name'] = nome
+            session['user_email'] = email
+            flash('Perfil atualizado com sucesso!', 'success')
+        else:
+            flash('Erro ao atualizar perfil.', 'danger')
+
+    except Exception as e:
+        logger.error(f"Erro ao atualizar perfil: {str(e)}", exc_info=True)
+        flash('Erro ao atualizar perfil.', 'danger')
+
+    return redirect(url_for('admin.perfil'))
+
+@admin_bp.route('/atualizar-senha', methods=['POST'])
+@login_required
+def atualizar_senha():
+    try:
+        senha_atual = request.form.get('senha_atual')
+        nova_senha = request.form.get('nova_senha')
+        confirmar_senha = request.form.get('confirmar_senha')
+        user_id = session.get('user_id')
+
+        if not all([senha_atual, nova_senha, confirmar_senha]):
+            flash('Por favor, preencha todos os campos.', 'warning')
+            return redirect(url_for('admin.seguranca'))
+
+        if nova_senha != confirmar_senha:
+            flash('As senhas não coincidem.', 'warning')
+            return redirect(url_for('admin.seguranca'))
+
+        supabase = SupabaseClient.get_client()
+        if not supabase:
+            raise Exception("Cliente Supabase não inicializado")
+
+        # Verificar senha atual
+        user_response = supabase.table('admin_users').select("password_hash").eq('id', user_id).execute()
+        if not user_response.data:
+            flash('Usuário não encontrado.', 'danger')
+            return redirect(url_for('admin.seguranca'))
+
+        password_hash = user_response.data[0]['password_hash']
+        if not verify_password(senha_atual, password_hash):
+            flash('Senha atual incorreta.', 'danger')
+            return redirect(url_for('admin.seguranca'))
+
+        # Atualizar senha
+        new_password_hash = generate_password_hash(nova_senha, method='pbkdf2:sha256')
+        response = supabase.table('admin_users').update({
+            'password_hash': new_password_hash
+        }).eq('id', user_id).execute()
+
+        if response.data:
+            flash('Senha atualizada com sucesso!', 'success')
+        else:
+            flash('Erro ao atualizar senha.', 'danger')
+
+    except Exception as e:
+        logger.error(f"Erro ao atualizar senha: {str(e)}", exc_info=True)
+        flash('Erro ao atualizar senha.', 'danger')
+
+    return redirect(url_for('admin.seguranca')) 

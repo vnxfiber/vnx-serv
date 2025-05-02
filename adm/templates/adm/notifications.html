@@ -7,9 +7,14 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">Notificações</h4>
-        <button class="btn btn-sm btn-outline-secondary" onclick="markAllAsRead()">
-            <i class="fas fa-check-double"></i> Marcar todas como lidas
-        </button>
+        <div class="btn-group">
+            <button class="btn btn-sm btn-outline-secondary me-2" onclick="markAllAsRead()">
+                <i class="fas fa-check-double"></i> Marcar todas como lidas
+            </button>
+            <button class="btn btn-sm btn-outline-danger" onclick="clearAllNotifications()">
+                <i class="fas fa-trash"></i> Limpar Notificações
+            </button>
+        </div>
     </div>
 
     <!-- Notifications List -->
@@ -81,11 +86,100 @@
     .fa-danger { color: var(--danger-color); }
     .fa-warning { color: var(--warning-color); }
     .fa-info { color: var(--primary-color); }
+
+    /* Estilos personalizados para os toasts */
+    .toast-container {
+        z-index: 1050;
+    }
+
+    .toast {
+        min-width: 300px;
+        backdrop-filter: blur(10px);
+        border: none;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .toast.bg-success {
+        background-color: #28a745 !important;
+        border-left: 4px solid #1e7e34;
+    }
+
+    .toast.bg-danger {
+        background-color: #dc3545 !important;
+        border-left: 4px solid #bd2130;
+    }
+
+    .toast.bg-warning {
+        background-color: #ffc107 !important;
+        border-left: 4px solid #d39e00;
+        color: #000 !important;
+    }
+
+    .toast.bg-info {
+        background-color: #17a2b8 !important;
+        border-left: 4px solid #138496;
+    }
+
+    .toast-header {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 0.75rem 1rem;
+    }
+
+    .toast-header.bg-success {
+        background-color: #28a745 !important;
+    }
+
+    .toast-header.bg-danger {
+        background-color: #dc3545 !important;
+    }
+
+    .toast-header.bg-warning {
+        background-color: #ffc107 !important;
+        color: #000 !important;
+    }
+
+    .toast-header.bg-info {
+        background-color: #17a2b8 !important;
+    }
+
+    .toast-body {
+        padding: 1rem;
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    .btn-close-white {
+        filter: brightness(0) invert(1);
+    }
+
+    .toast.bg-warning .btn-close-white {
+        filter: none;
+    }
 </style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
+    // Função para atualizar o contador de notificações
+    async function updateNotificationBadge() {
+        try {
+            const response = await fetch('/adm/notifications/count');
+            const data = await response.json();
+            
+            const badge = document.getElementById('notificationBadge');
+            if (badge) {
+                badge.textContent = data.count;
+                if (data.count > 0) {
+                    badge.classList.add('show');
+                } else {
+                    badge.classList.remove('show');
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar badge:', error);
+        }
+    }
+
     async function markAsRead(notificationId) {
         try {
             const response = await fetch('/adm/notifications/mark-read', {
@@ -150,5 +244,104 @@
             showToast('Erro', 'Ocorreu um erro ao marcar as notificações como lidas.', 'danger');
         }
     }
+
+    async function clearAllNotifications() {
+        try {
+            if (!confirm('Tem certeza que deseja limpar todas as notificações? Esta ação não pode ser desfeita.')) {
+                return;
+            }
+
+            const response = await fetch('/adm/notifications/clear-all', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Resposta do servidor:', data);
+
+            // Remove todas as notificações da lista
+            const notificationsList = document.querySelector('.notifications-list');
+            notificationsList.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Nenhuma notificação encontrada.</p>
+                </div>
+            `;
+            
+            // Atualiza o contador de notificações no header
+            updateNotificationBadge();
+            
+            // Mostra mensagem de sucesso
+            showToast('Sucesso', 'Notificações removidas com sucesso', 'success');
+            
+        } catch (error) {
+            console.error('Erro ao limpar notificações:', error);
+            showToast('Erro', 'Ocorreu um erro ao limpar as notificações', 'danger');
+        }
+    }
+
+    // Função para mostrar toasts de notificação
+    function showToast(title, message, type = 'info') {
+        const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+        
+        const toast = document.createElement('div');
+        toast.className = `toast show bg-${type}`;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+        
+        const textColorClass = type === 'warning' ? 'text-dark' : 'text-white';
+        
+        toast.innerHTML = `
+            <div class="toast-header bg-${type} ${textColorClass}">
+                <i class="fas fa-${getToastIcon(type)} me-2"></i>
+                <strong class="me-auto">${title}</strong>
+                <button type="button" class="btn-close ${type !== 'warning' ? 'btn-close-white' : ''}" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body ${textColorClass}">
+                ${message}
+            </div>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        // Remove o toast após 5 segundos
+        setTimeout(() => {
+            toast.remove();
+        }, 5000);
+    }
+
+    // Função auxiliar para obter o ícone correto para cada tipo de toast
+    function getToastIcon(type) {
+        const icons = {
+            'success': 'check-circle',
+            'danger': 'times-circle',
+            'warning': 'exclamation-triangle',
+            'info': 'info-circle'
+        };
+        return icons[type] || 'info-circle';
+    }
+
+    // Função auxiliar para criar o container de toasts se não existir
+    function createToastContainer() {
+        const container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        container.style.zIndex = '1050';
+        document.body.appendChild(container);
+        return container;
+    }
+
+    // Inicializa o contador de notificações quando a página carrega
+    document.addEventListener('DOMContentLoaded', () => {
+        updateNotificationBadge();
+    });
 </script>
 {% endblock %} 
