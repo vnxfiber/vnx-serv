@@ -19,13 +19,16 @@
     --gradient-primary: linear-gradient(135deg, #0a3d62, #3498db);
 }
 
+html, body {
+    overflow-x: hidden !important;
+}
+
 body {
     font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: var(--text-color);
     padding-top: 76px;
     line-height: 1.6;
     background-color: #f8f9fa;
-    overflow-x: hidden;
     max-width: 100%;
 }
 
@@ -1031,7 +1034,7 @@ footer a:hover {
         padding-left: 15px;
         padding-right: 15px;
         padding-bottom: 15px;
-        width: 100vw;
+        width: 100%;
         max-width: 100%;
         height: auto;
         max-height: calc(100vh - 76px);
