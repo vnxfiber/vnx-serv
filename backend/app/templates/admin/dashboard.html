@@ -745,7 +745,8 @@
                                     </a>
                                     {% if parceiro.whatsapp %}
                                         {% set numero = parceiro.whatsapp|replace('(', '')|replace(')', '')|replace('-', '')|replace(' ', '') %}
-                                        <a href="https://wa.me/55{{ numero }}" 
+                                        {% set mensagem = "Olá! Aqui é da VNX FIBER SERVICE. Seu cadastro foi selecionado para uma solicitação de proposta de serviço. Podemos conversar sobre os detalhes?" %}
+                                        <a href="https://wa.me/55{{ numero }}?text={{ mensagem|urlencode }}" 
                                            target="_blank"
                                            class="btn btn-sm btn-success"
                                            title="Contato via WhatsApp">
@@ -868,9 +869,6 @@
     // Função para atualizar o badge de notificações (manual, sem intervalo)
     async function updateNotificationBadge() {
         try {
-            // Remover qualquer flag de erro anterior
-            localStorage.removeItem('notification_error');
-            
             const response = await fetch('/admin/notifications/count', {
                 headers: {
                     'Cache-Control': 'no-cache',
@@ -948,148 +946,105 @@
         }
     }
     
-    // Funções básicas para o dashboard
-    document.addEventListener('DOMContentLoaded', function() {
-        // Inicializar gráficos
+    // Função para marcar todas as notificações como lidas
+    async function markAllAsRead() {
         try {
-            initCharts();
-        } catch (e) {
-            console.error("Erro ao inicializar gráficos:", e);
-        }
-        
-        // Configurar verificação ÚNICA de notificações
-        try {
-            // Limpar qualquer intervalo existente
-            if (window._notificationUpdateInterval) {
-                clearInterval(window._notificationUpdateInterval);
-                window._notificationUpdateInterval = null;
-            }
-            
-            // Chamar uma vez apenas quando a página carrega
-            // sem configurar intervalos automáticos
-            if (!localStorage.getItem('notification_error')) {
-                setTimeout(updateNotificationBadge, 1000);
-            }
-            
-            // Adicionar evento de clique ao ícone de notificação para atualizar manualmente
-            const notifIcon = document.getElementById('notificationsDropdown');
-            if (notifIcon) {
-                notifIcon.addEventListener('click', function() {
-                    updateNotificationBadge();
-                });
-            }
-        } catch (e) {
-            console.error("Falha ao configurar notificações:", e);
-    }
-        
-        // Configurar eventos de filtragem
-        setupFilterEvents();
-    });
-
-    // Função para inicializar os gráficos
-    function initCharts() {
-        try {
-            // Gráfico de status usando Chart.js
-            const statusCtx = document.getElementById('statusChart');
-            if (statusCtx) {
-                const data = JSON.parse(document.getElementById('chartsDataContainer')?.getAttribute('data-status') || '[0, 0, 0]');
-                new Chart(statusCtx, {
-                type: 'doughnut',
-                data: {
-                        labels: ['Pendentes', 'Aprovados', 'Rejeitados'],
-                    datasets: [{
-                            data: data,
-                        backgroundColor: ['#FFA500', '#4CAF50', '#F44336'],
-                        borderWidth: 0
-                    }]
+            const response = await fetch('/admin/notifications/mark-read', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
-                options: {
-                    responsive: true,
-                        maintainAspectRatio: false
-                    }
-                });
+                credentials: 'same-origin',
+                body: JSON.stringify({ notification_ids: [] })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            // Gráfico de especialidades usando ApexCharts
-            const especialidadesElement = document.getElementById('especialidadesApexChart');
-            if (especialidadesElement) {
-                const dataContainer = document.getElementById('chartsDataContainer');
-                const labels = JSON.parse(dataContainer?.getAttribute('data-labels') || '[]');
-                const data = JSON.parse(dataContainer?.getAttribute('data-cadastros') || '[]');
-                
-                const options = {
-                    series: [{
-                        name: 'Total',
-                        data: data
-                    }],
-                    chart: {
-                        type: 'bar',
-                        height: 320,
-                        toolbar: {
-                            show: false
-                        }
-                    },
-                    plotOptions: {
-                        bar: {
-                            horizontal: true,
-                            dataLabels: {
-                                position: 'top',
-                            },
-                        }
-                    },
-                    colors: ['#3B82F6'],
-                    dataLabels: {
-                        enabled: true,
-                        offsetX: 6,
-                        style: {
-                            fontSize: '12px',
-                            colors: ['#fff']
-                        }
-                    },
-                    stroke: {
-                        show: true,
-                        width: 1,
-                        colors: ['#fff']
-                    },
-                    grid: {
-                        borderColor: '#e7e7e7',
-                        row: {
-                            colors: ['#f3f3f3', 'transparent'],
-                            opacity: 0.5
-                        },
-                    },
-                    xaxis: {
-                        categories: labels,
-                        labels: {
-                            show: true,
-                        }
-                    },
-                    yaxis: {
-                        title: {
-                            text: 'Especialidades'
-                        }
-                    },
-                    tooltip: {
-                        y: {
-                            formatter: function (val) {
-                                return val + " parceiros"
-                            }
-                        }
-                    }
-                };
-
-                if (typeof ApexCharts !== 'undefined') {
-                    const chart = new ApexCharts(especialidadesElement, options);
-                    chart.render();
-            } else {
-                    console.error('ApexCharts não está disponível');
+            const result = await response.json();
+            if (result.success) {
+                // Atualizar a interface
+                const badge = document.getElementById('notificationBadge');
+                if (badge) {
+                    badge.style.display = 'none';
                 }
+                
+                const dropdownList = document.getElementById('notificationsDropdownList');
+                if (dropdownList) {
+                    dropdownList.innerHTML = `
+                        <div class="text-center py-4">
+                            <i class="fas fa-bell-slash fa-2x text-muted mb-3"></i>
+                            <p class="text-muted mb-0">Nenhuma notificação</p>
+                        </div>
+                    `;
+                }
+
+                // Atualizar os contadores na página
+                updateDashboardCounters();
             }
         } catch (error) {
-            console.error('Erro ao inicializar gráficos:', error);
+            console.error('Erro ao marcar notificações como lidas:', error);
+            const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+            const toast = document.createElement('div');
+            toast.className = 'toast show bg-danger text-white';
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
+                <div class="toast-header bg-danger text-white">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <strong class="me-auto">Erro</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                </div>
+                <div class="toast-body">
+                    Erro ao marcar notificações como lidas. Tente novamente.
+                </div>
+            `;
+            toastContainer.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
         }
     }
-    
+
+    // Função para atualizar os contadores do dashboard
+    async function updateDashboardCounters() {
+        try {
+            const response = await fetch('/admin/dashboard/counters', {
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Accept': 'application/json'
+                },
+                credentials: 'same-origin'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            // Atualizar os contadores
+            document.querySelector('[data-card="total"]').textContent = data.total_parceiros;
+            document.querySelector('[data-card="pendentes"]').textContent = data.parceiros_pendentes;
+            document.querySelector('[data-card="aprovados"]').textContent = data.parceiros_aprovados;
+            document.querySelector('[data-card="especialidade"]').textContent = data.especialidade_principal;
+        } catch (error) {
+            console.error('Erro ao atualizar contadores:', error);
+        }
+    }
+
+    // Atualizar contadores quando a página carregar
+    document.addEventListener('DOMContentLoaded', function() {
+        updateDashboardCounters();
+        updateNotificationBadge();
+    });
+
+    // Atualizar quando clicar no botão de atualizar
+    function refreshDashboard() {
+        updateDashboardCounters();
+        updateNotificationBadge();
+        window.location.reload();
+    }
+
     // Função para filtrar dados
     function aplicarFiltros() {
         const status = document.getElementById('statusFilter').value;
@@ -1125,67 +1080,6 @@
                     aplicarFiltros();
                 }
             });
-        }
-    }
-    
-    // Função para atualizar o dashboard
-    function refreshDashboard() {
-            window.location.reload();
-    }
-
-    async function markAllAsRead() {
-        try {
-            const response = await fetch('/admin/notifications/mark-read', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                credentials: 'same-origin',
-                body: JSON.stringify({ notification_ids: [] })
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const result = await response.json();
-            if (result.success) {
-            // Atualizar a interface
-                const badge = document.getElementById('notificationBadge');
-                if (badge) {
-                    badge.style.display = 'none';
-                }
-                
-                const dropdownList = document.getElementById('notificationsDropdownList');
-                if (dropdownList) {
-                    dropdownList.innerHTML = `
-                        <div class="text-center py-4">
-                            <i class="fas fa-bell-slash fa-2x text-muted mb-3"></i>
-                            <p class="text-muted mb-0">Nenhuma notificação</p>
-                        </div>
-                    `;
-                }
-            }
-        } catch (error) {
-            console.error('Erro ao marcar notificações como lidas:', error);
-            // Mostrar apenas mensagem de erro se houver falha
-            const toastContainer = document.getElementById('toastContainer') || createToastContainer();
-            const toast = document.createElement('div');
-            toast.className = 'toast show bg-danger text-white';
-            toast.setAttribute('role', 'alert');
-            toast.innerHTML = `
-                <div class="toast-header bg-danger text-white">
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    <strong class="me-auto">Erro</strong>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
-                        </div>
-                <div class="toast-body">
-                    Erro ao marcar notificações como lidas. Tente novamente.
-                                    </div>
-            `;
-            toastContainer.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
         }
     }
 
