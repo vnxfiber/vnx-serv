@@ -1,0 +1,132 @@
+/* Seção Hero */
+.hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    background-image: url('/assets/hero-bg.svg');
+    background-size: cover;
+    background-position: center;
+    padding: 8rem 0;
+}
+
+.hero-content {
+    max-width: 600px;
+}
+
+.hero-title {
+    font-size: 4rem;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+}
+
+.hero-text {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+    color: var(--text-secondary);
+}
+
+/* Seção Serviços */
+.services {
+    padding: 6rem 0;
+    background-color: var(--white);
+}
+
+.services-grid {
+    margin-top: 3rem;
+}
+
+/* Seção Sobre */
+.about {
+    padding: 6rem 0;
+    background-color: #F8FAFC;
+}
+
+.about-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.about-image {
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+/* Seção Depoimentos */
+.testimonials {
+    padding: 6rem 0;
+    background-color: var(--white);
+}
+
+.testimonials-grid {
+    margin-top: 3rem;
+}
+
+/* Seção Contato */
+.contact {
+    padding: 6rem 0;
+    background-color: #F8FAFC;
+}
+
+.contact-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* Seção CTA */
+.cta {
+    padding: 4rem 0;
+    background-color: var(--primary-color);
+    color: var(--white);
+    text-align: center;
+}
+
+.cta-title {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.cta-text {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 3rem;
+    }
+
+    .about-content,
+    .contact-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+
+    .hero-text {
+        font-size: 1.125rem;
+    }
+
+    .services,
+    .about,
+    .testimonials,
+    .contact {
+        padding: 4rem 0;
+    }
+} 

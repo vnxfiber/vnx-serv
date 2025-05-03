@@ -1,0 +1,337 @@
+/* Estilos para páginas de serviços */
+
+/* Variáveis de cores */
+:root {
+    --primary-color: #2980b9;
+    --primary-dark: #1a4f7a;
+    --text-dark: #2c3e50;
+    --text-muted: #6c757d;
+    --bg-light: #f8f9fa;
+}
+
+/* Hero Section */
+.hero {
+    position: relative;
+    padding: 120px 0 100px;
+    margin-top: -2px;
+    background: linear-gradient(135deg, rgba(13, 23, 33, 0.98), rgba(32, 45, 58, 0.98));
+    color: #fff;
+    overflow: hidden;
+}
+
+.hero-network-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.15;
+    background: url('../../assets/images/network-bg.svg') center/cover;
+    animation: floatPattern 20s ease-in-out infinite;
+}
+
+@keyframes floatPattern {
+    0% {
+        transform: scale(1) rotate(0deg);
+    }
+    50% {
+        transform: scale(1.1) rotate(1deg);
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(41, 128, 185, 0.1) 0%, transparent 70%);
+    animation: pulse 4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.4;
+    }
+    50% {
+        opacity: 0.7;
+    }
+    100% {
+        opacity: 0.4;
+    }
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.hero h1 {
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(120deg, #fff, #e6e9f0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero .lead {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+/* Cards na hero section */
+.hero .card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.hero .card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.hero .card h3 {
+    color: #fff;
+    font-weight: 600;
+}
+
+.hero .card p {
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+}
+
+/* Navegação de Serviços */
+.service-navigation {
+    position: sticky;
+    top: 70px;
+    z-index: 100;
+    background: white;
+    padding: 1rem 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.services-nav .nav-link {
+    color: var(--text-dark);
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin: 0 0.3rem;
+}
+
+.services-nav .nav-link:hover {
+    background-color: var(--bg-light);
+    color: var(--primary-color);
+}
+
+.services-nav .nav-link.active {
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 2px 8px rgba(41, 128, 185, 0.3);
+}
+
+/* Cards de Serviços */
+#servicos {
+    padding: 5rem 0;
+}
+
+#servicos h2 {
+    font-size: 2.5rem;
+    color: var(--text-dark);
+    margin-bottom: 3rem;
+    font-weight: 600;
+}
+
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.icon-circle {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(41, 128, 185, 0.1);
+}
+
+.icon-circle i {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+.card h3 {
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
+.card-text {
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin: 1.2rem 0;
+}
+
+.list-unstyled li {
+    color: var(--text-dark);
+    margin-bottom: 0.8rem;
+    font-size: 0.95rem;
+}
+
+/* Cases de Sucesso */
+.bg-light {
+    background-color: var(--bg-light) !important;
+    padding: 5rem 0;
+}
+
+.bg-light h2 {
+    font-size: 2.5rem;
+    color: var(--text-dark);
+    margin-bottom: 3rem;
+    font-weight: 600;
+}
+
+.case-card {
+    transition: transform 0.3s ease;
+}
+
+.case-card:hover {
+    transform: translateY(-5px);
+}
+
+.case-card .card-title {
+    color: var(--text-dark);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.case-card .card-text {
+    margin-bottom: 1.5rem;
+}
+
+.badge {
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+}
+
+/* CTA Section */
+.cta-section {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+    color: white;
+    padding: 5rem 0;
+}
+
+.cta-section h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.cta-section .lead {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    padding: 0.8rem 2rem;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(41, 128, 185, 0.3);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+.btn-outline-light {
+    padding: 0.8rem 2rem;
+    font-weight: 500;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .hero {
+        padding: 4rem 0;
+    }
+
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero .lead {
+        font-size: 1.1rem;
+    }
+    
+    .services-nav {
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        padding: 0.5rem 0;
+    }
+    
+    .services-nav::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .services-nav .nav-link {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+        margin: 0 0.2rem;
+    }
+    
+    .icon-circle {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .icon-circle i {
+        font-size: 1.2rem;
+    }
+
+    #servicos,
+    .bg-light,
+    .cta-section {
+        padding: 4rem 0;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    h2 {
+        font-size: 2rem !important;
+        margin-bottom: 2rem !important;
+    }
+}
+
+/* Header ajustes */
+header.fixed-top {
+    background: linear-gradient(135deg, rgba(13, 23, 33, 0.98), rgba(32, 45, 58, 0.98));
+}
+
+.navbar {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    transition: all 0.3s ease;
+} 

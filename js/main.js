@@ -283,12 +283,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize Swiper for client logos
     const clientSwiper = new Swiper('.swiper-container', {
-        slidesPerView: 2,
+        slidesPerView: 1,
         spaceBetween: 30,
-        loop: true,
+        loop: false,
         autoplay: {
             delay: 3000,
             disableOnInteraction: false,
+            pauseOnMouseEnter: true
         },
         pagination: {
             el: '.swiper-pagination',
@@ -296,13 +297,13 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         breakpoints: {
             640: {
-                slidesPerView: 3,
+                slidesPerView: 1,
             },
             768: {
-                slidesPerView: 4,
+                slidesPerView: 2,
             },
             1024: {
-                slidesPerView: 5,
+                slidesPerView: 3,
             },
         }
     });
