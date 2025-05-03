@@ -4,6 +4,8 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
+    // O código abaixo foi desativado para não substituir a logo estática pela animada
+    /*
     // Substituir todas as referências da logo estática pela animada
     const logoImages = document.querySelectorAll('img[src*="logo-white.svg"]');
     
@@ -29,4 +31,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     console.log('Logo replacement complete. Animated logos: ' + logoImages.length);
+    */
+    console.log('Logo replacement disabled.');
 }); 
