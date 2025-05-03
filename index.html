@@ -138,6 +138,17 @@
             position: relative;
             z-index: 2;
         }
+
+        /* Estilo para animação do header no mobile */
+        @media (max-width: 991px) {
+            header.fixed-top {
+                transition: transform 0.3s ease-in-out;
+            }
+            
+            header.nav-up {
+                transform: translateY(-100%);
+            }
+        }
     </style>
     <!-- JSON-LD para Rich Snippets -->
     <script type="application/ld+json">
@@ -1206,6 +1217,37 @@
                 once: true
             });
         });
+
+        // Controle de visibilidade do menu no scroll
+        let lastScrollTop = 0;
+        const header = document.querySelector('header');
+        const navbarCollapse = document.querySelector('.navbar-collapse');
+
+        window.addEventListener('scroll', () => {
+            // Não aplicar em desktop
+            if (window.innerWidth > 991) return;
+
+            let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+            
+            // Se o menu mobile estiver aberto, não esconder o header
+            if (navbarCollapse && navbarCollapse.classList.contains('show')) return;
+
+            if (currentScroll > lastScrollTop && currentScroll > 100) {
+                // Scroll para baixo
+                header.classList.add('nav-up');
+            } else {
+                // Scroll para cima ou no topo
+                header.classList.remove('nav-up');
+            }
+            lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
+        }, false);
+
+        // Garantir que o menu fique visível quando aberto
+        if (navbarCollapse) {
+            navbarCollapse.addEventListener('show.bs.collapse', () => {
+                header.classList.remove('nav-up');
+            });
+        }
     </script>
 </body>
 </html> 
