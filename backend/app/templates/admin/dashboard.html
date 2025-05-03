@@ -1,0 +1,1201 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-color: #4F46E5;
+        --secondary-color: #6366F1;
+        --success-color: #10B981;
+        --warning-color: #F59E0B;
+        --danger-color: #EF4444;
+        --info-color: #3B82F6;
+        --light-color: #F3F4F6;
+        --dark-color: #1F2937;
+    }
+
+    .card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        margin-bottom: 1.5rem;
+    }
+
+    .card-header {
+        background-color: transparent;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        padding: 1rem;
+    }
+
+    .status-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .status-pendente {
+        background-color: #FEF9C3;
+        color: #854D0E;
+    }
+
+    .status-aprovado {
+        background-color: #DCFCE7;
+        color: #166534;
+    }
+
+    .status-rejeitado {
+        background-color: #FEE2E2;
+        color: #991B1B;
+    }
+
+    .badge.bg-info {
+        background-color: #F0F9FF !important;
+        color: #0369A1;
+        font-size: 0.75rem;
+        font-weight: 500;
+        padding: 0.25rem 0.6rem;
+        margin: 0.125rem;
+    }
+
+    .table {
+        font-size: 0.875rem;
+        color: #4B5563;
+        border-collapse: separate;
+        border-spacing: 0 0.5rem;
+        margin-top: -0.5rem;
+    }
+
+    .table th {
+        font-weight: 500;
+        color: #6B7280;
+        background-color: #F9FAFB;
+        text-transform: none;
+        font-size: 0.875rem;
+        letter-spacing: 0;
+        padding: 0.75rem 1rem;
+        border: none;
+    }
+
+    .table td {
+        background-color: white;
+        padding: 1rem;
+        border-top: 1px solid #F3F4F6;
+        vertical-align: middle;
+    }
+
+    .table tr:hover td {
+        background-color: #F9FAFB;
+        transition: background-color 0.2s ease;
+    }
+
+    .avatar-sm {
+        width: 36px;
+        height: 36px;
+        background: #F3F4F6;
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6B7280;
+    }
+
+    .btn-group .btn-sm {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.75rem;
+        border-radius: 0.5rem;
+        margin: 0 0.125rem;
+        transition: all 0.2s ease;
+    }
+
+    .btn-group .btn-info {
+        background-color: #EFF6FF;
+        border-color: #BFDBFE;
+        color: #1E40AF;
+    }
+
+    .btn-group .btn-success {
+        background-color: #DCFCE7;
+        border-color: #86EFAC;
+        color: #166534;
+    }
+
+    .btn-group .btn-danger {
+        background-color: #FEE2E2;
+        border-color: #FECACA;
+        color: #991B1B;
+    }
+
+    .btn-group .btn:hover {
+        opacity: 0.9;
+    }
+
+    .card-header h6 {
+        font-size: 1rem;
+        color: #374151;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    .table-responsive {
+        padding: 0.5rem;
+    }
+
+    .fw-medium {
+        font-weight: 500 !important;
+        color: #374151;
+    }
+
+    .text-muted {
+        color: #6B7280 !important;
+    }
+
+    .pagination {
+        margin: 1rem 0 0;
+    }
+
+    .pagination .page-link {
+        border-radius: 0.5rem;
+        margin: 0 0.125rem;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+        color: #4B5563;
+        border: 1px solid #E5E7EB;
+        background-color: white;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #4F46E5;
+        border-color: #4F46E5;
+        color: white;
+        font-weight: 500;
+    }
+
+    .pagination .page-link:hover {
+        background-color: #F9FAFB;
+        border-color: #E5E7EB;
+        color: #374151;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        background-color: #F9FAFB;
+        border-color: #E5E7EB;
+        color: #9CA3AF;
+    }
+
+    .filter-section {
+        background-color: white;
+        padding: 0.75rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+    }
+
+    .stats-card {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        position: relative;
+        overflow: hidden;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .stats-card.primary::before { 
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background-color: var(--primary-color);
+    }
+    
+    .stats-card.warning::before { 
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background-color: var(--warning-color);
+    }
+    
+    .stats-card.success::before { 
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background-color: var(--success-color);
+    }
+    
+    .stats-card.info::before { 
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background-color: var(--info-color);
+    }
+
+    .stats-card .stats-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .stats-card.primary .stats-icon {
+        background: rgba(79, 70, 229, 0.1);
+        color: var(--primary-color);
+    }
+
+    .stats-card.warning .stats-icon {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning-color);
+    }
+
+    .stats-card.success .stats-icon {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success-color);
+    }
+
+    .stats-card.info .stats-icon {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--info-color);
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+        padding: 1rem;
+    }
+
+    /* Ranking de especialidades */
+    .ranking-section {
+        background: white;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        margin-bottom: 1rem;
+    }
+
+    .ranking-item {
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.875rem;
+        color: #4B5563;
+        margin-right: 1rem;
+        background: #F9FAFB;
+        border-radius: 1.5rem;
+        padding: 0.25rem 0.75rem 0.25rem 0.5rem;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        border: 1px solid #EFF6FF;
+        transition: box-shadow 0.2s;
+    }
+
+    .ranking-item .position {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.7rem;
+        height: 1.7rem;
+        font-weight: 700;
+        font-size: 0.85rem;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+        background: #E5E7EB;
+        color: #6B7280;
+        border: 2px solid #E5E7EB;
+    }
+
+    .ranking-item .total {
+        background: #EFF6FF;
+        color: #1E40AF;
+        padding: 0.25rem 0.5rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+
+    /* Badge de notificações */
+    .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: var(--danger-color);
+        color: white;
+        font-size: 0.7rem;
+        font-weight: bold;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .notification-icon-wrapper {
+        position: relative;
+    }
+
+    .notifications-dropdown {
+        width: 320px !important;
+        max-width: 320px !important;
+    }
+
+    .notifications-list {
+        max-height: 300px !important;
+        overflow: hidden !important;
+    }
+
+    .notification-item {
+        padding: 0.75rem 1rem !important;
+        border-bottom: 1px solid rgba(0,0,0,.1);
+    }
+
+    .notification-item:last-child {
+        border-bottom: none;
+    }
+
+    .notification-title {
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem !important;
+    }
+
+    .notification-message {
+        font-size: 0.8125rem;
+        margin-bottom: 0.25rem !important;
+        color: #6c757d;
+    }
+
+    .notification-time {
+        font-size: 0.75rem;
+        color: #adb5bd;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+        <div class="container-fluid">
+            <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Dashboard</h4>
+        <div class="d-flex align-items-center gap-2">
+            <!-- Menu de Configurações do Usuário -->
+            <div class="dropdown">
+                <button class="btn btn-link text-decoration-none position-relative p-2 user-settings-btn" 
+                        type="button"
+                        id="userSettingsDropdown"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar-sm bg-primary text-white rounded-circle me-2 d-flex align-items-center justify-content-center">
+                            {% set initials = session.get('user_name', 'U').split()|map('first')|join('')|upper %}
+                            <span class="fw-medium">{{ initials[:2] }}</span>
+                        </div>
+                        <span class="d-none d-md-inline text-dark">{{ session.get('user_name', 'Usuário') }}</span>
+                        <i class="fas fa-chevron-down ms-2 text-muted"></i>
+                    </div>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end shadow-lg py-0" style="min-width: 280px;">
+                    <div class="p-3 border-bottom">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-md bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center">
+                                {% set initials = session.get('user_name', 'U').split()|map('first')|join('')|upper %}
+                                <span class="fw-medium">{{ initials[:2] }}</span>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">{{ session.get('user_name', 'Usuário') }}</h6>
+                                <small class="text-muted">{{ session.get('user_email', 'Email não informado') }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-2">
+                        <h6 class="dropdown-header text-uppercase text-muted fw-semibold px-2 py-2">Configurações</h6>
+                        
+                        <a href="{{ url_for('admin.perfil') }}" class="dropdown-item px-3 py-2 rounded">
+                            <i class="fas fa-user-circle me-2 text-primary"></i>
+                            Meu Perfil
+                        </a>
+                        
+                        <a href="{{ url_for('admin.seguranca') }}" class="dropdown-item px-3 py-2 rounded">
+                            <i class="fas fa-shield-alt me-2 text-success"></i>
+                            Segurança
+                            {% if pending_security_updates %}
+                            <span class="badge bg-danger ms-2">!</span>
+                            {% endif %}
+                        </a>
+                        
+                        <a href="{{ url_for('admin.notificacoes_config') }}" class="dropdown-item px-3 py-2 rounded">
+                            <i class="fas fa-bell me-2 text-warning"></i>
+                            Notificações
+                        </a>
+                        
+                        <div class="dropdown-divider"></div>
+                        
+                        <h6 class="dropdown-header text-uppercase text-muted fw-semibold px-2 py-2">Desenvolvedor</h6>
+                        
+                        <a href="{{ url_for('admin.developer') }}" class="dropdown-item px-3 py-2 rounded">
+                            <i class="fas fa-code me-2 text-info"></i>
+                            Modo Desenvolvedor
+                        </a>
+                        
+                        <div class="dropdown-divider"></div>
+                        
+                        <a href="{{ url_for('admin.logout') }}" class="dropdown-item px-3 py-2 rounded text-danger">
+                            <i class="fas fa-sign-out-alt me-2"></i>
+                            Sair
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="dropdown">
+                <button class="btn btn-link notification-icon-wrapper text-decoration-none position-relative p-2" 
+                        type="button"
+                        id="notificationsDropdown"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                    <i class="fas fa-bell fs-5 text-secondary"></i>
+                        <span class="notification-badge" id="notificationBadge">0</span>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end notifications-dropdown shadow-lg p-0" 
+                    aria-labelledby="notificationsDropdown">
+                    <div class="dropdown-header d-flex justify-content-between align-items-center p-2 border-bottom">
+                        <h6 class="mb-0 fs-sm">Notificações</h6>
+                        <button type="button" class="btn btn-link text-muted text-decoration-none p-0" onclick="markAllAsRead()">
+                            <small>Marcar todas como lidas</small>
+                        </button>
+                    </div>
+                    <div class="notifications-list" id="notificationsDropdownList">
+                        <div class="text-center py-3">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                    <span class="visually-hidden">Carregando...</span>
+                                </div>
+                            </div>
+                        </div>
+                    <div class="dropdown-footer border-top p-2 text-center">
+                        <a href="{{ url_for('admin.notifications') }}" class="text-decoration-none">
+                            <small>Ver todas</small>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="refreshDashboard()">
+                <i class="fas fa-sync-alt"></i> Atualizar
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-3">
+        <!-- Total Parceiros Card -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card primary">
+                <div class="stats-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stats-content">
+                <div class="stats-title">Total de Parceiros</div>
+                <div class="stats-value" data-card="total">{{ total_parceiros }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pendentes Card -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card warning">
+                <div class="stats-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stats-content">
+                <div class="stats-title">Pendentes</div>
+                <div class="stats-value" data-card="pendentes">{{ parceiros_pendentes }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aprovados Card -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card success">
+                <div class="stats-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stats-content">
+                <div class="stats-title">Aprovados</div>
+                <div class="stats-value" data-card="aprovados">{{ parceiros_aprovados }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Especialidade Principal Card -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card info">
+                <div class="stats-icon">
+                    <i class="fas fa-tools"></i>
+                </div>
+                <div class="stats-content">
+                <div class="stats-title">Especialidade Principal</div>
+                <div class="stats-value" data-card="especialidade">{{ especialidade_principal }}</div>
+            </div>
+        </div>
+                        </div>
+                        </div>
+
+    <!-- Ranking de Especialidades -->
+    <div class="ranking-section mb-3">
+        <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center me-3">
+                <i class="fas fa-trophy text-warning me-2"></i>
+                <small class="text-muted">Top Especialidades:</small>
+                    </div>
+            {% if especialidades_ranking and especialidades_ranking|length > 1 %}
+                <div class="ranking-container d-flex align-items-center">
+                    {% for esp in especialidades_ranking[1:6] %}
+                        <div class="ranking-item">
+                            {% if loop.index == 1 %}
+                            <span class="position silver">2º</span>
+                            {% elif loop.index == 2 %}
+                            <span class="position bronze">3º</span>
+                            {% else %}
+                            <span class="position">{{ loop.index + 1 }}º</span>
+                            {% endif %}
+                            {{ esp.nome }}
+                            <span class="total">{{ esp.total }}</span>
+                        </div>
+                        {% if not loop.last %}
+                        <div class="ranking-separator"></div>
+                        {% endif %}
+                    {% endfor %}
+                    </div>
+            {% else %}
+                <small class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Não há especialidades suficientes para exibir o ranking.
+                </small>
+            {% endif %}
+                </div>
+            </div>
+            
+    <!-- Hidden data container for charts -->
+    <div id="chartsDataContainer" style="display: none;"
+         data-labels='{{ labels_especialidades|tojson|safe }}'
+         data-cadastros='{{ dados_especialidades|tojson|safe }}'
+         data-status='{{ dados_status|tojson|safe }}'>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-section mb-3">
+        <div class="row g-2">
+            <div class="col-md-2">
+                <label class="form-label">Status</label>
+                <select class="form-select" id="statusFilter">
+                    <option value="">Todos</option>
+                    <option value="Pendente" {% if request.args.get('status') == 'Pendente' %}selected{% endif %}>Pendente</option>
+                    <option value="Aprovado" {% if request.args.get('status') == 'Aprovado' %}selected{% endif %}>Aprovado</option>
+                    <option value="Rejeitado" {% if request.args.get('status') == 'Rejeitado' %}selected{% endif %}>Rejeitado</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Especialidade</label>
+                <select class="form-select" id="especialidadeFilter">
+                    <option value="">Todas</option>
+                    {% for especialidade in especialidades %}
+                    <option value="{{ especialidade }}" {% if request.args.get('especialidade') == especialidade %}selected{% endif %}>
+                        {{ especialidade }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Cidade</label>
+                <select class="form-select" id="cidadeFilter">
+                    <option value="">Todas</option>
+                    {% for cidade in cidades %}
+                    <option value="{{ cidade }}" {% if request.args.get('cidade') == cidade %}selected{% endif %}>
+                        {{ cidade }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Buscar</label>
+                <input type="text" class="form-control" id="searchInput" 
+                       placeholder="Nome, email..." 
+                       value="{{ request.args.get('search', '') }}">
+            </div>
+            <div class="col-md-1">
+                <label class="form-label">&nbsp;</label>
+                <button class="btn btn-primary w-100 d-block" onclick="aplicarFiltros()">
+                    <i class="fas fa-filter"></i>
+                </button>
+            </div>
+        </div>
+            </div>
+
+    <div class="row g-3 mb-3">
+        <!-- Charts -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center py-3">
+                    <h6 class="card-title mb-0 fw-bold">Distribuição por Status</h6>
+                    <!-- Removo os botões de download e tela cheia -->
+                </div>
+                <div class="card-body pb-1">
+                    <div class="chart-container position-relative" style="height: 320px;">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center py-3">
+                    <h6 class="card-title mb-0 fw-bold">Especialidades</h6>
+                    <!-- Removo os botões de download e tela cheia -->
+                </div>
+                <div class="card-body pb-1">
+                    <div id="especialidadesApexChart" style="height: 320px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Partners Table -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h6 class="card-title">
+                <i class="fas fa-users me-2 text-primary opacity-75"></i>
+                Parceiros Técnicos
+            </h6>
+        </div>
+        <div class="card-body px-0 pb-0">
+            {% if parceiros %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="parceirosTable">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Cidade</th>
+                            <th>Especialidades</th>
+                            <th>Status</th>
+                            <th>Data de Cadastro</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for parceiro in parceiros %}
+                        <tr data-id="{{ parceiro.id }}">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm me-3">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-medium">{{ parceiro.nome_completo|default(parceiro.nome)|default('Nome não informado') }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ parceiro.email|default('Email não informado') }}</td>
+                            <td>{{ parceiro.cidade|default('Cidade não informada') }}</td>
+                            <td class="especialidades-cell">
+                                {% if parceiro.especialidades %}
+                                    {% for esp in parceiro.especialidades %}
+                                        <span class="badge bg-info">{{ esp }}</span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-muted small">Não informado</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="status-badge status-{{ parceiro.status|default('Pendente')|lower }}">
+                                    {% if parceiro.status|default('Pendente')|lower == 'pendente' %}
+                                        <i class="fas fa-clock"></i>
+                                    {% elif parceiro.status|lower == 'aprovado' %}
+                                        <i class="fas fa-check"></i>
+                                    {% else %}
+                                        <i class="fas fa-times"></i>
+                                    {% endif %}
+                                    {{ parceiro.status|default('Pendente') }}
+                                </span>
+                            </td>
+                            <td>{{ parceiro.created_at|datetime }}</td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <a href="{{ url_for('admin.view_partner', partner_id=parceiro.id) }}" 
+                                       class="btn btn-sm btn-info" 
+                                       title="Ver detalhes">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if parceiro.whatsapp %}
+                                        {% set numero = parceiro.whatsapp|replace('(', '')|replace(')', '')|replace('-', '')|replace(' ', '') %}
+                                        <a href="https://wa.me/55{{ numero }}" 
+                                           target="_blank"
+                                           class="btn btn-sm btn-success"
+                                           title="Contato via WhatsApp">
+                                            <i class="fab fa-whatsapp"></i>
+                                        </a>
+                                    {% endif %}
+                                    {% if not parceiro.status or parceiro.status|lower == 'pendente' %}
+                                    <button class="btn btn-sm btn-success" 
+                                            onclick="updatePartnerStatus('{{ parceiro.id }}', 'Aprovado')" 
+                                            title="Aprovar">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" 
+                                            onclick="updatePartnerStatus('{{ parceiro.id }}', 'Rejeitado')" 
+                                            title="Rejeitar">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                <!-- Paginação Simples -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="text-muted">
+                        Exibindo {{ parceiros|length }} de {{ total_parceiros }} registros
+                    </div>
+                    <nav aria-label="Navegação de páginas">
+                        <ul class="pagination">
+                            {% if page > 1 %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin.dashboard', page=page-1, status=request.args.get('status', ''), especialidade=request.args.get('especialidade', ''), cidade=request.args.get('cidade', ''), search=request.args.get('search', '')) }}">
+                                    Anterior
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Anterior</span>
+                            </li>
+                            {% endif %}
+                            
+                            {% for p in range(1, total_pages + 1) %}
+                                {% if p == page %}
+                                <li class="page-item active" aria-current="page">
+                                    <span class="page-link">{{ p }}</span>
+                                </li>
+                                {% elif p <= 5 or p >= total_pages - 3 or (p >= page - 1 and p <= page + 1) %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('admin.dashboard', page=p, status=request.args.get('status', ''), especialidade=request.args.get('especialidade', ''), cidade=request.args.get('cidade', ''), search=request.args.get('search', '')) }}">
+                                        {{ p }}
+                                    </a>
+                                </li>
+                                {% elif p == page - 2 or p == page + 2 %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page < total_pages %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin.dashboard', page=page+1, status=request.args.get('status', ''), especialidade=request.args.get('especialidade', ''), cidade=request.args.get('cidade', ''), search=request.args.get('search', '')) }}">
+                                    Próximo
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Próximo</span>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-users fa-2x text-muted mb-2"></i>
+                <p class="text-muted mb-0">Nenhum parceiro técnico cadastrado ainda.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.41.0/dist/apexcharts.min.js"></script>
+<script>
+    // Função para atualizar status de parceiros
+    async function updatePartnerStatus(partnerId, newStatus) {
+        if (!confirm(`Deseja ${newStatus.toLowerCase()} este parceiro?`)) {
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('status', newStatus);
+            
+            const response = await fetch(`/admin/parceiro/${partnerId}/status`, {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (response.ok) {
+                // Recarregar a página após o sucesso
+                window.location.reload();
+            } else {
+                alert('Erro ao atualizar status. Por favor, tente novamente.');
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            alert('Ocorreu um erro ao processar sua solicitação.');
+        }
+    }
+    
+    // Função para atualizar o badge de notificações (manual, sem intervalo)
+    async function updateNotificationBadge() {
+        try {
+            // Remover qualquer flag de erro anterior
+            localStorage.removeItem('notification_error');
+            
+            const response = await fetch('/admin/notifications/count', {
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                },
+                credentials: 'same-origin'
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            const badge = document.getElementById('notificationBadge');
+            const dropdownList = document.getElementById('notificationsDropdownList');
+            
+            if (badge) {
+                if (data && typeof data.count === 'number') {
+                    if (data.count > 0) {
+                        badge.textContent = data.count > 99 ? '99+' : data.count;
+                        badge.style.display = 'flex';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+            }
+
+            // Atualizar a lista de notificações
+            const notificationsResponse = await fetch('/admin/notifications/list', {
+                headers: { 
+                    'Cache-Control': 'no-cache',
+                    'Accept': 'application/json'
+                },
+                credentials: 'same-origin'
+            });
+            
+            if (notificationsResponse.ok) {
+                const notifications = await notificationsResponse.json();
+                if (dropdownList) {
+                    dropdownList.innerHTML = notifications.length > 0 
+                        ? notifications.slice(0, 5).map(notif => `
+                            <div class="notification-item">
+                                <div class="notification-title">
+                                    <i class="fas fa-${notif.type || 'info'} me-2 text-${notif.type || 'info'}"></i>
+                                    ${notif.title}
+                                </div>
+                                <div class="notification-message">${notif.message}</div>
+                                <div class="notification-time">${new Date(notif.created_at).toLocaleString()}</div>
+                            </div>
+                        `).join('') + (notifications.length > 5 ? `
+                            <div class="text-center py-2 border-top">
+                                <small class="text-muted">+${notifications.length - 5} notificações</small>
+                            </div>
+                        ` : '')
+                        : `
+                            <div class="text-center py-3">
+                                <i class="fas fa-bell-slash text-muted mb-2"></i>
+                                <p class="text-muted mb-0"><small>Nenhuma notificação</small></p>
+                            </div>
+                        `;
+                }
+            } else {
+                throw new Error(`HTTP error! status: ${notificationsResponse.status}`);
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar notificações:', error);
+            if (dropdownList) {
+                dropdownList.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-exclamation-circle fa-2x text-danger mb-3"></i>
+                        <p class="text-danger mb-0">Erro ao carregar notificações</p>
+                    </div>
+                `;
+            }
+        }
+    }
+    
+    // Funções básicas para o dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar gráficos
+        try {
+            initCharts();
+        } catch (e) {
+            console.error("Erro ao inicializar gráficos:", e);
+        }
+        
+        // Configurar verificação ÚNICA de notificações
+        try {
+            // Limpar qualquer intervalo existente
+            if (window._notificationUpdateInterval) {
+                clearInterval(window._notificationUpdateInterval);
+                window._notificationUpdateInterval = null;
+            }
+            
+            // Chamar uma vez apenas quando a página carrega
+            // sem configurar intervalos automáticos
+            if (!localStorage.getItem('notification_error')) {
+                setTimeout(updateNotificationBadge, 1000);
+            }
+            
+            // Adicionar evento de clique ao ícone de notificação para atualizar manualmente
+            const notifIcon = document.getElementById('notificationsDropdown');
+            if (notifIcon) {
+                notifIcon.addEventListener('click', function() {
+                    updateNotificationBadge();
+                });
+            }
+        } catch (e) {
+            console.error("Falha ao configurar notificações:", e);
+    }
+        
+        // Configurar eventos de filtragem
+        setupFilterEvents();
+    });
+
+    // Função para inicializar os gráficos
+    function initCharts() {
+        try {
+            // Gráfico de status usando Chart.js
+            const statusCtx = document.getElementById('statusChart');
+            if (statusCtx) {
+                const data = JSON.parse(document.getElementById('chartsDataContainer')?.getAttribute('data-status') || '[0, 0, 0]');
+                new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                        labels: ['Pendentes', 'Aprovados', 'Rejeitados'],
+                    datasets: [{
+                            data: data,
+                        backgroundColor: ['#FFA500', '#4CAF50', '#F44336'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+            
+            // Gráfico de especialidades usando ApexCharts
+            const especialidadesElement = document.getElementById('especialidadesApexChart');
+            if (especialidadesElement) {
+                const dataContainer = document.getElementById('chartsDataContainer');
+                const labels = JSON.parse(dataContainer?.getAttribute('data-labels') || '[]');
+                const data = JSON.parse(dataContainer?.getAttribute('data-cadastros') || '[]');
+                
+                const options = {
+                    series: [{
+                        name: 'Total',
+                        data: data
+                    }],
+                    chart: {
+                        type: 'bar',
+                        height: 320,
+                        toolbar: {
+                            show: false
+                        }
+                    },
+                    plotOptions: {
+                        bar: {
+                            horizontal: true,
+                            dataLabels: {
+                                position: 'top',
+                            },
+                        }
+                    },
+                    colors: ['#3B82F6'],
+                    dataLabels: {
+                        enabled: true,
+                        offsetX: 6,
+                        style: {
+                            fontSize: '12px',
+                            colors: ['#fff']
+                        }
+                    },
+                    stroke: {
+                        show: true,
+                        width: 1,
+                        colors: ['#fff']
+                    },
+                    grid: {
+                        borderColor: '#e7e7e7',
+                        row: {
+                            colors: ['#f3f3f3', 'transparent'],
+                            opacity: 0.5
+                        },
+                    },
+                    xaxis: {
+                        categories: labels,
+                        labels: {
+                            show: true,
+                        }
+                    },
+                    yaxis: {
+                        title: {
+                            text: 'Especialidades'
+                        }
+                    },
+                    tooltip: {
+                        y: {
+                            formatter: function (val) {
+                                return val + " parceiros"
+                            }
+                        }
+                    }
+                };
+
+                if (typeof ApexCharts !== 'undefined') {
+                    const chart = new ApexCharts(especialidadesElement, options);
+                    chart.render();
+            } else {
+                    console.error('ApexCharts não está disponível');
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao inicializar gráficos:', error);
+        }
+    }
+    
+    // Função para filtrar dados
+    function aplicarFiltros() {
+        const status = document.getElementById('statusFilter').value;
+        const especialidade = document.getElementById('especialidadeFilter').value;
+        const cidade = document.getElementById('cidadeFilter').value;
+        const search = document.getElementById('searchInput').value;
+        
+        // Construir URL com filtros
+        const url = new URL(window.location.href);
+        if (status) url.searchParams.set('status', status);
+        else url.searchParams.delete('status');
+        
+        if (especialidade) url.searchParams.set('especialidade', especialidade);
+        else url.searchParams.delete('especialidade');
+        
+        if (cidade) url.searchParams.set('cidade', cidade);
+        else url.searchParams.delete('cidade');
+        
+        if (search) url.searchParams.set('search', search);
+        else url.searchParams.delete('search');
+        
+        // Redirecionar para a URL com os novos filtros
+        window.location.href = url.toString();
+    }
+    
+    // Configurar eventos para os filtros
+    function setupFilterEvents() {
+    // Adicionar evento de tecla Enter no campo de busca
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    aplicarFiltros();
+                }
+            });
+        }
+    }
+    
+    // Função para atualizar o dashboard
+    function refreshDashboard() {
+            window.location.reload();
+    }
+
+    async function markAllAsRead() {
+        try {
+            const response = await fetch('/admin/notifications/mark-read', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ notification_ids: [] })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            if (result.success) {
+            // Atualizar a interface
+                const badge = document.getElementById('notificationBadge');
+                if (badge) {
+                    badge.style.display = 'none';
+                }
+                
+                const dropdownList = document.getElementById('notificationsDropdownList');
+                if (dropdownList) {
+                    dropdownList.innerHTML = `
+                        <div class="text-center py-4">
+                            <i class="fas fa-bell-slash fa-2x text-muted mb-3"></i>
+                            <p class="text-muted mb-0">Nenhuma notificação</p>
+                        </div>
+                    `;
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao marcar notificações como lidas:', error);
+            // Mostrar apenas mensagem de erro se houver falha
+            const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+            const toast = document.createElement('div');
+            toast.className = 'toast show bg-danger text-white';
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
+                <div class="toast-header bg-danger text-white">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <strong class="me-auto">Erro</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                        </div>
+                <div class="toast-body">
+                    Erro ao marcar notificações como lidas. Tente novamente.
+                                    </div>
+            `;
+            toastContainer.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+    }
+
+    function createToastContainer() {
+        const container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        container.style.zIndex = '1050';
+        document.body.appendChild(container);
+        return container;
+    }
+</script>
+{% endblock %} 

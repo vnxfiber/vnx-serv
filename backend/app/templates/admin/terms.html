@@ -1,0 +1,262 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Termos de Uso{% endblock %}
+
+{% block content %}
+<div class="terms-container">
+    <div class="terms-header">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='assets/logo-icon-white.svg') }}" alt="Logo" class="terms-logo">
+        </div>
+        <h1>Termos de Uso</h1>
+        <p class="last-updated">Última atualização: {{ current_date }}</p>
+    </div>
+
+    <div class="terms-content">
+        <section class="terms-section">
+            <h2>1. Aceitação dos Termos</h2>
+            <p>Ao acessar e usar este sistema administrativo, você concorda em cumprir e estar vinculado aos seguintes termos e condições de uso. Se você não concordar com qualquer parte destes termos, não poderá acessar ou utilizar nossos serviços.</p>
+        </section>
+
+        <section class="terms-section">
+            <h2>2. Uso do Sistema</h2>
+            <p>O acesso ao sistema administrativo é restrito a usuários autorizados. Você concorda em:</p>
+            <ul>
+                <li>Manter a confidencialidade de suas credenciais de acesso</li>
+                <li>Não compartilhar sua conta com terceiros</li>
+                <li>Notificar imediatamente qualquer uso não autorizado</li>
+                <li>Ser responsável por todas as atividades realizadas em sua conta</li>
+            </ul>
+        </section>
+
+        <section class="terms-section">
+            <h2>3. Privacidade e Segurança</h2>
+            <p>Nos comprometemos com a proteção de seus dados pessoais. Ao utilizar nosso sistema:</p>
+            <ul>
+                <li>Seus dados são processados de acordo com nossa Política de Privacidade</li>
+                <li>Utilizamos criptografia e medidas de segurança avançadas</li>
+                <li>Seus dados são armazenados em servidores seguros</li>
+                <li>Você pode solicitar acesso ou exclusão de seus dados</li>
+            </ul>
+        </section>
+
+        <section class="terms-section">
+            <h2>4. Responsabilidades</h2>
+            <p>Como usuário do sistema, você é responsável por:</p>
+            <ul>
+                <li>Manter seus dados cadastrais atualizados</li>
+                <li>Garantir a precisão das informações fornecidas</li>
+                <li>Respeitar as leis e regulamentos aplicáveis</li>
+                <li>Utilizar o sistema de forma ética e profissional</li>
+            </ul>
+        </section>
+
+        <section class="terms-section">
+            <h2>5. Limitações de Uso</h2>
+            <p>É expressamente proibido:</p>
+            <ul>
+                <li>Tentar acessar áreas restritas do sistema</li>
+                <li>Realizar engenharia reversa do software</li>
+                <li>Introduzir malware ou códigos maliciosos</li>
+                <li>Interferir no funcionamento normal do sistema</li>
+            </ul>
+        </section>
+
+        <section class="terms-section">
+            <h2>6. Modificações dos Termos</h2>
+            <p>Reservamos o direito de modificar estes termos a qualquer momento. Alterações significativas serão notificadas através do sistema. O uso continuado após as modificações implica na aceitação dos novos termos.</p>
+        </section>
+
+        <section class="terms-section">
+            <h2>7. Contato</h2>
+            <p>Para questões relacionadas a estes termos, entre em contato através de:</p>
+            <ul>
+                <li>Email: suporte@empresa.com</li>
+                <li>Telefone: (XX) XXXX-XXXX</li>
+                <li>Horário: Segunda a Sexta, 9h às 18h</li>
+            </ul>
+        </section>
+    </div>
+
+    <div class="terms-footer">
+        <a href="{{ url_for('admin.register') }}" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+            Voltar para o registro
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .sidebar {
+        display: none;
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+        padding: 0;
+    }
+
+    .terms-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 2rem 1rem;
+    }
+
+    .terms-header {
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto 2rem;
+        padding: 2rem;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo-container {
+        width: 70px;
+        height: 70px;
+        margin: 0 auto 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .terms-logo {
+        width: 35px;
+        height: 35px;
+        filter: brightness(0) invert(1);
+    }
+
+    .terms-header h1 {
+        color: #2d3748;
+        font-size: 2rem;
+        margin: 1rem 0 0.5rem;
+    }
+
+    .last-updated {
+        color: #718096;
+        font-size: 0.9rem;
+    }
+
+    .terms-content {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .terms-section {
+        margin-bottom: 2rem;
+    }
+
+    .terms-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .terms-section h2 {
+        color: #2d3748;
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .terms-section p {
+        color: #4a5568;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+
+    .terms-section ul {
+        list-style: none;
+        padding-left: 0;
+    }
+
+    .terms-section ul li {
+        color: #4a5568;
+        padding: 0.5rem 0;
+        padding-left: 1.5rem;
+        position: relative;
+        line-height: 1.5;
+    }
+
+    .terms-section ul li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 1rem;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #667eea;
+    }
+
+    .terms-footer {
+        max-width: 800px;
+        margin: 2rem auto 0;
+        text-align: center;
+    }
+
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: white;
+        color: #667eea;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .back-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        color: #5a67d8;
+    }
+
+    @media (max-width: 840px) {
+        .terms-container {
+            padding: 1rem;
+        }
+
+        .terms-header,
+        .terms-content {
+            padding: 1.5rem;
+        }
+
+        .terms-header h1 {
+            font-size: 1.75rem;
+        }
+
+        .terms-section h2 {
+            font-size: 1.2rem;
+        }
+    }
+
+    @media print {
+        .terms-container {
+            padding: 0;
+            background: white;
+        }
+
+        .terms-header,
+        .terms-content {
+            box-shadow: none;
+            max-width: 100%;
+        }
+
+        .terms-footer {
+            display: none;
+        }
+    }
+</style>
+{% endblock %} 

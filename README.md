@@ -1,3 +1,67 @@
+# VNX FIBER SERVICE
+
+Projeto do site da VNX FIBER SERVICE com frontend e backend separados.
+
+## Estrutura do Projeto
+
+```
+/
+├── backend/              # Aplicação backend (Flask)
+│   ├── app/              # Código fonte da aplicação
+│   ├── logs/             # Logs da aplicação
+│   ├── migrations/       # Migrações de banco de dados
+│   ├── config.py         # Configurações
+│   ├── requirements.txt  # Dependências Python
+│   └── run.py            # Script para executar a aplicação
+│
+├── frontend/             # Aplicação frontend (HTML, CSS, JS)
+│   ├── assets/           # Recursos estáticos
+│   ├── styles/           # Arquivos CSS
+│   ├── scripts/          # Scripts JavaScript
+│   ├── js/               # Scripts JavaScript gerais
+│   └── *.html            # Páginas HTML
+│
+└── .venv/                # Ambiente virtual Python (não versionado)
+```
+
+## Como executar
+
+### Backend (Flask)
+
+1. Ative o ambiente virtual:
+   ```
+   .venv\Scripts\activate  # Windows
+   source .venv/bin/activate  # Linux/Mac
+   ```
+
+2. Instale as dependências:
+   ```
+   cd backend
+   pip install -r requirements.txt
+   ```
+
+3. Execute o servidor:
+   ```
+   python run.py
+   ```
+
+4. Acesse o backend em: http://localhost:5000
+
+### Frontend
+
+1. Inicie um servidor HTTP para arquivos estáticos:
+   ```
+   cd frontend
+   python -m http.server 8000
+   ```
+
+2. Acesse o frontend em: http://localhost:8000
+
+## Desenvolvimento
+
+- Backend: O código do backend está organizado na pasta `backend/` seguindo uma estrutura modular.
+- Frontend: O código do frontend está na pasta `frontend/` e contém todos os arquivos estáticos.
+
 # VNX FIBER SERVICE - Sistema de Gestão de Parceiros Técnicos
 
 Este sistema permite gerenciar os cadastros de parceiros técnicos da VNX FIBER SERVICE, incluindo um formulário público de cadastro e uma dashboard administrativa protegida.

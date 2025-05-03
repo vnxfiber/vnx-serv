@@ -1,0 +1,18 @@
+{
+  "name": "vnx-fiber-service-frontend",
+  "version": "1.0.0",
+  "description": "Frontend para o site da VNX FIBER SERVICE",
+  "main": "js/main.js",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bootstrap": "^5.3.2",
+    "font-awesome": "^6.5.1",
+    "aos": "^2.3.4",
+    "swiper": "^11.0.0"
+  }
+} 

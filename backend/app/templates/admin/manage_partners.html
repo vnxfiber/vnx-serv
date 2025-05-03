@@ -1,0 +1,859 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Gerenciar Parceiros{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="mb-1">Gerenciar Parceiros</h4>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}" class="text-decoration-none">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Gerenciar Parceiros</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('admin.export_partners') }}" class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-download me-1"></i> Exportar CSV
+            </a>
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="refreshTable()">
+                <i class="fas fa-sync-alt me-1"></i> Atualizar
+            </button>
+            <button type="button" class="btn btn-outline-danger btn-sm" id="deleteSelectedBtn" style="display: none;">
+                <i class="fas fa-trash me-1"></i> Deletar Selecionados
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters Card -->
+    <div class="card mb-4">
+        <div class="card-header d-flex align-items-center">
+            <i class="fas fa-filter me-2 text-primary opacity-75"></i>
+            <h5 class="card-title mb-0">Filtros</h5>
+        </div>
+        <div class="card-body">
+            <form id="filterForm" onsubmit="return false;">
+                <div class="row g-3">
+                    <div class="col-md-2">
+                        <label class="form-label text-muted small">Status</label>
+                        <select class="form-select" id="statusFilter" onchange="applyFilters()">
+                            <option value="">Todos</option>
+                            <option value="Pendente" {% if current_filters.status == 'Pendente' %}selected{% endif %}>Pendente</option>
+                            <option value="Aprovado" {% if current_filters.status == 'Aprovado' %}selected{% endif %}>Aprovado</option>
+                            <option value="Rejeitado" {% if current_filters.status == 'Rejeitado' %}selected{% endif %}>Rejeitado</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted small">Especialidade</label>
+                        <select class="form-select" id="especialidadeFilter" onchange="applyFilters()">
+                            <option value="">Todas</option>
+                            {% for especialidade in especialidades %}
+                            <option value="{{ especialidade }}" {% if current_filters.especialidade == especialidade %}selected{% endif %}>
+                                {{ especialidade }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-muted small">Cidade</label>
+                        <select class="form-select" id="cidadeFilter" onchange="applyFilters()">
+                            <option value="">Todas</option>
+                            {% for cidade in cidades %}
+                            <option value="{{ cidade }}" {% if current_filters.cidade == cidade %}selected{% endif %}>
+                                {{ cidade }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted small">Buscar</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="searchInput" 
+                                   placeholder="Nome, email..." 
+                                   value="{{ current_filters.search or '' }}"
+                                   onkeypress="if(event.key === 'Enter') applyFilters()">
+                            <button class="btn btn-primary" type="button" onclick="applyFilters()">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Partners Table Card -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-users me-2 text-primary opacity-75"></i>
+            <h5 class="card-title mb-0">Lista de Parceiros</h5>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center">
+                    <label class="me-2 text-muted small">Ordenar por:</label>
+                    <select class="form-select form-select-sm" id="sortBySelect" onchange="applySorting()" style="min-width: 150px;">
+                        <option value="created_at" {% if current_filters.sort_by == 'created_at' %}selected{% endif %}>Data de Cadastro</option>
+                        <option value="nome_completo" {% if current_filters.sort_by == 'nome_completo' %}selected{% endif %}>Nome</option>
+                        <option value="cidade" {% if current_filters.sort_by == 'cidade' %}selected{% endif %}>Cidade</option>
+                        <option value="status" {% if current_filters.sort_by == 'status' %}selected{% endif %}>Status</option>
+                    </select>
+                    <button class="btn btn-link btn-sm text-muted" onclick="toggleSortOrder()">
+                        <i id="sortOrderIcon" class="fas fa-sort-{{ 'down' if current_filters.sort_order == 'desc' else 'up' }}"></i>
+                    </button>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-light text-dark">Total: {{ total_records }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            {% if parceiros %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="selectAllPartners">
+                                </div>
+                            </th>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Cidade</th>
+                            <th>Especialidades</th>
+                            <th>Status</th>
+                            <th>Data de Cadastro</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for parceiro in parceiros %}
+                        <tr>
+                            <td>
+                                <div class="form-check">
+                                    <input class="form-check-input partner-checkbox" type="checkbox" 
+                                           value="{{ parceiro.id }}" data-partner-id="{{ parceiro.id }}">
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm me-3">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-medium">{{ parceiro.nome_completo }}</div>
+                                        <small class="text-muted">ID: {{ parceiro.id[:8] }}...</small>
+                                        {% if parceiro.whatsapp %}
+                                        <a href="https://wa.me/{{ parceiro.whatsapp|format_whatsapp }}" 
+                                           class="contact-link small" 
+                                           target="_blank"
+                                           title="Abrir WhatsApp">
+                                            <i class="fab fa-whatsapp text-success"></i> {{ parceiro.whatsapp }}
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <a href="mailto:{{ parceiro.email }}" class="contact-link">
+                                    {{ parceiro.email }}
+                                </a>
+                            </td>
+                            <td>
+                                <div class="fw-medium">{{ parceiro.cidade }}</div>
+                                <small class="text-muted">{{ parceiro.estado }}</small>
+                            </td>
+                            <td>
+                                <div class="especialidades-wrapper">
+                                    {% if parceiro.especialidades %}
+                                        {% for esp in parceiro.especialidades[:2] %}
+                                            <span class="badge">{{ esp }}</span>
+                                        {% endfor %}
+                                        {% if parceiro.especialidades|length > 2 %}
+                                            <span class="badge bg-secondary" title="{{ parceiro.especialidades[2:] | join(', ') }}">
+                                                +{{ parceiro.especialidades|length - 2 }}
+                                            </span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted small">Não informado</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-badge status-{{ (parceiro.status or 'pendente')|lower }}">
+                                    {% if parceiro.status|default('Pendente')|lower == 'pendente' %}
+                                        <i class="fas fa-clock"></i>
+                                    {% elif parceiro.status|lower == 'aprovado' %}
+                                        <i class="fas fa-check"></i>
+                                    {% else %}
+                                        <i class="fas fa-times"></i>
+                                    {% endif %}
+                                    {{ parceiro.status or 'Pendente' }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="fw-medium">{{ parceiro.created_at|datetime }}</div>
+                                <small class="text-muted">
+                                    {{ ((parceiro.updated_at|todatetime) - (parceiro.created_at|todatetime)).days }} dias
+                                </small>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <a href="{{ url_for('admin.view_partner', partner_id=parceiro.id) }}" 
+                                       class="btn btn-sm btn-info" 
+                                       title="Ver detalhes">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if not parceiro.status or (parceiro.status or '')|lower == 'pendente' %}
+                                    <button class="btn btn-sm btn-success" 
+                                            onclick="updateStatus('{{ parceiro.id }}', 'Aprovado')" 
+                                            title="Aprovar">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" 
+                                            onclick="updateStatus('{{ parceiro.id }}', 'Rejeitado')" 
+                                            title="Rejeitar">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    {% endif %}
+                                    <button class="btn btn-sm btn-danger" 
+                                            onclick="deletePartner('{{ parceiro.id }}')" 
+                                            title="Deletar">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="d-flex justify-content-between align-items-center p-3 border-top">
+                <div class="d-flex align-items-center">
+                    <label for="perPageSelect" class="me-2 text-muted small">Itens por página:</label>
+                    <select id="perPageSelect" class="form-select form-select-sm" style="width: 80px;" onchange="changePerPage(this.value)">
+                        <option value="5" {% if per_page == 5 %}selected{% endif %}>5</option>
+                        <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                        <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+                        <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                        <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+                    </select>
+                </div>
+                <nav aria-label="Navegação de páginas">
+                    <ul class="pagination pagination-sm mb-0" id="paginationContainer"
+                        data-current-page="{{ page }}"
+                        data-total-pages="{{ total_pages }}"
+                        data-per-page="{{ per_page }}">
+                        <!-- A paginação será renderizada via JavaScript -->
+                    </ul>
+                </nav>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Nenhum parceiro encontrado</h5>
+                <p class="text-muted mb-0">Tente ajustar os filtros de busca</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos base */
+    .card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-header {
+        background-color: transparent;
+        border-bottom: 1px solid #F3F4F6;
+        padding: 1.25rem;
+    }
+
+    .card-header h5 {
+        font-size: 1rem;
+        color: #374151;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    /* Tabela */
+    .table {
+        font-size: 0.875rem;
+        color: #4B5563;
+        border-collapse: separate;
+        border-spacing: 0 0.5rem;
+        margin-top: -0.5rem;
+    }
+
+    .table th {
+        font-weight: 500;
+        color: #6B7280;
+        background-color: #F9FAFB;
+        text-transform: none;
+        font-size: 0.875rem;
+        letter-spacing: 0;
+        padding: 0.75rem 1rem;
+        border: none;
+        white-space: nowrap;
+    }
+
+    .table td {
+        background-color: white;
+        padding: 1rem;
+        border-top: 1px solid #F3F4F6;
+        vertical-align: middle;
+    }
+
+    .table tr:hover td {
+        background-color: #F9FAFB;
+        transition: background-color 0.2s ease;
+    }
+
+    /* Avatar e Badges */
+    .avatar-sm {
+        width: 36px;
+        height: 36px;
+        background: #F3F4F6;
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6B7280;
+    }
+
+    .status-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .status-pendente {
+        background-color: #FEF9C3;
+        color: #854D0E;
+    }
+
+    .status-aprovado {
+        background-color: #DCFCE7;
+        color: #166534;
+    }
+
+    .status-rejeitado {
+        background-color: #FEE2E2;
+        color: #991B1B;
+    }
+
+    /* Especialidades */
+    .especialidades-wrapper {
+        max-width: 200px;
+    }
+
+    .especialidades-wrapper .badge {
+        background-color: #F0F9FF !important;
+        color: #0369A1;
+        font-size: 0.75rem;
+        font-weight: 500;
+        padding: 0.25rem 0.6rem;
+        margin: 0.125rem;
+    }
+
+    .especialidades-wrapper .badge.bg-secondary {
+        background-color: #F3F4F6 !important;
+        color: #6B7280;
+    }
+
+    /* Botões e Ações */
+    .btn-group .btn-sm {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.75rem;
+        border-radius: 0.5rem;
+        margin: 0 0.125rem;
+        transition: all 0.2s ease;
+    }
+
+    .btn-group .btn-info {
+        background-color: #EFF6FF;
+        border-color: #BFDBFE;
+        color: #1E40AF;
+    }
+
+    .btn-group .btn-success {
+        background-color: #DCFCE7;
+        border-color: #86EFAC;
+        color: #166534;
+    }
+
+    .btn-group .btn-danger {
+        background-color: #FEE2E2;
+        border-color: #FECACA;
+        color: #991B1B;
+    }
+
+    .btn-group .btn:hover {
+        opacity: 0.9;
+    }
+
+    /* Links e Textos */
+    .contact-link {
+        color: #4B5563;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .contact-link:hover {
+        color: #2563EB;
+    }
+
+    .text-muted {
+        color: #6B7280 !important;
+    }
+
+    .fw-medium {
+        font-weight: 500 !important;
+        color: #374151;
+    }
+
+    /* Formulários */
+    .form-select, .form-control {
+        border-radius: 0.5rem;
+        border: 1px solid #E5E7EB;
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
+        color: #374151;
+    }
+
+    .form-select:focus, .form-control:focus {
+        border-color: #93C5FD;
+        box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.1);
+    }
+
+    /* Paginação */
+    .pagination {
+        margin: 1rem 0 0;
+    }
+
+    .pagination .page-link {
+        border-radius: 0.5rem;
+        margin: 0 0.125rem;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+        color: #4B5563;
+        border: 1px solid #E5E7EB;
+        background-color: white;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #4F46E5;
+        border-color: #4F46E5;
+        color: white;
+        font-weight: 500;
+    }
+
+    .pagination .page-link:hover {
+        background-color: #F9FAFB;
+        border-color: #E5E7EB;
+        color: #374151;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        background-color: #F9FAFB;
+        border-color: #E5E7EB;
+        color: #9CA3AF;
+    }
+
+    /* Checkbox personalizado */
+    .form-check-input {
+        width: 1.35rem;
+        height: 1.35rem;
+        border-radius: 0.3rem;
+        border: 2px solid #6366F1;
+        background-color: #fff;
+        box-shadow: 0 1px 4px rgba(79,70,229,0.10);
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-check-input:checked {
+        background-color: #4F46E5;
+        border-color: #3730A3;
+        box-shadow: 0 0 0 2px #A5B4FC;
+    }
+
+    .form-check-input:focus {
+        border-color: #3730A3;
+        box-shadow: 0 0 0 2px #A5B4FC;
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .especialidades-wrapper {
+            max-width: 150px;
+        }
+        
+        .table-responsive {
+            margin: 0;
+            padding: 0;
+        }
+
+        .btn-group .btn-sm {
+            padding: 0.25rem 0.4rem;
+        }
+    }
+
+    /* Animações */
+    .fa-spin {
+        animation: fa-spin 1s linear infinite;
+    }
+
+    @keyframes fa-spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Função para obter configuração da paginação
+    function getPageConfig() {
+        const container = document.getElementById('paginationContainer');
+        if (!container) return { currentPage: 1, totalPages: 1, perPage: 10 };
+        
+        return {
+            currentPage: parseInt(container.getAttribute('data-current-page') || '1'),
+            totalPages: parseInt(container.getAttribute('data-total-pages') || '1'),
+            perPage: parseInt(container.getAttribute('data-per-page') || '10')
+        };
+    }
+    
+    // Funções de paginação
+    function changePage(newPage) {
+        const params = new URLSearchParams(window.location.search);
+        params.set('page', newPage.toString());
+        window.location.href = `${window.location.pathname}?${params.toString()}`;
+    }
+
+    function changePerPage(newPerPage) {
+        const params = new URLSearchParams(window.location.search);
+        params.set('per_page', newPerPage);
+        params.set('page', '1');
+        window.location.href = `${window.location.pathname}?${params.toString()}`;
+    }
+
+    // Função para navegar entre páginas (anterior/próxima)
+    function goToPage(currentPage, increment) {
+        const newPage = parseInt(currentPage) + increment;
+        changePage(newPage);
+    }
+    
+    // Renderiza a paginação dinamicamente
+    function renderPagination() {
+        const container = document.getElementById('paginationContainer');
+        if (!container) return;
+        
+        const PAGE_CONFIG = getPageConfig();
+        const { currentPage, totalPages } = PAGE_CONFIG;
+        let html = '';
+        
+        // Primeira página
+        html += `
+            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="javascript:void(0)" onclick="changePage(1)" aria-label="Primeira">
+                    <span aria-hidden="true">&laquo;&laquo;</span>
+                </a>
+            </li>
+        `;
+        
+        // Página anterior
+        html += `
+            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="javascript:void(0)" onclick="goToPage(${currentPage}, -1)" aria-label="Anterior">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        `;
+        
+        // Calcular range de páginas
+        let start = Math.max(currentPage - 2, 1);
+        let end = Math.min(start + 4, totalPages);
+        start = Math.max(end - 4, 1);
+        
+        // Elipse inicial se necessário
+        if (start > 1) {
+            html += `
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            `;
+        }
+        
+        // Páginas numeradas
+        for (let p = start; p <= end; p++) {
+            html += `
+                <li class="page-item ${p === currentPage ? 'active' : ''}">
+                    <a class="page-link" href="javascript:void(0)" onclick="changePage(${p})">${p}</a>
+                </li>
+            `;
+        }
+        
+        // Elipse final se necessário
+        if (end < totalPages) {
+            html += `
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            `;
+        }
+        
+        // Próxima página
+        html += `
+            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                <a class="page-link" href="javascript:void(0)" onclick="goToPage(${currentPage}, 1)" aria-label="Próxima">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        `;
+        
+        // Última página
+        html += `
+            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                <a class="page-link" href="javascript:void(0)" onclick="changePage(${totalPages})" aria-label="Última">
+                    <span aria-hidden="true">&raquo;&raquo;</span>
+                </a>
+            </li>
+        `;
+        
+        container.innerHTML = html;
+    }
+
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', () => {
+        // Renderiza a paginação
+        renderPagination();
+        
+        // Adicionar evento de tecla Enter no campo de busca
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    applyFilters();
+                }
+            });
+        }
+    });
+
+    // Funções de filtro
+    function applyFilters() {
+        const status = document.getElementById('statusFilter')?.value || '';
+        const especialidade = document.getElementById('especialidadeFilter')?.value || '';
+        const cidade = document.getElementById('cidadeFilter')?.value || '';
+        const search = document.getElementById('searchInput')?.value || '';
+        const sortBy = document.getElementById('sortBySelect')?.value || 'created_at';
+        const sortOrder = document.getElementById('sortOrderIcon')?.classList.contains('fa-sort-down') ? 'desc' : 'asc';
+        
+        const params = new URLSearchParams();
+        if (status) params.set('status', status);
+        if (especialidade) params.set('especialidade', especialidade);
+        if (cidade) params.set('cidade', cidade);
+        if (search) params.set('search', search);
+        params.set('sort_by', sortBy);
+        params.set('sort_order', sortOrder);
+        params.set('page', '1');
+        
+        window.location.href = `${window.location.pathname}?${params.toString()}`;
+    }
+
+    function clearFilters() {
+        document.getElementById('statusFilter').value = '';
+        document.getElementById('especialidadeFilter').value = '';
+        document.getElementById('cidadeFilter').value = '';
+        document.getElementById('searchInput').value = '';
+        applyFilters();
+    }
+
+    // Funções de ordenação
+    function applySorting() {
+        applyFilters();
+    }
+
+    function toggleSortOrder() {
+        const icon = document.getElementById('sortOrderIcon');
+        icon.classList.toggle('fa-sort-down');
+        icon.classList.toggle('fa-sort-up');
+        applyFilters();
+    }
+
+    // Função para atualizar a tabela
+    function refreshTable() {
+        const button = document.querySelector('button[onclick="refreshTable()"]');
+        const icon = button.querySelector('.fa-sync-alt');
+        
+        icon.classList.add('fa-spin');
+        button.disabled = true;
+        
+        window.location.reload();
+    }
+
+    // Função para atualizar o status de um parceiro
+    async function updateStatus(partnerId, newStatus) {
+        if (!confirm(`Deseja ${newStatus.toLowerCase()} este parceiro?`)) {
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('status', newStatus);
+            
+            const response = await fetch(`/admin/parceiro/${partnerId}/status`, {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (response.ok) {
+                showToast('Sucesso', `Parceiro ${newStatus.toLowerCase()} com sucesso!`);
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                showToast('Erro', 'Não foi possível atualizar o status.', 'danger');
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            showToast('Erro', 'Ocorreu um erro ao atualizar o status.', 'danger');
+        }
+    }
+
+    // Função para deletar um parceiro
+    async function deletePartner(partnerId) {
+        if (!confirm('Tem certeza que deseja excluir este parceiro? Esta ação não pode ser desfeita.')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/admin/parceiro/${partnerId}/delete`, {
+                method: 'DELETE',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                showToast('Sucesso', 'Parceiro deletado com sucesso!', 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                showToast('Erro', data.error || 'Erro ao deletar parceiro', 'danger');
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            showToast('Erro', 'Ocorreu um erro ao processar a solicitação', 'danger');
+        }
+    }
+
+    // Função para deletar múltiplos parceiros
+    async function deleteSelectedPartners() {
+        const selectedIds = getSelectedPartnersIds();
+        
+        if (selectedIds.length === 0) {
+            showToast('Aviso', 'Nenhum parceiro selecionado.', 'warning');
+            return;
+        }
+        
+        if (!confirm(`Tem certeza que deseja excluir ${selectedIds.length} parceiros? Esta ação não pode ser desfeita.`)) {
+            return;
+        }
+        
+        try {
+            const response = await fetch('/admin/parceiros/delete-batch', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    partner_ids: selectedIds
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                showToast('Sucesso', `${data.deleted_count} parceiros deletados com sucesso!`, 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                showToast('Erro', data.error || 'Erro ao deletar parceiros', 'danger');
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            showToast('Erro', 'Ocorreu um erro ao deletar os parceiros', 'danger');
+        }
+    }
+
+    // Função para obter os IDs dos parceiros selecionados
+    function getSelectedPartnersIds() {
+        const selectedCheckboxes = document.querySelectorAll('.partner-checkbox:checked');
+        return Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
+    }
+
+    // Gerenciamento de seleção em lote
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectAllCheckbox = document.getElementById('selectAllPartners');
+        const partnerCheckboxes = document.querySelectorAll('.partner-checkbox');
+        const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+
+        function updateDeleteButtonVisibility() {
+            const selectedCount = document.querySelectorAll('.partner-checkbox:checked').length;
+            if (deleteSelectedBtn) {
+                deleteSelectedBtn.style.display = selectedCount > 0 ? 'block' : 'none';
+            }
+        }
+
+        if (selectAllCheckbox) {
+            selectAllCheckbox.addEventListener('change', function() {
+                partnerCheckboxes.forEach(function(checkbox) {
+                    checkbox.checked = selectAllCheckbox.checked;
+                });
+                updateDeleteButtonVisibility();
+            });
+        }
+
+        partnerCheckboxes.forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                updateDeleteButtonVisibility();
+                
+                if (!this.checked && selectAllCheckbox) {
+                    selectAllCheckbox.checked = false;
+                } else if (selectAllCheckbox) {
+                    const allChecked = Array.from(partnerCheckboxes).every(function(cb) {
+                        return cb.checked;
+                    });
+                    selectAllCheckbox.checked = allChecked;
+                }
+            });
+        });
+
+        if (deleteSelectedBtn) {
+            deleteSelectedBtn.addEventListener('click', deleteSelectedPartners);
+        }
+    });
+</script>
+{% endblock %} 
