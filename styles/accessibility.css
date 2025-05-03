@@ -1,0 +1,76 @@
+/* Melhorias de acessibilidade para o site VNX FIBER SERVICE */
+
+/* Melhorar visibilidade do foco para navegação por teclado */
+:focus {
+    outline: 3px solid #3498db !important;
+    outline-offset: 2px !important;
+}
+
+/* Aumentar contraste em textos sobre fundos claros */
+.text-muted {
+    color: #5a6268 !important; /* Cor mais escura para .text-muted */
+}
+
+/* Melhorar contraste em links em áreas específicas */
+footer a, 
+.bg-dark a {
+    color: #f0f0f0 !important; /* Texto mais claro sobre fundo escuro */
+}
+
+/* Ajustar contraste no texto sobre gradientes */
+.hero p {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); /* Sombra para melhorar legibilidade */
+}
+
+/* Melhorar visibilidade de botões */
+.btn {
+    font-weight: 600;
+}
+
+.btn-primary {
+    background-color: #0a3d62 !important; /* Cor primária mais escura para contraste */
+    border-color: #0a3d62 !important;
+}
+
+.btn-outline-light {
+    border-width: 2px; /* Borda mais grossa */
+}
+
+/* Melhorar contraste em elementos interativos */
+.nav-link:hover,
+.nav-link:focus,
+.nav-link.active {
+    background-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* Adicionar indicador visual para campos obrigatórios */
+label.required::after {
+    content: " *";
+    color: #dc3545;
+}
+
+/* Skip to main content - link que aparece apenas com foco por teclado */
+.skip-to-content {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    z-index: 9999;
+}
+
+.skip-to-content:focus {
+    left: 0;
+    top: 0;
+    width: auto;
+    height: auto;
+    padding: 10px 15px;
+    background: #ffffff;
+    border-radius: 0 0 4px 0;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    outline: none;
+    text-decoration: none;
+    color: #0a3d62;
+    font-weight: bold;
+} 

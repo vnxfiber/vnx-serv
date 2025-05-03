@@ -1,0 +1,244 @@
+/* Responsividade melhorada para VNX FIBER SERVICE */
+
+/* Otimizações Gerais */
+@media (max-width: 1199.98px) {
+    .container {
+        max-width: 100%;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+    
+    .section-title {
+        font-size: 2.2rem;
+    }
+    
+    .hero h1 {
+        font-size: 3rem;
+    }
+}
+
+/* Dispositivos Médios (Tablets, menos de 992px) */
+@media (max-width: 991.98px) {
+    body {
+        padding-top: 66px;
+    }
+    
+    .navbar-brand img {
+        max-height: 50px;
+    }
+    
+    .hero {
+        min-height: 80vh;
+    }
+    
+    .hero h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .hero .lead {
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    /* Ajuste para menu mobile */
+    .navbar-collapse {
+        background-color: var(--primary-color);
+        border-radius: 0 0 8px 8px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+        margin-top: 10px;
+    }
+    
+    .navbar-nav .nav-item {
+        margin-bottom: 5px;
+    }
+    
+    /* Ajustes para seções em tablets */
+    .service-category {
+        margin-bottom: 30px;
+    }
+    
+    .contact-info {
+        margin-bottom: 30px;
+    }
+    
+    /* Ajustes para FAQ em tablets */
+    .accordion-button {
+        font-size: 0.95rem;
+        padding: 12px 15px;
+    }
+    
+    .accordion-body {
+        padding: 15px;
+    }
+    
+    /* Ajustes para botão de agendamento em tablets */
+    .appointment-button {
+        right: 15px;
+        bottom: 20px;
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Dispositivos Pequenos (Telefones em paisagem e tablets pequenos, menos de 768px) */
+@media (max-width: 767.98px) {
+    .navbar-brand img {
+        max-height: 45px;
+        width: auto;
+    }
+    
+    .hero {
+        min-height: 70vh;
+        padding-top: 20px;
+    }
+    
+    .hero h1 {
+        font-size: 2rem;
+        margin-top: 1rem;
+    }
+    
+    .hero .lead {
+        font-size: 1.1rem;
+    }
+    
+    .hero .btn-primary, 
+    .hero .btn-outline-light {
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 10px 20px;
+        font-size: 1rem;
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    section {
+        padding: 40px 0;
+    }
+    
+    /* Ajustes para imagens em dispositivos móveis */
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    /* Ajustes para Grid em mobile */
+    [class*="col-"] {
+        margin-bottom: 20px;
+    }
+    
+    .row > [class*="col-"]:last-child {
+        margin-bottom: 0;
+    }
+    
+    /* Ajustes para formulários em mobile */
+    .form-control, 
+    .btn {
+        font-size: 1rem;
+        padding: 10px 15px;
+    }
+    
+    /* Ajustes para footer em mobile */
+    footer h5 {
+        margin-top: 15px;
+        font-size: 1.1rem;
+    }
+    
+    /* Fix para o botão flutuante em mobile */
+    .appointment-button {
+        bottom: 15px;
+        right: 10px;
+        font-size: 0.85rem;
+        padding: 8px 15px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    
+    /* Ajustes para FAQ em mobile */
+    .accordion-button {
+        font-size: 0.9rem;
+        padding: 10px;
+    }
+    
+    .accordion-body {
+        padding: 10px;
+    }
+    
+    /* Ajuste no espaçamento do modal em mobile */
+    .modal-body {
+        padding: 15px;
+    }
+}
+
+/* Dispositivos Extra Pequenos (Telefones em modo retrato, menos de 576px) */
+@media (max-width: 575.98px) {
+    body {
+        padding-top: 56px;
+    }
+    
+    .navbar-brand img {
+        max-height: 40px;
+    }
+    
+    .hero h1 {
+        font-size: 1.7rem;
+    }
+    
+    .hero .lead {
+        font-size: 1rem;
+    }
+    
+    .section-title {
+        font-size: 1.6rem;
+    }
+    
+    /* Aumentar tamanho de toque para elementos interativos */
+    .nav-link,
+    .btn,
+    .form-control {
+        padding: 12px 15px;
+    }
+    
+    /* Ajustes para serviços em mobile pequeno */
+    .service-category {
+        min-height: auto;
+        margin-bottom: 20px;
+    }
+    
+    .service-item {
+        padding: 15px;
+    }
+    
+    /* Simplificar alguns elementos para telas muito pequenas */
+    .stat-number {
+        font-size: 1.8rem;
+    }
+    
+    .social-links a {
+        width: 35px;
+        height: 35px;
+        line-height: 35px;
+        margin-right: 5px;
+    }
+    
+    /* Otimizar aparência do botão de agendamento */
+    .appointment-button {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+        bottom: 10px;
+        right: 10px;
+    }
+    
+    .appointment-button i {
+        margin-right: 5px;
+        font-size: 0.9rem;
+    }
+} 

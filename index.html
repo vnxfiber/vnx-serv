@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VNX FIBER SERVICE - Soluções em Telecomunicações</title>
     <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-12345ABCDE"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'G-XXXXXXXXXX');
+      gtag('config', 'G-12345ABCDE');
     </script>
     <meta name="description" content="VNX FIBER SERVICE - Soluções completas em telecomunicações, infraestrutura de rede, serviços para ISP, telefonia e comunicação sem fio.">
     <meta name="keywords" content="fibra óptica, telecomunicações, infraestrutura de rede, ISP, telefonia, comunicação sem fio">
@@ -19,7 +19,16 @@
     <meta property="og:description" content="Soluções completas em infraestrutura de rede, serviços para ISP, telefonia e comunicação sem fio">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://vnxfiber.com.br">
-    <meta property="og:image" content="assets/icons/og-image.svg">
+    <meta property="og:image" content="https://vnxfiber.com.br/assets/icons/og-image.svg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:site_name" content="VNX FIBER SERVICE">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="VNX FIBER SERVICE - Soluções em Telecomunicações">
+    <meta name="twitter:description" content="Soluções completas em infraestrutura de rede, serviços para ISP, telefonia e comunicação sem fio">
+    <meta name="twitter:image" content="https://vnxfiber.com.br/assets/icons/og-image.svg">
     <!-- Favicons e ícones -->
     <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="assets/favicon.ico" sizes="any">
@@ -39,8 +48,10 @@
     <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
     <!-- Swiper -->
     <link href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/main.min.css">
     <link rel="stylesheet" href="styles/logo.css">
+    <link rel="stylesheet" href="styles/accessibility.css">
+    <link rel="stylesheet" href="styles/responsive.css">
     <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
     <link rel="preload" href="assets/logo-animated.svg" as="image">
     <!-- Particles.js CSS -->
@@ -135,12 +146,15 @@
     </script>
 </head>
 <body>
+    <!-- Skip to content link para acessibilidade -->
+    <a href="#home" class="skip-to-content">Pular para o conteúdo</a>
+    
     <!-- Header -->
     <header class="fixed-top">
         <nav class="navbar navbar-expand-lg navbar-dark" aria-label="Navegação principal">
             <div class="container">
                 <a class="navbar-brand" href="#">
-                    <img src="assets/logo-animated.svg" alt="VNX FIBER SERVICE" width="240" height="80">
+                    <img src="assets/logo-animated.svg" alt="VNX FIBER SERVICE - Soluções em Telecomunicações" width="240" height="80" fetchpriority="high">
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
                     <span class="navbar-toggler-icon"></span>
@@ -158,6 +172,9 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#tecnologias">Tecnologias</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#faq">FAQ</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#contato">Contato</a>
@@ -666,6 +683,140 @@
         </div>
     </section>
 
+    <!-- FAQ/Perguntas Frequentes -->
+    <section id="faq" class="py-5 bg-light">
+        <div class="container">
+            <div class="row justify-content-center mb-5">
+                <div class="col-lg-8 text-center">
+                    <h2 class="section-title" data-aos="fade-up">Perguntas Frequentes</h2>
+                    <p class="lead" data-aos="fade-up" data-aos-delay="100">Confira as dúvidas mais comuns sobre nossos serviços</p>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-12" data-aos="fade-up" data-aos-delay="200">
+                    <div class="accordion" id="faqAccordion">
+                        <!-- Pergunta 1 -->
+                        <div class="accordion-item mb-3 border rounded">
+                            <h3 class="accordion-header" id="faqHeading1">
+                                <button class="accordion-button collapsed" type="button" 
+                                        data-bs-toggle="collapse" data-bs-target="#faqCollapse1" 
+                                        aria-expanded="false" aria-controls="faqCollapse1">
+                                    Qual a área de atuação da VNX FIBER SERVICE?
+                                </button>
+                            </h3>
+                            <div id="faqCollapse1" class="accordion-collapse collapse" 
+                                 aria-labelledby="faqHeading1" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <p>A VNX FIBER SERVICE atua em todo o Brasil, oferecendo soluções completas em telecomunicações. 
+                                    Nosso foco principal são serviços de infraestrutura de rede, serviços para ISP, telefonia, 
+                                    comunicação sem fio e consultoria especializada para empresas de TI e provedores de internet.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Pergunta 2 -->
+                        <div class="accordion-item mb-3 border rounded">
+                            <h3 class="accordion-header" id="faqHeading2">
+                                <button class="accordion-button collapsed" type="button" 
+                                        data-bs-toggle="collapse" data-bs-target="#faqCollapse2" 
+                                        aria-expanded="false" aria-controls="faqCollapse2">
+                                    Como solicitar um orçamento para serviços?
+                                </button>
+                            </h3>
+                            <div id="faqCollapse2" class="accordion-collapse collapse" 
+                                 aria-labelledby="faqHeading2" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <p>Existem várias formas de solicitar um orçamento:</p>
+                                    <ul>
+                                        <li>Entre em contato pelo telefone (98) 9 9988-2215</li>
+                                        <li>Envie um e-mail para contato@vnxfiber.com.br</li>
+                                        <li>Preencha o formulário na seção "Contato" deste site</li>
+                                        <li>Agende uma visita técnica através do botão "Agendar Atendimento"</li>
+                                    </ul>
+                                    <p>Nossa equipe responderá em até 24 horas úteis com uma proposta personalizada para seu projeto.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Pergunta 3 -->
+                        <div class="accordion-item mb-3 border rounded">
+                            <h3 class="accordion-header" id="faqHeading3">
+                                <button class="accordion-button collapsed" type="button" 
+                                        data-bs-toggle="collapse" data-bs-target="#faqCollapse3" 
+                                        aria-expanded="false" aria-controls="faqCollapse3">
+                                    Vocês trabalham com provedores de internet de pequeno porte?
+                                </button>
+                            </h3>
+                            <div id="faqCollapse3" class="accordion-collapse collapse" 
+                                 aria-labelledby="faqHeading3" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <p>Sim, trabalhamos com provedores de todos os portes! Nossa equipe é especializada em 
+                                    atender desde pequenos ISPs regionais até grandes provedores nacionais. Oferecemos serviços 
+                                    de consultoria, implementação e suporte técnico, adequando nossas soluções às necessidades 
+                                    e ao orçamento de cada cliente.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Pergunta 4 -->
+                        <div class="accordion-item mb-3 border rounded">
+                            <h3 class="accordion-header" id="faqHeading4">
+                                <button class="accordion-button collapsed" type="button" 
+                                        data-bs-toggle="collapse" data-bs-target="#faqCollapse4" 
+                                        aria-expanded="false" aria-controls="faqCollapse4">
+                                    Quais tecnologias de fibra óptica vocês trabalham?
+                                </button>
+                            </h3>
+                            <div id="faqCollapse4" class="accordion-collapse collapse" 
+                                 aria-labelledby="faqHeading4" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <p>Trabalhamos com as principais tecnologias e padrões de fibra óptica do mercado, incluindo:</p>
+                                    <ul>
+                                        <li>GPON e EPON</li>
+                                        <li>XGS-PON e NG-PON2 para redes de 10G</li>
+                                        <li>Redes metropolitanas (MAN)</li>
+                                        <li>Redes de transporte de longa distância</li>
+                                        <li>FTTH, FTTB, FTTA e FTTx em geral</li>
+                                        <li>DWDM e sistemas de alta capacidade</li>
+                                    </ul>
+                                    <p>Nossos técnicos são certificados pelos principais fabricantes do mercado.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Pergunta 5 -->
+                        <div class="accordion-item mb-3 border rounded">
+                            <h3 class="accordion-header" id="faqHeading5">
+                                <button class="accordion-button collapsed" type="button" 
+                                        data-bs-toggle="collapse" data-bs-target="#faqCollapse5" 
+                                        aria-expanded="false" aria-controls="faqCollapse5">
+                                    Como funciona o processo de cadastro para parceiros técnicos?
+                                </button>
+                            </h3>
+                            <div id="faqCollapse5" class="accordion-collapse collapse" 
+                                 aria-labelledby="faqHeading5" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <p>O processo de cadastro para parceiros técnicos é simples e rápido:</p>
+                                    <ol>
+                                        <li>Acesse a página "Trabalhe Conosco" em nosso site</li>
+                                        <li>Preencha o formulário com suas informações de contato e experiência</li>
+                                        <li>Selecione suas áreas de especialidade</li>
+                                        <li>Envie o formulário</li>
+                                    </ol>
+                                    <p>Nossa equipe analisará seu cadastro e entrará em contato em até 7 dias úteis. 
+                                    Com a aprovação, você passará a receber oportunidades de projetos de acordo com sua região
+                                    e especialidades técnicas.</p>
+                                    <p><a href="trabalhe-conosco.html" class="btn btn-sm btn-primary mt-2">Cadastrar como parceiro</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Contato -->
     <section id="contato" class="py-5">
         <div class="container">
@@ -706,34 +857,45 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="name" class="form-label">Nome</label>
-                                    <input type="text" class="form-control" id="name" placeholder="Seu nome" required>
+                                    <input type="text" class="form-control" id="name" name="name" placeholder="Seu nome" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="email" class="form-label">E-mail</label>
-                                    <input type="email" class="form-control" id="email" placeholder="Seu e-mail" required>
+                                    <input type="email" class="form-control" id="email" name="email" placeholder="Seu e-mail" required>
                                 </div>
+                            </div>
+                            <!-- Campo honeypot (invisível) para proteção contra spam -->
+                            <div class="d-none">
+                                <label for="website" class="form-label">Website</label>
+                                <input type="text" class="form-control" id="website" name="website" tabindex="-1" autocomplete="off">
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="phone" class="form-label">Telefone</label>
-                                    <input type="tel" class="form-control" id="phone" placeholder="Seu telefone">
+                                    <input type="tel" class="form-control" id="phone" name="phone" placeholder="(XX) XXXXX-XXXX">
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="subject" class="form-label">Assunto</label>
-                                    <select class="form-select" id="subject">
+                                    <select class="form-select" id="subject" name="subject">
                                         <option selected disabled>Selecione</option>
-                                        <option>Infraestrutura de Rede</option>
-                                        <option>Serviços para ISP</option>
-                                        <option>Telefonia</option>
-                                        <option>Rádio e Comunicação</option>
-                                        <option>Consultoria</option>
-                                        <option>Outros</option>
+                                        <option value="infraestrutura">Infraestrutura de Rede</option>
+                                        <option value="isp">Serviços para ISP</option>
+                                        <option value="telefonia">Telefonia</option>
+                                        <option value="radio">Rádio e Comunicação</option>
+                                        <option value="consultoria">Consultoria</option>
+                                        <option value="outros">Outros</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <label for="message" class="form-label">Mensagem</label>
-                                <textarea class="form-control" id="message" rows="5" placeholder="Como podemos ajudar?" required></textarea>
+                                <textarea class="form-control" id="message" name="message" rows="5" placeholder="Como podemos ajudar?" required></textarea>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="privacyConsent" name="privacyConsent" required>
+                                <label class="form-check-label" for="privacyConsent">
+                                    Concordo com o uso dos meus dados conforme a <a href="politica-de-privacidade.html" target="_blank">Política de Privacidade</a>.
+                                </label>
                             </div>
                             <div class="text-end">
                                 <button type="submit" class="btn btn-primary btn-lg">
@@ -766,21 +928,26 @@
                         <div class="row g-2">
                             <div class="col-md-6 mb-2">
                                 <label for="scheduleName" class="form-label small">Nome</label>
-                                <input type="text" class="form-control form-control-sm" id="scheduleName" required>
+                                <input type="text" class="form-control form-control-sm" id="scheduleName" name="name" required>
                             </div>
                             <div class="col-md-6 mb-2">
                                 <label for="scheduleEmail" class="form-label small">E-mail</label>
-                                <input type="email" class="form-control form-control-sm" id="scheduleEmail" required>
+                                <input type="email" class="form-control form-control-sm" id="scheduleEmail" name="email" required>
                             </div>
+                        </div>
+                        <!-- Campo honeypot (invisível) para proteção contra spam -->
+                        <div class="d-none">
+                            <label for="scheduleWebsite" class="form-label small">Website</label>
+                            <input type="text" class="form-control form-control-sm" id="scheduleWebsite" name="website" tabindex="-1" autocomplete="off">
                         </div>
                         <div class="row g-2">
                             <div class="col-md-6 mb-2">
                                 <label for="schedulePhone" class="form-label small">Telefone</label>
-                                <input type="tel" class="form-control form-control-sm" id="schedulePhone" required>
+                                <input type="tel" class="form-control form-control-sm" id="schedulePhone" name="phone" placeholder="(XX) XXXXX-XXXX" required>
                             </div>
                             <div class="col-md-6 mb-2">
                                 <label for="scheduleService" class="form-label small">Serviço</label>
-                                <select class="form-select form-select-sm" id="scheduleService" required>
+                                <select class="form-select form-select-sm" id="scheduleService" name="service" required>
                                     <option value="" selected disabled>Selecione um serviço</option>
                                     <option value="infraestrutura">Infraestrutura de Rede</option>
                                     <option value="isp">Serviços para ISP</option>
@@ -793,16 +960,22 @@
                         <div class="row g-2">
                             <div class="col-md-6 mb-2">
                                 <label for="scheduleDate" class="form-label small">Data preferencial</label>
-                                <input type="date" class="form-control form-control-sm" id="scheduleDate" required>
+                                <input type="date" class="form-control form-control-sm" id="scheduleDate" name="date" required>
                             </div>
                             <div class="col-md-6 mb-2">
                                 <label for="scheduleTime" class="form-label small">Horário</label>
-                                <input type="time" class="form-control form-control-sm" id="scheduleTime" required>
+                                <input type="time" class="form-control form-control-sm" id="scheduleTime" name="time" required>
                             </div>
                         </div>
                         <div class="mb-2">
                             <label for="scheduleMessage" class="form-label small">Mensagem (opcional)</label>
-                            <textarea class="form-control form-control-sm" id="scheduleMessage" rows="2"></textarea>
+                            <textarea class="form-control form-control-sm" id="scheduleMessage" name="message" rows="2"></textarea>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="schedulePrivacyConsent" name="privacyConsent" required>
+                            <label class="form-check-label small" for="schedulePrivacyConsent">
+                                Concordo com o uso dos meus dados conforme a <a href="politica-de-privacidade.html" target="_blank">Política de Privacidade</a>.
+                            </label>
                         </div>
                     </form>
                 </div>
@@ -835,6 +1008,7 @@
                         <li><a href="#quem-somos"><i class="fas fa-angle-right me-2"></i>Quem Somos</a></li>
                         <li><a href="#servicos"><i class="fas fa-angle-right me-2"></i>Serviços</a></li>
                         <li><a href="#tecnologias"><i class="fas fa-angle-right me-2"></i>Tecnologias</a></li>
+                        <li><a href="#faq"><i class="fas fa-angle-right me-2"></i>FAQ</a></li>
                         <li><a href="#contato"><i class="fas fa-angle-right me-2"></i>Contato</a></li>
                         <li><a href="trabalhe-conosco.html"><i class="fas fa-angle-right me-2"></i>Trabalhe Conosco</a></li>
                     </ul>
@@ -880,6 +1054,7 @@
     <!-- Polyfills para compatibilidade com navegadores antigos -->
     <script src="/scripts/polyfill.min.js"></script>
     <script src="scripts/logo-handler.js"></script>
+    <script src="scripts/form-handler.js"></script>
     <script src="js/main.js"></script>
     <script src="js/mobile-menu.js"></script>
     
