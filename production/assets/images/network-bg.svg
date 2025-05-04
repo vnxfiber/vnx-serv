@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1440" height="800" viewBox="0 0 1440 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g opacity="0.6">
+        <!-- Pontos principais -->
+        <circle cx="200" cy="150" r="3" fill="white"/>
+        <circle cx="400" cy="300" r="3" fill="white"/>
+        <circle cx="600" cy="200" r="3" fill="white"/>
+        <circle cx="800" cy="400" r="3" fill="white"/>
+        <circle cx="1000" cy="250" r="3" fill="white"/>
+        <circle cx="1200" cy="350" r="3" fill="white"/>
+        <circle cx="300" cy="450" r="3" fill="white"/>
+        <circle cx="500" cy="500" r="3" fill="white"/>
+        <circle cx="700" cy="600" r="3" fill="white"/>
+        <circle cx="900" cy="550" r="3" fill="white"/>
+        
+        <!-- Pontos secundários -->
+        <circle cx="250" cy="200" r="2" fill="white" opacity="0.6"/>
+        <circle cx="450" cy="350" r="2" fill="white" opacity="0.6"/>
+        <circle cx="650" cy="250" r="2" fill="white" opacity="0.6"/>
+        <circle cx="850" cy="450" r="2" fill="white" opacity="0.6"/>
+        <circle cx="1050" cy="300" r="2" fill="white" opacity="0.6"/>
+        <circle cx="350" cy="500" r="2" fill="white" opacity="0.6"/>
+        <circle cx="550" cy="550" r="2" fill="white" opacity="0.6"/>
+        <circle cx="750" cy="650" r="2" fill="white" opacity="0.6"/>
+        
+        <!-- Pontos terciários -->
+        <circle cx="150" cy="100" r="1" fill="white" opacity="0.4"/>
+        <circle cx="350" cy="250" r="1" fill="white" opacity="0.4"/>
+        <circle cx="550" cy="150" r="1" fill="white" opacity="0.4"/>
+        <circle cx="750" cy="350" r="1" fill="white" opacity="0.4"/>
+        <circle cx="950" cy="200" r="1" fill="white" opacity="0.4"/>
+        <circle cx="250" cy="400" r="1" fill="white" opacity="0.4"/>
+        <circle cx="450" cy="450" r="1" fill="white" opacity="0.4"/>
+        <circle cx="650" cy="550" r="1" fill="white" opacity="0.4"/>
+        
+        <!-- Linhas principais -->
+        <path d="M200 150C300 200,400 300,600 200" stroke="white" stroke-width="1" opacity="0.3"/>
+        <path d="M600 200C700 250,800 400,1000 250" stroke="white" stroke-width="1" opacity="0.3"/>
+        <path d="M300 450C400 475,500 500,700 600" stroke="white" stroke-width="1" opacity="0.3"/>
+        <path d="M500 500C600 525,700 600,900 550" stroke="white" stroke-width="1" opacity="0.3"/>
+        
+        <!-- Linhas secundárias -->
+        <path d="M250 200C350 250,450 350,650 250" stroke="white" stroke-width="0.5" opacity="0.2"/>
+        <path d="M450 350C550 375,650 250,850 450" stroke="white" stroke-width="0.5" opacity="0.2"/>
+        <path d="M350 500C450 525,550 550,750 650" stroke="white" stroke-width="0.5" opacity="0.2"/>
+        
+        <!-- Conexões cruzadas -->
+        <path d="M200 150C250 300,300 450,500 500" stroke="white" stroke-width="0.5" opacity="0.15"/>
+        <path d="M600 200C650 350,700 600,900 550" stroke="white" stroke-width="0.5" opacity="0.15"/>
+        <path d="M400 300C450 400,500 500,700 600" stroke="white" stroke-width="0.5" opacity="0.15"/>
+    </g>
+</svg> 

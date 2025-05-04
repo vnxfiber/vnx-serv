@@ -1,0 +1,389 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Modo Desenvolvedor{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Ferramentas de Desenvolvimento</h5>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="debugMode" onchange="toggleDebugMode(this)">
+                        <label class="form-check-label" for="debugMode">Modo Debug</label>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Seção de Dados de Teste -->
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-3">Dados de Teste</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Gerar Parceiros</h6>
+                                        <div class="mb-3">
+                                            <label class="form-label">Quantidade</label>
+                                            <input type="number" class="form-control" id="numParceiros" value="10" min="1" max="100">
+                                        </div>
+                                        <button class="btn btn-primary" onclick="gerarDadosTeste('parceiros')">
+                                            <i class="fas fa-users me-2"></i>Gerar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Gerar Notificações</h6>
+                                        <div class="mb-3">
+                                            <label class="form-label">Quantidade</label>
+                                            <input type="number" class="form-control" id="numNotificacoes" value="5" min="1" max="50">
+                                        </div>
+                                        <button class="btn btn-primary" onclick="gerarDadosTeste('notificacoes')">
+                                            <i class="fas fa-bell me-2"></i>Gerar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Limpar Dados</h6>
+                                        <p class="small text-muted mb-3">Remove todos os dados de teste do banco</p>
+                                        <button class="btn btn-danger" onclick="limparDadosTeste()">
+                                            <i class="fas fa-trash me-2"></i>Limpar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção de Logs -->
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-3">Logs e Depuração</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Logs do Sistema</h6>
+                                        <div class="mb-3">
+                                            <select class="form-select mb-2" id="logLevel">
+                                                <option value="DEBUG">Debug</option>
+                                                <option value="INFO">Info</option>
+                                                <option value="WARNING">Warning</option>
+                                                <option value="ERROR">Error</option>
+                                            </select>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-primary" onclick="configurarLogs()">
+                                                <i class="fas fa-cog me-2"></i>Configurar
+                                            </button>
+                                            <button class="btn btn-secondary" onclick="visualizarLogs()">
+                                                <i class="fas fa-eye me-2"></i>Visualizar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Console do Navegador</h6>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="consoleDebug">
+                                            <label class="form-check-label" for="consoleDebug">Ativar Debug no Console</label>
+                                        </div>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="networkDebug">
+                                            <label class="form-check-label" for="networkDebug">Monitorar Requisições</label>
+                                        </div>
+                                        <button class="btn btn-primary" onclick="configurarConsole()">
+                                            <i class="fas fa-terminal me-2"></i>Aplicar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção de Diagnóstico -->
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-3">Diagnóstico do Sistema</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Banco de Dados</h6>
+                                        <button class="btn btn-primary mb-2 w-100" onclick="testarConexaoDB()">
+                                            <i class="fas fa-database me-2"></i>Testar Conexão
+                                        </button>
+                                        <button class="btn btn-info w-100" onclick="verificarEstrutura()">
+                                            <i class="fas fa-table me-2"></i>Verificar Estrutura
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Cache</h6>
+                                        <button class="btn btn-primary mb-2 w-100" onclick="verificarCache()">
+                                            <i class="fas fa-memory me-2"></i>Verificar Cache
+                                        </button>
+                                        <button class="btn btn-warning w-100" onclick="limparCache()">
+                                            <i class="fas fa-broom me-2"></i>Limpar Cache
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Sistema</h6>
+                                        <button class="btn btn-primary mb-2 w-100" onclick="verificarSessoes()">
+                                            <i class="fas fa-users me-2"></i>Verificar Sessões
+                                        </button>
+                                        <button class="btn btn-info w-100" onclick="verificarRotas()">
+                                            <i class="fas fa-route me-2"></i>Listar Rotas
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Console de Logs -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="text-muted mb-0">Console</h6>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="limparConsole()">
+                                <i class="fas fa-eraser me-2"></i>Limpar
+                            </button>
+                        </div>
+                        <div class="bg-dark text-light p-3 rounded" style="height: 300px; overflow-y: auto;" id="consoleOutput">
+                            <div class="text-muted">Console iniciado. Aguardando logs...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let debugMode = false;
+
+function toggleDebugMode(checkbox) {
+    debugMode = checkbox.checked;
+    fetch('/admin/developer/toggle-debug', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ debug: debugMode })
+    });
+    logToConsole(`Modo debug ${debugMode ? 'ativado' : 'desativado'}`);
+}
+
+function gerarDadosTeste(tipo) {
+    const quantidade = document.getElementById(tipo === 'parceiros' ? 'numParceiros' : 'numNotificacoes').value;
+    fetch(`/admin/developer/gerar-dados`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ tipo, quantidade })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            logToConsole(`Dados de teste gerados: ${quantidade} ${tipo}`);
+        } else {
+            logToConsole(`Erro ao gerar dados: ${data.error}`, 'error');
+        }
+    });
+}
+
+function limparDadosTeste() {
+    if (!confirm('Tem certeza que deseja limpar todos os dados de teste?')) return;
+    
+    fetch('/admin/developer/limpar-dados', {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            logToConsole('Dados de teste removidos com sucesso');
+        } else {
+            logToConsole(`Erro ao limpar dados: ${data.error}`, 'error');
+        }
+    });
+}
+
+function configurarLogs() {
+    const level = document.getElementById('logLevel').value;
+    fetch('/admin/developer/configurar-logs', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ level })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            logToConsole(`Nível de log configurado para: ${level}`);
+        } else {
+            logToConsole(`Erro ao configurar logs: ${data.error}`, 'error');
+        }
+    });
+}
+
+function visualizarLogs() {
+    fetch('/admin/developer/visualizar-logs')
+    .then(response => response.json())
+    .then(data => {
+        if (data.logs) {
+            data.logs.forEach(log => logToConsole(log));
+        } else {
+            logToConsole('Nenhum log encontrado');
+        }
+    });
+}
+
+function configurarConsole() {
+    const consoleDebug = document.getElementById('consoleDebug').checked;
+    const networkDebug = document.getElementById('networkDebug').checked;
+    
+    fetch('/admin/developer/configurar-console', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ consoleDebug, networkDebug })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            logToConsole('Configurações do console atualizadas');
+        } else {
+            logToConsole(`Erro ao configurar console: ${data.error}`, 'error');
+        }
+    });
+}
+
+function testarConexaoDB() {
+    fetch('/admin/developer/testar-db')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            logToConsole('Conexão com banco de dados OK');
+        } else {
+            logToConsole(`Erro na conexão: ${data.error}`, 'error');
+        }
+    });
+}
+
+function verificarEstrutura() {
+    fetch('/admin/developer/verificar-estrutura')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            logToConsole('Estrutura do banco de dados verificada');
+            data.tabelas.forEach(tabela => {
+                logToConsole(`Tabela ${tabela.nome}: ${tabela.status}`);
+            });
+        } else {
+            logToConsole(`Erro ao verificar estrutura: ${data.error}`, 'error');
+        }
+    });
+}
+
+function verificarCache() {
+    fetch('/admin/developer/verificar-cache')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            logToConsole('Status do cache:');
+            logToConsole(`Uso: ${data.uso}%`);
+            logToConsole(`Itens: ${data.itens}`);
+        } else {
+            logToConsole(`Erro ao verificar cache: ${data.error}`, 'error');
+        }
+    });
+}
+
+function limparCache() {
+    fetch('/admin/developer/limpar-cache', { method: 'POST' })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            logToConsole('Cache limpo com sucesso');
+        } else {
+            logToConsole(`Erro ao limpar cache: ${data.error}`, 'error');
+        }
+    });
+}
+
+function verificarSessoes() {
+    fetch('/admin/developer/verificar-sessoes')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            logToConsole(`Sessões ativas: ${data.total}`);
+            data.sessoes.forEach(sessao => {
+                logToConsole(`Usuário: ${sessao.usuario}, Última atividade: ${sessao.ultima_atividade}`);
+            });
+        } else {
+            logToConsole(`Erro ao verificar sessões: ${data.error}`, 'error');
+        }
+    });
+}
+
+function verificarRotas() {
+    fetch('/admin/developer/listar-rotas')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            logToConsole('Rotas registradas:');
+            data.rotas.forEach(rota => {
+                logToConsole(`${rota.metodo} ${rota.url} -> ${rota.funcao}`);
+            });
+        } else {
+            logToConsole(`Erro ao listar rotas: ${data.error}`, 'error');
+        }
+    });
+}
+
+function logToConsole(message, type = 'info') {
+    const consoleOutput = document.getElementById('consoleOutput');
+    const timestamp = new Date().toLocaleTimeString();
+    const logEntry = document.createElement('div');
+    logEntry.className = `log-entry text-${type === 'error' ? 'danger' : 'light'}`;
+    logEntry.innerHTML = `[${timestamp}] ${message}`;
+    consoleOutput.appendChild(logEntry);
+    consoleOutput.scrollTop = consoleOutput.scrollHeight;
+}
+
+function limparConsole() {
+    const consoleOutput = document.getElementById('consoleOutput');
+    consoleOutput.innerHTML = '<div class="text-muted">Console limpo.</div>';
+}
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar estado atual do modo debug
+    fetch('/admin/developer/status')
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('debugMode').checked = data.debug || false;
+        debugMode = data.debug || false;
+    });
+});
+</script>
+{% endblock %} 

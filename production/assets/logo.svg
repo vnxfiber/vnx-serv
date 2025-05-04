@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="280" height="90" viewBox="0 0 280 90" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        :root {
+            --primary-color: #ffffff;
+            --glow-opacity-start: 0.4;
+            --glow-opacity-end: 0.7;
+            --pulse-opacity-start: 0.6;
+            --pulse-opacity-mid: 0.8;
+            --pulse-size-min: 1.5;
+            --pulse-size-max: 2.5;
+            --animation-duration: 3s;
+            --stroke-width: 1.5;
+        }
+
+        .text { font-family: Arial, sans-serif; fill: var(--primary-color); }
+        .main-text { 
+            font-size: 32px; 
+            font-weight: bold;
+            animation: glow var(--animation-duration) ease-in-out infinite alternate;
+        }
+        .sub-text { 
+            font-size: 18px;
+            opacity: 1;
+        }
+        .fiber-line { 
+            stroke: var(--primary-color); 
+            stroke-width: var(--stroke-width);
+            stroke-dasharray: 150;
+            stroke-dashoffset: 150;
+            animation: drawLine var(--animation-duration) ease-out forwards;
+        }
+        .fiber-line:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+        .fiber-line:nth-child(3) {
+            animation-delay: 1s;
+        }
+        
+        .pulse {
+            animation: pulse var(--animation-duration) infinite;
+            transform-origin: center;
+            transform-box: fill-box;
+            fill: var(--primary-color);
+            opacity: var(--pulse-opacity-start);
+            r: var(--pulse-size-max);
+        }
+        .pulse:nth-child(2) { animation-delay: 0.2s; }
+        .pulse:nth-child(3) { animation-delay: 0.4s; }
+        .pulse:nth-child(4) { animation-delay: 0.6s; }
+        .pulse:nth-child(5) { animation-delay: 0.8s; }
+        
+        @keyframes drawLine {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+        
+        @keyframes glow {
+            from {
+                filter: drop-shadow(0 0 1px rgba(var(--primary-color), var(--glow-opacity-start)));
+            }
+            to {
+                filter: drop-shadow(0 0 2px rgba(var(--primary-color), var(--glow-opacity-end)));
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                r: var(--pulse-size-min);
+                opacity: var(--pulse-opacity-start);
+            }
+            50% {
+                r: var(--pulse-size-max);
+                opacity: var(--pulse-opacity-mid);
+            }
+            100% {
+                r: var(--pulse-size-min);
+                opacity: var(--pulse-opacity-start);
+            }
+        }
+    </style>
+    
+    <g class="text-zone">
+        <text x="140" y="42" class="text main-text" text-anchor="middle">VNX</text>
+        <text x="140" y="68" class="text sub-text" text-anchor="middle">FIBER SERVICE</text>
+    </g>
+    
+    <g class="animation-zone" transform="translate(0, 5)">
+        <path class="fiber-line" d="M40,40 C80,38 110,42 140,40 S170,38 200,40" fill="none"/>
+        <path class="fiber-line" d="M50,45 C90,43 120,47 140,45 S160,43 190,45" fill="none" opacity="0.7"/>
+        <path class="fiber-line" d="M60,35 C100,33 130,37 140,35 S150,33 180,35" fill="none" opacity="0.7"/>
+        
+        <circle class="pulse" cx="110" cy="40" r="2.5"/>
+        <circle class="pulse" cx="125" cy="38" r="2.5"/>
+        <circle class="pulse" cx="140" cy="40" r="2.5"/>
+        <circle class="pulse" cx="155" cy="42" r="2.5"/>
+        <circle class="pulse" cx="170" cy="40" r="2.5"/>
+    </g>
+</svg> 

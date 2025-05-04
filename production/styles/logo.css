@@ -1,0 +1,46 @@
+/* 
+ * VNX FIBER SERVICE - Logo Padrão
+ * Este arquivo CSS define estilos para a logo animada em todo o site
+ */
+
+/* Definições padrão para o container da logo no cabeçalho e rodapé */
+.site-logo, 
+.navbar-brand img,
+header .logo img,
+.footer-logo,
+footer .logo img {
+    width: 180px !important;
+    height: 50px !important;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+}
+
+/* Em telas menores, reduzir o tamanho da logo */
+@media (max-width: 768px) {
+    .site-logo, 
+    .navbar-brand img,
+    header .logo img,
+    .footer-logo,
+    footer .logo img {
+        width: 140px !important;
+        height: 38px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .site-logo, 
+    .navbar-brand img,
+    header .logo img,
+    .footer-logo,
+    footer .logo img {
+        width: 100px !important;
+        height: 28px !important;
+    }
+}
+
+/* Efeito hover opcional para a logo do cabeçalho */
+.site-logo:hover, 
+.navbar-brand img:hover,
+header .logo img:hover {
+    filter: brightness(1.1);
+} 

@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <!-- Fundo com gradiente sutil -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f8f9fa;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e9ecef;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#bgGradient)" rx="10" ry="10"/>
+
+  <!-- Elementos Centrais: Conexão e Colaboração -->
+  <g transform="translate(400, 250)">
+    <!-- Núcleo de Conexão (Globo estilizado) -->
+    <circle cx="0" cy="0" r="100" fill="#0a3d62" opacity="0.1"/>
+    <circle cx="0" cy="0" r="80" fill="none" stroke="#0a3d62" stroke-width="3" stroke-dasharray="8 4"/>
+    <circle cx="0" cy="0" r="60" fill="#3498db" opacity="0.3"/>
+    
+    <!-- Linhas de Conexão Curvadas -->
+    <path d="M0,-80 Q 80,-40 120,0 Q 80,40 0,80" stroke="#3498db" stroke-width="4" fill="none" opacity="0.8"/>
+    <path d="M0,-80 Q -80,-40 -120,0 Q -80,40 0,80" stroke="#3498db" stroke-width="4" fill="none" opacity="0.8"/>
+    <path d="M-80,0 Q -40,80 0,120 Q 40,80 80,0" stroke="#e67e22" stroke-width="3" fill="none" opacity="0.7"/>
+    <path d="M-80,0 Q -40,-80 0,-120 Q 40,-80 80,0" stroke="#e67e22" stroke-width="3" fill="none" opacity="0.7"/>
+
+    <!-- Ícones representando Pessoas/Equipe em volta -->
+    <g transform="translate(0, -120)">
+      <circle cx="0" cy="0" r="18" fill="#2ecc71"/>
+      <circle cx="0" cy="-5" r="6" fill="#fff"/> 
+      <rect x="-10" y="8" width="20" height="15" rx="5" fill="#fff"/>
+    </g>
+    <g transform="translate(120, 0)">
+       <circle cx="0" cy="0" r="18" fill="#e74c3c"/>
+       <circle cx="0" cy="-5" r="6" fill="#fff"/> 
+       <rect x="-10" y="8" width="20" height="15" rx="5" fill="#fff"/>
+    </g>
+    <g transform="translate(0, 120)">
+       <circle cx="0" cy="0" r="18" fill="#f1c40f"/>
+       <circle cx="0" cy="-5" r="6" fill="#fff"/> 
+       <rect x="-10" y="8" width="20" height="15" rx="5" fill="#fff"/>
+    </g>
+    <g transform="translate(-120, 0)">
+       <circle cx="0" cy="0" r="18" fill="#9b59b6"/>
+       <circle cx="0" cy="-5" r="6" fill="#fff"/> 
+       <rect x="-10" y="8" width="20" height="15" rx="5" fill="#fff"/>
+    </g>
+    
+    <!-- Elemento central - Logo estilizada ou ícone -->
+    <g transform="translate(0, 0) scale(0.6)">
+        <path d="M 0 -40 L 35 -20 L 35 20 L 0 40 L -35 20 L -35 -20 Z" fill="#0a3d62"/>
+        <path d="M 0 -25 L 23 -12 L 23 12 L 0 25 L -23 12 L -23 -12 Z" fill="#fff"/>
+    </g>
+  </g>
+
+  <!-- Elementos de fundo - Formas geométricas sutis -->
+  <g opacity="0.1">
+    <circle cx="100" cy="100" r="50" fill="#0a3d62"/>
+    <rect x="650" y="350" width="100" height="100" rx="10" ry="10" fill="#3498db" transform="rotate(15, 700, 400)"/>
+    <polygon points="50,450 150,450 100,380" fill="#e67e22"/>
+    <path d="M600,50 Q700,150 600,250" stroke="#2ecc71" stroke-width="8" fill="none"/>
+  </g>
+
+  <!-- Selo "10+ Anos" -->
+  <g transform="translate(680, 80)">
+      <circle cx="0" cy="0" r="55" fill="#0a3d62"/>
+      <circle cx="0" cy="0" r="48" fill="#fff" stroke="#0a3d62" stroke-width="2"/>
+      <text x="0" y="-5" text-anchor="middle" font-family="'Poppins', sans-serif" font-size="30" font-weight="bold" fill="#0a3d62">
+          10+
+          <tspan x="0" dy="1.3em" font-size="11" font-weight="normal">Anos de</tspan>
+          <tspan x="0" dy="1.2em" font-size="11" font-weight="normal">Experiência</tspan>
+      </text>
+  </g>
+
+  <!-- Título da Imagem -->
+  <text x="50%" y="90%" text-anchor="middle" font-family="'Poppins', sans-serif" font-size="24" font-weight="600" fill="#0a3d62">Quem Somos: Conectando Pessoas e Tecnologia</text>
+</svg> 
