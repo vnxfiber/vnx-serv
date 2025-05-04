@@ -460,8 +460,16 @@
 
                             <!-- Experiência e Certificações -->
                             <div class="mb-3" data-aos="fade-up" data-aos-delay="150">
-                                <label for="experiencia" class="form-label fw-bold">Resumo da Experiência e Certificações Relevantes</label>
-                                <textarea class="form-control" id="experiencia" name="experiencia" rows="4" placeholder="Descreva brevemente sua experiência, tempo de atuação, principais projetos e certificações (ex: CCNA, ITIL, Furukawa FCP)..."></textarea>
+                                <label for="experiencia" class="form-label fw-bold">Resumo da Experiência e Certificações Relevantes <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="experiencia" name="experiencia" rows="4" 
+                                    placeholder="Descreva brevemente: 1) Sua experiência profissional principal; 2) Quanto tempo atua na área; 3) Certificações que possui; 4) Principais projetos ou realizações."
+                                    required minlength="100" maxlength="500"></textarea>
+                                <div class="form-text text-muted">
+                                    <span id="charCount">0</span>/500 caracteres (mínimo: 100)
+                                </div>
+                                <div class="invalid-feedback">
+                                    Por favor, descreva sua experiência e certificações com pelo menos 100 caracteres.
+                                </div>
                             </div>
 
                              <!-- Contato -->
@@ -1232,6 +1240,26 @@
             const yearElement = document.getElementById('current-year');
             if (yearElement) {
                 yearElement.textContent = new Date().getFullYear();
+            }
+
+            // Adicionar contador de caracteres para o campo de experiência
+            const experienciaTextarea = document.getElementById('experiencia');
+            const charCountSpan = document.getElementById('charCount');
+
+            if (experienciaTextarea && charCountSpan) {
+                experienciaTextarea.addEventListener('input', function() {
+                    const length = this.value.length;
+                    charCountSpan.textContent = length;
+                    
+                    // Atualizar classes de validação visual
+                    if (length < 100) {
+                        this.classList.add('is-invalid');
+                        this.classList.remove('is-valid');
+                    } else if (length <= 500) {
+                        this.classList.remove('is-invalid');
+                        this.classList.add('is-valid');
+                    }
+                });
             }
 
             console.log('Setup concluído');

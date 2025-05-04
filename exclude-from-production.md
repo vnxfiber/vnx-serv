@@ -44,4 +44,14 @@ Estes arquivos são usados apenas durante o desenvolvimento e podem ser excluíd
 npm run build
 
 # Depois cria a versão de produção
-npm run production 
+npm run production
+
+# Criar ambiente virtual
+python -m venv venv
+
+# Ativar o ambiente virtual
+# No Windows:
+.\venv\Scripts\activate
+
+# Instalar dependências
+pip install -r scripts/requirements.txt 

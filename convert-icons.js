@@ -6,93 +6,79 @@ const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
 
-const sizes = [16, 32, 64, 96, 128, 180, 192, 512];
-const iconDir = path.join(__dirname, 'assets', 'icons');
+const faviconDir = path.join(__dirname, 'assets', 'favicons');
 
 // Ensure directory exists
-if (!fs.existsSync(iconDir)) {
-  fs.mkdirSync(iconDir, { recursive: true });
+if (!fs.existsSync(faviconDir)) {
+  fs.mkdirSync(faviconDir, { recursive: true });
 }
 
-// Convert favicon.svg to various PNG sizes
-const faviconSvg = path.join(__dirname, 'assets', 'icons', 'favicon.svg');
+// Base SVG file
+const faviconSvg = path.join(__dirname, 'assets', 'favicons', 'favicon.svg');
+
+// Gerar favicon PNG em vários tamanhos
+const sizes = [16, 32, 70, 144, 150, 180, 192, 310, 512];
 sizes.forEach(size => {
   sharp(faviconSvg)
     .resize(size, size)
-    .toFile(path.join(iconDir, `favicon-${size}x${size}.png`), err => {
-      if (err) {
-        console.error(`Error converting favicon to ${size}x${size}:`, err);
-      } else {
-        console.log(`Created favicon-${size}x${size}.png`);
-      }
-    });
+    .toFile(path.join(faviconDir, `favicon-${size}x${size}.png`))
+    .then(() => console.log(`✓ Criado favicon-${size}x${size}.png`))
+    .catch(err => console.error(`✗ Erro ao criar favicon-${size}x${size}.png:`, err));
 });
 
-// Create apple touch icon
-const appleTouchSvg = path.join(__dirname, 'assets', 'icons', 'apple-touch-icon.svg');
-sharp(appleTouchSvg)
+// Gerar apple-touch-icon
+sharp(faviconSvg)
   .resize(180, 180)
-  .toFile(path.join(iconDir, 'apple-touch-icon.png'), err => {
-    if (err) {
-      console.error('Error converting apple-touch-icon:', err);
-    } else {
-      console.log('Created apple-touch-icon.png');
-    }
-  });
-
-// Create Android Chrome icons
-sharp(faviconSvg)
-  .resize(192, 192)
-  .toFile(path.join(iconDir, 'android-chrome-192x192.png'), err => {
-    if (err) {
-      console.error('Error creating android-chrome-192x192.png:', err);
-    } else {
-      console.log('Created android-chrome-192x192.png');
-    }
-  });
+  .toFile(path.join(faviconDir, 'apple-touch-icon.png'))
+  .then(() => console.log('✓ Criado apple-touch-icon.png'))
+  .catch(err => console.error('✗ Erro ao criar apple-touch-icon.png:', err));
 
 sharp(faviconSvg)
-  .resize(512, 512)
-  .toFile(path.join(iconDir, 'android-chrome-512x512.png'), err => {
-    if (err) {
-      console.error('Error creating android-chrome-512x512.png:', err);
-    } else {
-      console.log('Created android-chrome-512x512.png');
-    }
-  });
+  .resize(180, 180)
+  .toFile(path.join(faviconDir, 'apple-touch-icon-180x180.png'))
+  .then(() => console.log('✓ Criado apple-touch-icon-180x180.png'))
+  .catch(err => console.error('✗ Erro ao criar apple-touch-icon-180x180.png:', err));
 
-// Create MS Tile icons
-[70, 150, 310].forEach(size => {
+// Gerar ícones MS Tile
+['70x70', '144x144', '150x150', '310x310'].forEach(size => {
+  const [width, height] = size.split('x').map(Number);
   sharp(faviconSvg)
-    .resize(size, size)
-    .toFile(path.join(iconDir, `mstile-${size}x${size}.png`), err => {
-      if (err) {
-        console.error(`Error creating mstile-${size}x${size}.png:`, err);
-      } else {
-        console.log(`Created mstile-${size}x${size}.png`);
-      }
-    });
+    .resize(width, height)
+    .toFile(path.join(faviconDir, `mstile-${size}.png`))
+    .then(() => console.log(`✓ Criado mstile-${size}.png`))
+    .catch(err => console.error(`✗ Erro ao criar mstile-${size}.png:`, err));
 });
 
-// Create wide MS Tile icon
+// Gerar MS Tile wide
 sharp(faviconSvg)
   .resize(310, 150)
   .extend({
     top: 0,
     bottom: 0,
-    left: 75,
-    right: 75,
+    left: 0,
+    right: 0,
     background: { r: 10, g: 61, b: 98, alpha: 1 }
   })
-  .toFile(path.join(iconDir, 'mstile-310x150.png'), err => {
-    if (err) {
-      console.error('Error creating mstile-310x150.png:', err);
-    } else {
-      console.log('Created mstile-310x150.png');
-    }
-  });
+  .toFile(path.join(faviconDir, 'mstile-310x150.png'))
+  .then(() => console.log('✓ Criado mstile-310x150.png'))
+  .catch(err => console.error('✗ Erro ao criar mstile-310x150.png:', err));
 
-// Create ICO file (using 16x16, 32x32, and 48x48 sizes)
-console.log('To create ICO file, use a tool like https://convertico.com or a similar library');
+// Gerar ICO file (combinando 16x16, 32x32 e 48x48)
+const ico = require('sharp-ico');
+Promise.all([16, 32, 48].map(size =>
+  sharp(faviconSvg)
+    .resize(size, size)
+    .toBuffer()
+))
+.then(buffers => {
+  fs.writeFileSync(
+    path.join(faviconDir, 'favicon.ico'),
+    ico.encode(buffers)
+  );
+  console.log('✓ Criado favicon.ico');
+})
+.catch(err => console.error('✗ Erro ao criar favicon.ico:', err));
 
-console.log('Icon generation script completed - remember to run this with Node.js after installing sharp'); 
+console.log('\nPara executar este script:');
+console.log('1. Instale as dependências: npm install sharp sharp-ico');
+console.log('2. Execute: node convert-icons.js'); 
