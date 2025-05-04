@@ -947,6 +947,11 @@
         setupFilterEvents();
     });
 
+    // Variável para controlar a última contagem
+    let lastNotificationCount = 0;
+    let lastUpdateTime = 0;
+    const UPDATE_INTERVAL = 5000; // 5 segundos
+
     // Função para atualizar status de parceiros
     async function updatePartnerStatus(partnerId, newStatus) {
         if (!confirm(`Deseja ${newStatus.toLowerCase()} este parceiro?`)) {
@@ -973,13 +978,21 @@
         }
     }
     
-    // Função para atualizar o badge de notificações
     async function updateNotificationBadge() {
         try {
-            const response = await fetch('/admin/notifications/count', {
+            const now = new Date().getTime();
+            // Evitar atualizações muito frequentes
+            if (now - lastUpdateTime < UPDATE_INTERVAL) {
+                return;
+            }
+            lastUpdateTime = now;
+
+            const timestamp = new Date().getTime();
+            const response = await fetch(`/admin/notifications/count?_=${timestamp}`, {
                 headers: {
-                    'Cache-Control': 'no-cache',
-                    'Pragma': 'no-cache'
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
                 },
                 credentials: 'same-origin'
             });
@@ -994,44 +1007,50 @@
             
             if (badge) {
                 if (data && typeof data.count === 'number') {
-                    badge.textContent = data.count > 99 ? '99+' : data.count;
-                    badge.style.display = data.count > 0 ? 'flex' : 'none';
-                }
-            }
+                    // Só atualiza se a contagem mudou
+                    if (data.count !== lastNotificationCount) {
+                        lastNotificationCount = data.count;
+                        badge.textContent = data.count > 99 ? '99+' : data.count;
+                        badge.style.display = data.count > 0 ? 'flex' : 'none';
 
-            // Atualizar lista de notificações
-            const notificationsResponse = await fetch('/admin/notifications/list', {
-                headers: { 
-                    'Cache-Control': 'no-cache',
-                    'Accept': 'application/json'
-                },
-                credentials: 'same-origin'
-            });
-            
-            if (notificationsResponse.ok) {
-                const notifications = await notificationsResponse.json();
-                if (dropdownList) {
-                    dropdownList.innerHTML = notifications.length > 0 
-                        ? notifications.slice(0, 5).map(notif => `
-                            <div class="notification-item">
-                                <div class="notification-title">
-                                    <i class="fas fa-${notif.type || 'info'} me-2 text-${notif.type || 'info'}"></i>
-                                    ${notif.title}
-                                </div>
-                                <div class="notification-message">${notif.message}</div>
-                                <div class="notification-time">${new Date(notif.created_at).toLocaleString()}</div>
-                            </div>
-                        `).join('') + (notifications.length > 5 ? `
-                            <div class="text-center py-2 border-top">
-                                <small class="text-muted">+${notifications.length - 5} notificações</small>
-                            </div>
-                        ` : '')
-                        : `
-                            <div class="text-center py-3">
-                                <i class="fas fa-bell-slash text-muted mb-2"></i>
-                                <p class="text-muted mb-0"><small>Nenhuma notificação</small></p>
-                            </div>
-                        `;
+                        // Atualizar lista de notificações apenas se houver mudança na contagem
+                        const notificationsResponse = await fetch(`/admin/notifications/list?_=${timestamp}`, {
+                            headers: { 
+                                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                                'Pragma': 'no-cache',
+                                'Expires': '0',
+                                'Accept': 'application/json'
+                            },
+                            credentials: 'same-origin'
+                        });
+                        
+                        if (notificationsResponse.ok) {
+                            const notifications = await notificationsResponse.json();
+                            if (dropdownList) {
+                                dropdownList.innerHTML = notifications.length > 0 
+                                    ? notifications.slice(0, 5).map(notif => `
+                                        <div class="notification-item">
+                                            <div class="notification-title">
+                                                <i class="fas fa-${notif.type || 'info'} me-2 text-${notif.type || 'info'}"></i>
+                                                ${notif.title}
+                                            </div>
+                                            <div class="notification-message">${notif.message}</div>
+                                            <div class="notification-time">${new Date(notif.created_at).toLocaleString()}</div>
+                                        </div>
+                                    `).join('') + (notifications.length > 5 ? `
+                                        <div class="text-center py-2 border-top">
+                                            <small class="text-muted">+${notifications.length - 5} notificações</small>
+                                        </div>
+                                    ` : '')
+                                    : `
+                                        <div class="text-center py-3">
+                                            <i class="fas fa-bell-slash text-muted mb-2"></i>
+                                            <p class="text-muted mb-0"><small>Nenhuma notificação</small></p>
+                                        </div>
+                                    `;
+                            }
+                        }
+                    }
                 }
             }
         } catch (error) {
@@ -1068,6 +1087,7 @@
             if (result.success) {
                 const badge = document.getElementById('notificationBadge');
                 if (badge) {
+                    badge.textContent = '0';
                     badge.style.display = 'none';
                 }
                 
@@ -1081,7 +1101,9 @@
                     `;
                 }
 
-                updateDashboardCounters();
+                // Forçar atualização do contador
+                await updateNotificationBadge();
+                await updateDashboardCounters();
             }
         } catch (error) {
             console.error('Erro ao marcar notificações como lidas:', error);

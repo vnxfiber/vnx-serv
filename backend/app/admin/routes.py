@@ -361,40 +361,47 @@ def dashboard():
                 
                 if last_check_response.data and len(last_check_response.data) > 0:
                     last_check_time = last_check_response.data[0].get('last_check_time')
+                    
+                    # Convertemos o timestamp para o formato correto antes de comparar
+                    if isinstance(last_check_time, str):
+                        try:
+                            last_check_time = datetime.fromisoformat(last_check_time.replace('Z', '+00:00'))
+                            last_check_iso = last_check_time.isoformat()
+                            
+                            # Consultar novos cadastros desde a última verificação - usando o formato ISO correto
+                            new_partners_response = supabase.table('parceiros_tecnicos') \
+                                .select('id') \
+                                .filter('created_at', 'gt', last_check_iso) \
+                                .execute()
+                                
+                            if new_partners_response.data and len(new_partners_response.data) > 0:
+                                # Criar notificação apenas se houver novos parceiros
+                                logger.debug(f"Encontrados {len(new_partners_response.data)} novos parceiros desde {last_check_iso}")
+                                create_notification(
+                                    user_id=user_id,
+                                    title='Novos Parceiros',
+                                    message=f'Há {len(new_partners_response.data)} novo(s) cadastro(s) de parceiro(s) técnico(s).',
+                                    type='info'
+                                )
+                        except Exception as date_error:
+                            logger.error(f"Erro na conversão de data: {str(date_error)}")
                 
-                # Se não houver registro anterior, criar um
-                if not last_check_time:
-                    # Registrar o acesso atual
-                    current_time = datetime.now().isoformat()
+                # Atualizar o timestamp da última verificação
+                current_time = datetime.now().isoformat()
+                if last_check_time:
+                    supabase.table('user_last_checks') \
+                        .update({'last_check_time': current_time}) \
+                        .eq('user_id', user_id) \
+                        .execute()
+                else:
+                    # Se não houver registro anterior, criar um
                     supabase.table('user_last_checks').insert({
                         'user_id': user_id,
                         'last_check_time': current_time
                     }).execute()
-                else:
-                    # Converter para datetime
-                    if isinstance(last_check_time, str):
-                        last_check_time = datetime.fromisoformat(last_check_time.replace('Z', '+00:00'))
                     
-                    # Buscar parceiros cadastrados após a última verificação
-                    new_partners_response = supabase.table('parceiros_tecnicos').select('*').gt('created_at', last_check_time.isoformat()).execute()
-                    new_partners = new_partners_response.data or []
-                    
-                    # Se houver novos parceiros, criar notificação
-                    if new_partners and len(new_partners) > 0:
-                        create_notification(
-                            user_id=user_id,
-                            title='Novos Parceiros Cadastrados',
-                            message=f'{len(new_partners)} novos parceiros foram cadastrados desde seu último acesso.',
-                            type='info'
-                        )
-                    
-                    # Atualizar o timestamp da última verificação
-                    current_time = datetime.now().isoformat()
-                    supabase.table('user_last_checks').update({
-                        'last_check_time': current_time
-                    }).eq('user_id', user_id).execute()
             except Exception as check_error:
-                logger.error(f"Erro ao verificar novos cadastros: {str(check_error)}")
+                logger.error(f"Erro ao verificar novos cadastros: {str(check_error)}", exc_info=True)
                 # Não interromper o fluxo se essa verificação falhar
         
         # Iniciar com uma consulta básica
@@ -891,6 +898,23 @@ def create_notification(user_id, title, message, type='info'):
     """Função auxiliar para criar uma nova notificação."""
     try:
         supabase = SupabaseClient.get_client()
+        
+        # Verificar se já existe uma notificação recente com o mesmo título e mensagem
+        # para evitar duplicações em atualizações de página
+        recent_time = (datetime.now() - timedelta(minutes=10)).isoformat()
+        
+        existing_response = supabase.table('notifications') \
+            .select('id') \
+            .eq('user_id', user_id) \
+            .eq('title', title) \
+            .eq('message', message) \
+            .gte('created_at', recent_time) \
+            .execute()
+            
+        # Se já existir uma notificação recente similar, não criar outra
+        if existing_response.data and len(existing_response.data) > 0:
+            logger.debug(f"Notificação similar recente encontrada, evitando duplicação: {title}")
+            return False
         
         notification_data = {
             'user_id': user_id,
