@@ -38,4 +38,10 @@ Estes arquivos são usados apenas durante o desenvolvimento e podem ser excluíd
 
 - Mantenha backups dos arquivos excluídos em seu ambiente de desenvolvimento
 - Documente quaisquer processos de build necessários para gerar arquivos de produção
-- Mantenha uma cópia do `.gitignore` e outros arquivos de configuração em seu ambiente de desenvolvimento 
+- Mantenha uma cópia do `.gitignore` e outros arquivos de configuração em seu ambiente de desenvolvimento
+
+# Primeiro otimiza os arquivos
+npm run build
+
+# Depois cria a versão de produção
+npm run production 
