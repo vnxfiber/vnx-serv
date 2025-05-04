@@ -639,6 +639,12 @@
                        placeholder="Nome, email..." 
                        value="{{ request.args.get('search', '') }}">
             </div>
+            <div class="col-md-2">
+                <label class="form-label">Descrição</label>
+                <input type="text" class="form-control" id="descricaoFilter" 
+                       placeholder="Buscar na experiência..." 
+                       value="{{ request.args.get('descricao', '') }}">
+            </div>
             <div class="col-md-1">
                 <label class="form-label">&nbsp;</label>
                 <button class="btn btn-primary w-100 d-block" onclick="aplicarFiltros()">
@@ -1165,6 +1171,7 @@
         const especialidade = document.getElementById('especialidadeFilter').value;
         const cidade = document.getElementById('cidadeFilter').value;
         const search = document.getElementById('searchInput').value;
+        const descricao = document.getElementById('descricaoFilter').value;
         
         const url = new URL(window.location.href);
         if (status) url.searchParams.set('status', status);
@@ -1178,6 +1185,9 @@
         
         if (search) url.searchParams.set('search', search);
         else url.searchParams.delete('search');
+        
+        if (descricao) url.searchParams.set('descricao', descricao);
+        else url.searchParams.delete('descricao');
         
         window.location.href = url.toString();
     }

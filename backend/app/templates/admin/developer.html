@@ -27,6 +27,12 @@
                                             <label class="form-label">Quantidade</label>
                                             <input type="number" class="form-control" id="numParceiros" value="10" min="1" max="100">
                                         </div>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="gerarExperiencia" checked>
+                                            <label class="form-check-label" for="gerarExperiencia">
+                                                Incluir Experiência Profissional
+                                            </label>
+                                        </div>
                                         <button class="btn btn-primary" onclick="gerarDadosTeste('parceiros')">
                                             <i class="fas fa-users me-2"></i>Gerar
                                         </button>
@@ -192,17 +198,19 @@ function toggleDebugMode(checkbox) {
 
 function gerarDadosTeste(tipo) {
     const quantidade = document.getElementById(tipo === 'parceiros' ? 'numParceiros' : 'numNotificacoes').value;
+    const gerarExperiencia = tipo === 'parceiros' ? document.getElementById('gerarExperiencia').checked : false;
+    
     fetch(`/admin/developer/gerar-dados`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ tipo, quantidade })
+        body: JSON.stringify({ tipo, quantidade, gerarExperiencia })
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            logToConsole(`Dados de teste gerados: ${quantidade} ${tipo}`);
+            logToConsole(`Dados de teste gerados: ${quantidade} ${tipo}${tipo === 'parceiros' && gerarExperiencia ? ' com experiência profissional' : ''}`);
         } else {
             logToConsole(`Erro ao gerar dados: ${data.error}`, 'error');
         }

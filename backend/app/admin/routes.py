@@ -331,6 +331,7 @@ def dashboard():
     status = request.args.get('status', '')
     especialidade = request.args.get('especialidade', '')
     cidade = request.args.get('cidade', '')
+    descricao = request.args.get('descricao', '')
     
     # Verificar se é uma requisição AJAX
     is_ajax = request.args.get('ajax', 'false') == 'true'
@@ -417,6 +418,9 @@ def dashboard():
         if search:
             search_term = f"%{search}%".lower()
             query = query.or_(f"nome.ilike.{search_term},email.ilike.{search_term}")
+        if descricao:
+            descricao_term = f"%{descricao}%".lower()
+            query = query.ilike('experiencia', descricao_term)
         
         # Executar a consulta para obter o número total de registros
         result = query.execute()
@@ -1575,6 +1579,7 @@ def gerar_dados_teste():
         data = request.get_json()
         tipo = data.get('tipo')
         quantidade = int(data.get('quantidade', 10))
+        gerar_experiencia = data.get('gerarExperiencia', False)
         
         supabase = SupabaseClient.get_client()
         if not supabase:
@@ -1599,18 +1604,24 @@ def gerar_dados_teste():
             
             for i in range(quantidade):
                 estado, cidade = estados_cidades[i % len(estados_cidades)]
+                esp = especialidades[i % len(especialidades)]
                 dados = {
                     'nome_completo': f'Técnico Teste {i+1}',
                     'email': f'tecnico{i+1}@teste.com',
                     'whatsapp': f'(98) 9{random.randint(8000,9999)}-{random.randint(1000,9999)}',
                     'estado': estado,
                     'cidade': cidade,
-                    'especialidades': especialidades[i % len(especialidades)],
+                    'especialidades': esp,
                     'status': status_opcoes[i % len(status_opcoes)],
                     'created_at': (datetime.now() - timedelta(days=i)).isoformat()
                 }
-                supabase.table('parceiros_tecnicos').insert(dados).execute()
                 
+                if gerar_experiencia:
+                    anos_exp = random.randint(2, 15)
+                    dados['experiencia'] = f'Profissional com {anos_exp} anos de experiência em {", ".join(esp)}. Especialista em instalação e manutenção de equipamentos, com foco em qualidade e satisfação do cliente.'
+                
+                supabase.table('parceiros_tecnicos').insert(dados).execute()
+        
         elif tipo == 'notificacoes':
             user_id = session.get('user_id')
             tipos = ['info', 'success', 'warning', 'danger']
