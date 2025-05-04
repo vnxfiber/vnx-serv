@@ -22,5 +22,14 @@
     "sharp": "^0.34.1",
     "sharp-ico": "^0.1.5",
     "uglify-js": "^3.17.4"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vnxfiber/vnx-serv.git"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/vnxfiber/vnx-serv/issues"
+  },
+  "homepage": "https://github.com/vnxfiber/vnx-serv#readme"
 }
