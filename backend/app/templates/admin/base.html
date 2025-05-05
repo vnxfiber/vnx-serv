@@ -250,67 +250,143 @@
         /* Toast Notifications */
         .toast-container {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 1060;
+            max-width: 350px;
         }
-
+        
         .toast {
-            background: white;
-            border-left: 4px solid #007bff;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            margin-bottom: 0;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            color: #333;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 0.75rem;
+            padding: 0;
+            overflow: hidden;
             opacity: 0;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            transform: translateX(100%) scale(0.9);
-            min-width: 300px;
-            max-width: 400px;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
         }
-
+        
         .toast.show {
             opacity: 1;
-            transform: translateX(0) scale(1);
+            transform: translateY(0);
         }
-
+        
         .toast.success {
-            border-left-color: var(--success-color);
+            border-left: 4px solid #4caf50;
         }
-
+        
         .toast.danger {
-            border-left-color: var(--danger-color);
+            border-left: 4px solid #f44336;
         }
-
+        
         .toast.warning {
-            border-left-color: var(--warning-color);
+            border-left: 4px solid #ff9800;
         }
-
+        
         .toast.info {
-            border-left-color: var(--primary-color);
+            border-left: 4px solid #2196f3;
         }
-
+        
         .toast-header {
             background-color: transparent;
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             padding: 0.75rem 1rem;
             display: flex;
             align-items: center;
-            justify-content: space-between;
         }
-
+        
+        .toast-header i {
+            margin-right: 0.5rem;
+        }
+        
+        .toast-header .title {
+            font-weight: 600;
+            flex: 1;
+        }
+        
         .toast-body {
             padding: 0.75rem 1rem;
-            color: #666;
-        }
-
-        .toast .btn-close {
-            font-size: 0.875rem;
-            padding: 0.5rem;
-            margin: -0.5rem -0.5rem -0.5rem auto;
+            font-size: 0.9rem;
         }
     </style>
+    
+    <!-- Função global para gerenciar notificações toast -->
+    <script>
+        // Função global para criar toasts discretos que desaparecem após 4 segundos
+        function showToast(message, type = 'info', title = null) {
+            // Tipos válidos: success, danger, warning, info
+            
+            // Verificar se o container de toasts existe
+            let toastContainer = document.getElementById('toastContainer');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toastContainer';
+                toastContainer.className = 'toast-container';
+                document.body.appendChild(toastContainer);
+            }
+            
+            // Criar o toast
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            
+            // Ícones para cada tipo
+            const icons = {
+                success: 'check-circle',
+                danger: 'exclamation-circle',
+                warning: 'exclamation-triangle',
+                info: 'info-circle'
+            };
+            
+            // Criar conteúdo do toast
+            let toastContent = '';
+            
+            // Se tiver título, adicionar cabeçalho
+            if (title) {
+                toastContent += `
+                <div class="toast-header">
+                    <i class="fas fa-${icons[type]}"></i>
+                    <span class="title">${title}</span>
+                    <button type="button" class="btn-close" onclick="this.closest('.toast').remove()"></button>
+                </div>`;
+            }
+            
+            // Adicionar corpo
+            toastContent += `
+            <div class="toast-body">
+                ${title ? message : `<i class="fas fa-${icons[type]} me-2"></i> ${message}`}
+                ${!title ? '<button type="button" class="btn-close float-end" onclick="this.closest(\'.toast\').remove()"></button>' : ''}
+            </div>`;
+            
+            toast.innerHTML = toastContent;
+            
+            // Adicionar ao container
+            toastContainer.appendChild(toast);
+            
+            // Mostrar o toast (após um pequeno atraso para o efeito de animação)
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            // Remover o toast após 4 segundos
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 4000);
+            
+            return toast;
+        }
+    </script>
+    
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -368,13 +444,20 @@
     </main>
 
     <!-- Toast Container -->
-    <div class="toast-container"></div>
+    <div id="toastContainer" class="toast-container"></div>
 
     <script>
-        // Função para criar e mostrar uma notificação toast
+        // Função global para criar e mostrar uma notificação toast
         function showToast(title, message, type = 'info') {
-            const toastContainer = document.querySelector('.toast-container');
+            const toastContainer = document.getElementById('toastContainer');
             const toastId = 'toast-' + Date.now();
+            
+            const icons = {
+                'success': 'check-circle',
+                'danger': 'times-circle',
+                'warning': 'exclamation-triangle',
+                'info': 'info-circle'
+            };
             
             const toast = document.createElement('div');
             toast.id = toastId;
@@ -385,8 +468,9 @@
             
             toast.innerHTML = `
                 <div class="toast-header">
-                    <strong class="me-auto">${title}</strong>
-                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    <i class="fas fa-${icons[type]} me-2"></i>
+                    <strong class="title">${title}</strong>
+                    <button type="button" class="btn-close" onclick="removeToast('${toastId}')"></button>
                 </div>
                 <div class="toast-body">
                     ${message}
@@ -395,26 +479,26 @@
             
             toastContainer.appendChild(toast);
             
-            // Inicializa o toast do Bootstrap
-            const bsToast = new bootstrap.Toast(toast, {
-                autohide: true,
-                delay: 5000
-            });
-            
-            // Adiciona classe show para animar a entrada
-            requestAnimationFrame(() => {
+            // Adiciona a classe show após um pequeno delay para ativar a animação
+            setTimeout(() => {
                 toast.classList.add('show');
-            });
-            
-            bsToast.show();
-            
-            // Remove o toast do DOM após ser fechado
-            toast.addEventListener('hidden.bs.toast', () => {
+            }, 10);
+
+            // Remove o toast após 4 segundos
+            setTimeout(() => {
+                removeToast(toastId);
+            }, 4000);
+        }
+
+        // Função para remover um toast específico com animação
+        function removeToast(toastId) {
+            const toast = document.getElementById(toastId);
+            if (toast) {
                 toast.classList.remove('show');
                 setTimeout(() => {
                     toast.remove();
-                }, 300);
-            });
+                }, 300); // Tempo da animação de fade out
+            }
         }
 
         // Função para auto-fechar alertas

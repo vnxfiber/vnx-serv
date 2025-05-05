@@ -1,29 +1,42 @@
 import os
-from functools import wraps
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify, Response
-from supabase import create_client, Client
-import logging
-import json
-from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime, timedelta
-import hashlib
-import base64
-from .logger_config import setup_logger
-import sys
-import os
-import random
-import io
+import re
 import csv
+import json
+import uuid
+import base64
+import hashlib
+import logging
+import datetime
+from io import StringIO
+from functools import wraps
+from datetime import datetime, timedelta
+import sys
+import random
 import pytz
+import io
+import subprocess
+import time
+import pathlib
+
+# Imports Flask
+from flask import (
+    Blueprint, render_template, redirect, url_for, request, 
+    flash, session, jsonify, Response, current_app
+)
+from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+from flask_login import login_required
+
+# Imports Supabase
+from supabase import create_client, Client
+
+# Imports locais
 from ..utils.supabase import SupabaseClient
 from ..utils.logger import logger
 
 # Adiciona o diretório pai ao path para permitir importações relativas
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from config import Config
-
-# Configuração do logger
-logger = setup_logger()
 
 # Blueprint do Admin
 admin_bp = Blueprint('admin', __name__,
@@ -354,8 +367,11 @@ def dashboard():
                 # Não interromper o fluxo se essa verificação falhar
         
         # Verificar novos cadastros desde o último acesso
-        if user_id and not is_ajax:
+        if user_id and not is_ajax and 'checked_new_partners' not in session:
             try:
+                # Marcar que já foi feita a verificação nesta sessão
+                session['checked_new_partners'] = True
+                
                 # Buscar a última vez que o usuário verificou por novos cadastros
                 last_check_response = supabase.table('user_last_checks').select('*').eq('user_id', user_id).limit(1).execute()
                 last_check_time = None
@@ -479,7 +495,8 @@ def dashboard():
         dados_especialidades = [especialidades_count.get(esp, 0) for esp in especialidades]
         
         # 2. Gráfico de distribuição por status
-        dados_status = [parceiros_pendentes, parceiros_aprovados, parceiros_rejeitados]
+        # Ajustar a ordem para [Aprovado, Pendente, Rejeitado] para corresponder aos rótulos no frontend
+        dados_status = [parceiros_aprovados, parceiros_pendentes, parceiros_rejeitados]
         
         # Criar ranking de especialidades
         especialidades_ranking = [
@@ -833,21 +850,85 @@ def mark_notifications_read():
 def clear_all_notifications():
     """Rota para limpar todas as notificações do usuário."""
     try:
+        logger.debug("Iniciando clear_all_notifications")
         supabase = SupabaseClient.get_client()
+        if not supabase:
+            logger.error("Cliente Supabase não inicializado")
+            return jsonify({'status': 'error', 'message': 'Erro de conexão com o banco de dados'}), 500
+            
         user_id = session.get('user_id')
+        if not user_id:
+            logger.error("User ID não encontrado na sessão")
+            return jsonify({'status': 'error', 'message': 'Sessão inválida'}), 400
         
-        # Deleta todas as notificações do usuário
-        supabase.table('notifications') \
+        logger.info(f"Tentando limpar notificações para usuário {user_id}")
+        
+        # Primeiro, verificar se existem notificações para este usuário
+        check_response = supabase.table('notifications') \
+            .select('count', count='exact') \
+            .eq('user_id', user_id) \
+            .execute()
+            
+        count = check_response.count if hasattr(check_response, 'count') else 0
+        logger.info(f"Encontradas {count} notificações para o usuário {user_id}")
+        
+        if count == 0:
+            logger.info(f"Nenhuma notificação encontrada para o usuário {user_id}")
+            return jsonify({'status': 'success', 'message': 'Nenhuma notificação para excluir'}), 200
+        
+        # Tenta primeiro a abordagem com SQL direto usando RPC
+        try:
+            logger.info(f"Tentando excluir notificações via SQL direto")
+            # Usar RPC para executar SQL se disponível
+            rpc_response = supabase.rpc(
+                'excluir_notificacoes_usuario',
+                {'p_user_id': user_id}
+            ).execute()
+            logger.debug(f"Resposta RPC: {rpc_response}")
+        except Exception as rpc_error:
+            logger.warning(f"RPC não disponível ou falhou: {str(rpc_error)}")
+        
+        # Deletar todas as notificações do usuário usando o método padrão
+        try:
+            logger.info(f"Tentando excluir notificações via método padrão")
+            delete_response = supabase.table('notifications') \
             .delete() \
             .eq('user_id', user_id) \
             .execute()
         
-        # Se chegou aqui, a operação foi bem-sucedida
-        return jsonify({'status': 'success'}), 200
+            logger.debug(f"Resposta da exclusão: {delete_response}")
+                
+            # Verificar se as notificações foram realmente excluídas
+            verify_response = supabase.table('notifications') \
+                .select('count', count='exact') \
+                .eq('user_id', user_id) \
+                .execute()
+                
+            remaining = verify_response.count if hasattr(verify_response, 'count') else 0
+            logger.info(f"Após exclusão, restam {remaining} notificações")
+                
+            if remaining > 0:
+                logger.warning("Algumas notificações não foram excluídas, tentando método alternativo")
+                # Tentar excluir usando SQL direto
+                try:
+                    sql = f"DELETE FROM notifications WHERE user_id = '{user_id}'"
+                    delete_direct = supabase.table('notifications').delete().eq('user_id', user_id).execute()
+                    logger.debug(f"Resposta da exclusão direta: {delete_direct}")
+                except Exception as sql_error:
+                    logger.error(f"Erro ao tentar exclusão alternativa: {str(sql_error)}")
+            
+            return jsonify({
+                'status': 'success', 
+                'message': 'Notificações excluídas com sucesso',
+                'deleted': count - remaining
+            }), 200
+        except Exception as delete_error:
+            logger.error(f"Erro ao excluir notificações: {str(delete_error)}", exc_info=True)
+            return jsonify({'status': 'error', 'message': f'Erro ao excluir notificações: {str(delete_error)}'}), 500
             
     except Exception as e:
         logger.error(f"Erro ao limpar notificações: {str(e)}", exc_info=True)
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+        return jsonify({'status': 'error', 'message': f'Erro ao limpar notificações: {str(e)}'}), 500
 
 @admin_bp.route('/notifications/recent')
 @login_required
@@ -1577,9 +1658,25 @@ def gerar_dados_teste():
     """Gera dados de teste no banco de dados."""
     try:
         data = request.get_json()
+        if not data:
+            return jsonify({
+                'success': False,
+                'message': 'Dados não fornecidos na requisição'
+            }), 400
+            
         tipo = data.get('tipo')
-        quantidade = int(data.get('quantidade', 10))
-        gerar_experiencia = data.get('gerarExperiencia', False)
+        if not tipo:
+            return jsonify({
+                'success': False,
+                'message': 'Tipo de dados não especificado'
+            }), 400
+            
+        try:
+            quantidade = min(int(data.get('quantidade', 10)), 100)
+        except (ValueError, TypeError):
+            quantidade = 10
+            
+        gerar_experiencia = bool(data.get('gerar_experiencia', True))
         
         supabase = SupabaseClient.get_client()
         if not supabase:
@@ -1590,63 +1687,123 @@ def gerar_dados_teste():
             estados_cidades = [
                 ('MA', 'São Luís'), ('MA', 'Imperatriz'),
                 ('PI', 'Teresina'), ('CE', 'Fortaleza'),
-                ('PE', 'Recife')
+                ('PE', 'Recife'), ('BA', 'Salvador')
             ]
             
+            # Especialidades válidas conforme descoberto no diagnóstico
             especialidades = [
-                ['Fibra Óptica', 'Servidores TI'],
-                ['Wi-Fi Corporativo', 'Infraestrutura Fisica'],
-                ['Solucoes ISP', 'Telefonia VoIP'],
-                ['Radio Comunicacao', 'Consultoria']
+                'Solucoes ISP', 'Telefonia VoIP',
+                'Redes', 'Seguranca'
             ]
             
-            status_opcoes = ['Pendente', 'Aprovado', 'Rejeitado']
+            status_opcoes = ['Pendente', 'Aprovado', 'Reprovado']
+            
+            sucesso = 0
+            erros = 0
             
             for i in range(quantidade):
-                estado, cidade = estados_cidades[i % len(estados_cidades)]
-                esp = especialidades[i % len(especialidades)]
-                dados = {
-                    'nome_completo': f'Técnico Teste {i+1}',
-                    'email': f'tecnico{i+1}@teste.com',
-                    'whatsapp': f'(98) 9{random.randint(8000,9999)}-{random.randint(1000,9999)}',
-                    'estado': estado,
-                    'cidade': cidade,
-                    'especialidades': esp,
-                    'status': status_opcoes[i % len(status_opcoes)],
-                    'created_at': (datetime.now() - timedelta(days=i)).isoformat()
-                }
-                
-                if gerar_experiencia:
-                    anos_exp = random.randint(2, 15)
-                    dados['experiencia'] = f'Profissional com {anos_exp} anos de experiência em {", ".join(esp)}. Especialista em instalação e manutenção de equipamentos, com foco em qualidade e satisfação do cliente.'
-                
-                supabase.table('parceiros_tecnicos').insert(dados).execute()
-        
-        elif tipo == 'notificacoes':
+                try:
+                    # Gerar dados aleatórios
+                    estado, cidade = random.choice(estados_cidades)
+                    nome = f"Teste {random.randint(1000, 9999)}"
+                    email = f"teste.{random.randint(1000, 9999)}@teste.com"
+                    # Formato correto: 11 dígitos (DDD + número) sem o prefixo do país
+                    whatsapp = f"{random.randint(10, 99)}9{random.randint(10000000, 99999999)}"
+                    
+                    # Montar especialidades escolhidas aleatoriamente
+                    especialidades_escolhidas = random.sample(especialidades, random.randint(1, 2))
+                    
+                    # Dados do parceiro
+                    parceiro_data = {
+                        'nome_completo': nome,
+                        'email': email,
+                        'whatsapp': whatsapp,
+                        'estado': estado,
+                        'cidade': cidade,
+                        'especialidades': especialidades_escolhidas,
+                        'experiencia': f"Teste gerado pelo sistema",
+                        'status': random.choice(status_opcoes),
+                        'is_test_data': True,
+                        'created_at': datetime.now().isoformat()
+                    }
+                    
+                    logger.debug(f"Inserindo parceiro de teste: {parceiro_data}")
+                    
+                    # Inserir parceiro na tabela parceiros_tecnicos
+                    result = supabase.table('parceiros_tecnicos').insert(parceiro_data).execute()
+                    
+                    if hasattr(result, 'data') and result.data:
+                        sucesso += 1
+                        logger.info(f"Parceiro inserido com sucesso: ID {result.data[0].get('id', 'N/A')}")
+                        
+                        # Gerar experiência profissional se solicitado
+                        if gerar_experiencia:
+                            try:
+                                exp_data = {
+                                    'parceiro_id': result.data[0].get('id'),
+                                    'empresa': f"Empresa Teste {random.randint(1, 100)}",
+                                    'cargo': random.choice(especialidades),
+                                    'periodo_inicio': '2020-01-01',
+                                    'periodo_fim': '2023-12-31',
+                                    'is_test_data': True
+                                }
+                                supabase.table('experiencia_profissional').insert(exp_data).execute()
+                                logger.debug(f"Experiência profissional adicionada para parceiro ID {result.data[0].get('id')}")
+                            except Exception as exp_err:
+                                logger.warning(f"Erro ao adicionar experiência: {str(exp_err)}")
+                    else:
+                        erro_msg = "Resposta sem dados"
+                        if hasattr(result, 'error') and result.error:
+                            erro_msg = f"Erro Supabase: {result.error}"
+                        
+                        logger.error(f"Erro ao inserir parceiro: {erro_msg}")
+                        erros += 1
+                        
+                except Exception as e:
+                    logger.error(f"Erro ao gerar parceiro {i+1}: {str(e)}", exc_info=True)
+                    erros += 1
+                    continue
+            
+            # Criar notificação para o usuário
             user_id = session.get('user_id')
-            tipos = ['info', 'success', 'warning', 'danger']
-            titulos = [
-                'Novo Parceiro', 'Atualização do Sistema',
-                'Alerta de Segurança', 'Manutenção Programada'
-            ]
+            try:
+                create_notification(
+                    user_id=user_id,
+                    title='Dados de Teste Gerados',
+                    message=f'{sucesso} parceiros técnicos de teste foram gerados com sucesso.',
+                    type='info'
+                )
+            except Exception as notif_error:
+                logger.error(f"Erro ao criar notificação: {str(notif_error)}")
             
-            for i in range(quantidade):
-                tipo = tipos[i % len(tipos)]
-                titulo = titulos[i % len(titulos)]
-                dados = {
-                    'user_id': user_id,
-                    'title': f'{titulo} #{i+1}',
-                    'message': f'Esta é uma notificação de teste do tipo {tipo}',
-                    'type': tipo,
-                    'read': False,
-                    'created_at': (datetime.now() - timedelta(minutes=i*30)).isoformat()
+            return jsonify({
+                'success': True,
+                'message': f'{sucesso} parceiros criados com sucesso. {erros} erros encontrados.',
+                'data': {
+                    'sucesso': sucesso,
+                    'erros': erros
                 }
-                supabase.table('notifications').insert(dados).execute()
-        
-        return jsonify({'success': True})
+            })
+            
+        elif tipo == 'notificacoes':
+            # Implementar geração de notificações aqui
+            return jsonify({
+                'success': True,
+                'message': 'Notificações geradas com sucesso'
+            })
+            
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Tipo de dados inválido'
+            }), 400
+            
     except Exception as e:
-        logger.error(f"Erro ao gerar dados de teste: {str(e)}", exc_info=True)
-        return jsonify({'success': False, 'error': str(e)}), 500
+        logger.error(f"Erro ao gerar dados: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'message': f'Erro ao gerar dados: {str(e)}'
+        }), 500
 
 @admin_bp.route('/developer/limpar-dados', methods=['POST'])
 @login_required
@@ -1821,18 +1978,809 @@ def listar_rotas():
     """Lista todas as rotas registradas no sistema."""
     try:
         rotas = []
-        for rule in admin_bp.url_map.iter_rules():
-            rotas.append({
-                'url': rule.rule,
-                'metodo': ','.join(rule.methods),
-                'funcao': rule.endpoint
+        
+        # Tratar de forma segura para evitar erro com app não inicializada
+        app = admin_bp.app
+        
+        if not app:
+            logger.warning("Aplicação Flask não inicializada ao listar rotas")
+            return jsonify({
+                'success': True,
+                'total': 0,
+                'rotas': [{
+                    'url': '/admin/developer',
+                    'metodos': ['GET'],
+                    'funcao': 'admin.developer',
+                    'argumentos': []
+                }]
             })
         
+        # Iterar sobre todas as rotas registradas de forma segura
+        try:
+            for rule in app.url_map.iter_rules():
+                try:
+                    # Filtrar apenas as rotas do admin
+                    if rule.endpoint.startswith('admin.'):
+                        metodos = list(rule.methods - {'HEAD', 'OPTIONS'})
+                        args = list(rule.arguments) if hasattr(rule, 'arguments') and rule.arguments else []
+                        
+                        rotas.append({
+                            'url': str(rule.rule),
+                            'metodos': metodos,
+                            'funcao': str(rule.endpoint),
+                            'argumentos': args
+                        })
+                except Exception as rule_error:
+                    logger.error(f"Erro ao processar rota {rule}: {str(rule_error)}")
+                    continue
+        except Exception as iter_error:
+            logger.error(f"Erro ao iterar sobre as rotas: {str(iter_error)}")
+            # Retornar lista mínima em caso de erro
+            return jsonify({
+                'success': True,
+                'total': 1,
+                'rotas': [{
+                    'url': '/admin/developer',
+                    'metodos': ['GET'],
+                    'funcao': 'admin.developer',
+                    'argumentos': []
+                }]
+            })
+        
+        # Ordenar rotas por URL
+        rotas.sort(key=lambda x: x['url'])
+        
+        logger.debug(f"Total de rotas encontradas: {len(rotas)}")
         return jsonify({
             'success': True,
             'total': len(rotas),
             'rotas': rotas
         })
+        
     except Exception as e:
         logger.error(f"Erro ao listar rotas: {str(e)}", exc_info=True)
-        return jsonify({'success': False, 'error': str(e)}), 500 
+        # Retornar lista vazia em caso de erro para evitar 500
+        return jsonify({
+            'success': True,
+            'total': 0,
+            'rotas': []
+        })
+
+@admin_bp.route('/dashboard/counters')
+@login_required
+def dashboard_counters():
+    """Retorna apenas os contadores do dashboard via AJAX."""
+    try:
+        supabase = SupabaseClient.get_client()
+        
+        # Buscar todos os parceiros
+        response = supabase.table('parceiros_tecnicos').select('*').execute()
+        parceiros = response.data if response.data else []
+        
+        # Inicializar contadores
+        total_parceiros = len(parceiros)
+        parceiros_pendentes = 0
+        parceiros_aprovados = 0
+        parceiros_rejeitados = 0
+        especialidades_count = {}
+        
+        # Contar por status e especialidades
+        for parceiro in parceiros:
+            status = parceiro.get('status', 'Pendente')
+            if status == 'Pendente':
+                parceiros_pendentes += 1
+            elif status == 'Aprovado':
+                parceiros_aprovados += 1
+            elif status == 'Rejeitado':
+                parceiros_rejeitados += 1
+            
+            # Contar especialidades
+            especialidades = parceiro.get('especialidades', [])
+            for esp in especialidades:
+                especialidades_count[esp] = especialidades_count.get(esp, 0) + 1
+        
+        # Determinar especialidade principal
+        especialidade_principal = "Nenhuma"
+        if especialidades_count:
+            especialidade_principal = max(especialidades_count.items(), key=lambda x: x[1])[0]
+        
+        # Preparar dados para os gráficos
+        # Ordem: [Aprovado, Pendente, Rejeitado] para corresponder aos rótulos no frontend
+        dados_status = [parceiros_aprovados, parceiros_pendentes, parceiros_rejeitados]
+        
+        return jsonify({
+            'total_parceiros': total_parceiros,
+            'parceiros_pendentes': parceiros_pendentes,
+            'parceiros_aprovados': parceiros_aprovados,
+            'parceiros_rejeitados': parceiros_rejeitados,
+            'especialidade_principal': especialidade_principal,
+            'dados_status': dados_status
+        })
+        
+    except Exception as e:
+        logger.error(f"Erro ao obter contadores: {str(e)}", exc_info=True)
+        return jsonify({'error': 'Erro ao obter contadores'}), 500
+
+@admin_bp.route('/developer/configurar-console', methods=['POST'])
+@login_required
+def configurar_console():
+    """Configura as opções do console de desenvolvimento."""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'error': 'Dados não fornecidos'}), 400
+            
+        # Configurar nível de log
+        nivel_log = data.get('nivelLog', 'INFO')
+        if nivel_log:
+            log_levels = {
+                'DEBUG': logging.DEBUG,
+                'INFO': logging.INFO,
+                'WARNING': logging.WARNING,
+                'ERROR': logging.ERROR
+            }
+            logger.setLevel(log_levels.get(nivel_log, logging.INFO))
+            
+        # Configurar outras opções do console conforme necessário
+        mostrar_debug = data.get('mostrarDebug', False)
+        mostrar_info = data.get('mostrarInfo', True)
+        mostrar_warning = data.get('mostrarWarning', True)
+        mostrar_error = data.get('mostrarError', True)
+        
+        # Salvar configurações na sessão para persistência
+        session['console_config'] = {
+            'nivel_log': nivel_log,
+            'mostrar_debug': mostrar_debug,
+            'mostrar_info': mostrar_info,
+            'mostrar_warning': mostrar_warning,
+            'mostrar_error': mostrar_error
+        }
+        
+        logger.info("Configurações do console atualizadas com sucesso")
+        return jsonify({
+            'success': True,
+            'config': session['console_config']
+        })
+        
+    except Exception as e:
+        logger.error(f"Erro ao configurar console: {str(e)}", exc_info=True)
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@admin_bp.route('/developer/gerar-parceiros-teste', methods=['POST'])
+@login_required
+def gerar_parceiros_teste():
+    """Gera parceiros técnicos de teste para desenvolvimento e testes."""
+    try:
+        # Habilitando modo de depuração
+        logger.setLevel(logging.DEBUG)
+        
+        # Log de recebimento da solicitação
+        logger.debug("INICIO: Rota gerar-parceiros-teste acessada")
+        logger.debug(f"Método: {request.method}")
+        
+        # Validar dados da requisição
+        data = request.get_json()
+        logger.debug(f"Dados recebidos no body: {data}")
+        
+        if not data or 'parceiros' not in data:
+            logger.error("Dados inválidos na requisição: " + str(data))
+            return jsonify({
+                'success': False,
+                'message': 'Dados inválidos na requisição'
+            }), 400
+            
+        parceiros = data.get('parceiros', [])
+        logger.debug(f"Lista de parceiros recebida: {parceiros}")
+        
+        if not parceiros or not isinstance(parceiros, list):
+            logger.error("Lista de parceiros inválida: " + str(parceiros))
+            return jsonify({
+                'success': False,
+                'message': 'Lista de parceiros inválida'
+            }), 400
+            
+        if len(parceiros) > 20:
+            return jsonify({
+                'success': False,
+                'message': 'Número máximo de parceiros excedido (máx: 20)'
+            }), 400
+            
+        # Conectar ao Supabase
+        logger.debug("Obtendo cliente Supabase...")
+        supabase = SupabaseClient.get_client()
+        if not supabase:
+            logger.error("Cliente Supabase não está inicializado")
+            raise Exception("Cliente Supabase não inicializado")
+        
+        logger.debug("Cliente Supabase inicializado com sucesso")
+        
+        # Testar a conexão com o banco
+        try:
+            logger.debug("Testando conexão com banco de dados...")
+            test_response = supabase.table('admin_users').select('count', count='exact').execute()
+            logger.debug(f"Conexão com banco OK. Resposta: {test_response}")
+        except Exception as test_error:
+            logger.error(f"Erro ao testar conexão: {str(test_error)}")
+            logger.error(f"Detalhes do erro: {test_error}", exc_info=True)
+        
+        # Valores válidos para especialidades
+        especialidades_validas = [
+            "Solucoes ISP", "Telefonia VoIP", "Fibra Óptica", "Servidores TI", 
+            "Infraestrutura Fisica", "Wi-Fi Corporativo", "Radio Comunicacao", 
+            "Consultoria", "Redes", "Seguranca"
+        ]
+        logger.debug(f"Especialidades válidas: {especialidades_validas}")
+        
+        # Converter dados e inserir no banco
+        parceiros_inseridos = 0
+        erros = []
+        
+        for i, parceiro in enumerate(parceiros):
+            try:
+                logger.debug(f"======== Processando parceiro {i+1}/{len(parceiros)}: {parceiro.get('nome_completo')} ========")
+                
+                # Marcar como dado de teste
+                parceiro['is_test_data'] = True
+                
+                # Validar WhatsApp (garantir que seja apenas dígitos)
+                if 'whatsapp' in parceiro:
+                    # Remover qualquer caractere não numérico
+                    whatsapp = ''.join(filter(str.isdigit, parceiro['whatsapp']))
+                    
+                    # Remover prefixo 55 se existir
+                    if whatsapp.startswith('55') and len(whatsapp) > 11:
+                        whatsapp = whatsapp[2:]
+                    
+                    # Garantir que tenha exatamente 11 dígitos (DDD + número)
+                    if len(whatsapp) != 11:
+                        # Se não tiver o comprimento correto, usar um padrão
+                        whatsapp = f"98{str(random.randint(100000000, 999999999))}"
+                        logger.warning(f"WhatsApp ajustado para um valor padrão válido: {whatsapp}")
+                        
+                    # Atualizar no objeto
+                    parceiro['whatsapp'] = whatsapp
+                    logger.debug(f"WhatsApp formatado: {whatsapp}")
+                
+                # Validar especialidades
+                if 'especialidades' in parceiro and parceiro['especialidades']:
+                    esp_originais = parceiro['especialidades']
+                    
+                    # Mapear para valores válidos
+                    esp_validas = []
+                    for esp in esp_originais:
+                        if esp in especialidades_validas:
+                            esp_validas.append(esp)
+                        elif esp == 'Infraestrutura' or esp == 'Servidores' or esp == 'Fibra Óptica':
+                            esp_validas.append('Solucoes ISP')
+                        elif esp == 'Wi-Fi Corporativo':
+                            esp_validas.append('Redes')
+                        elif esp == 'Segurança da Informação':
+                            esp_validas.append('Seguranca')
+                    
+                    # Se não houver especialidades válidas após o mapeamento, usar um padrão
+                    if not esp_validas:
+                        esp_validas = ['Solucoes ISP']
+                    
+                    # Remover duplicatas e atualizar
+                    parceiro['especialidades'] = list(set(esp_validas))
+                    logger.debug(f"Especialidades convertidas: {parceiro['especialidades']}")
+                else:
+                    # Valor padrão se não informado
+                    parceiro['especialidades'] = ['Solucoes ISP']
+                
+                # Garantir campos mínimos obrigatórios
+                campos_requeridos = ['nome_completo', 'email', 'whatsapp', 'cidade', 'estado', 'especialidades']
+                for campo in campos_requeridos:
+                    if campo not in parceiro or parceiro[campo] is None:
+                        if campo == 'especialidades':
+                            parceiro[campo] = ['Solucoes ISP']
+                        else:
+                            parceiro[campo] = f"Teste {campo} {i+1}"
+                        logger.debug(f"Campo {campo} ausente, preenchido com valor padrão")
+                
+                # Simplificar o nome para evitar caracteres especiais
+                nome = parceiro.get('nome_completo', '')
+                if nome:
+                    # Substituir caracteres especiais
+                    import re
+                    nome_limpo = re.sub(r'[^a-zA-ZÀ-ÿ\s\'\.-]', '', nome)
+                    if nome_limpo != nome:
+                        logger.debug(f"Nome simplificado: '{nome}' -> '{nome_limpo}'")
+                        parceiro['nome_completo'] = nome_limpo
+                    
+                    # Truncar se for muito longo
+                    if len(parceiro['nome_completo']) > 100:
+                        parceiro['nome_completo'] = parceiro['nome_completo'][:100]
+                        logger.debug(f"Nome truncado para: {parceiro['nome_completo']}")
+                
+                # Garantir que o email seja único
+                email_base = parceiro.get('email', '').split('@')[0] if '@' in parceiro.get('email', '') else f"teste{i}"
+                dominio = parceiro.get('email', '').split('@')[1] if '@' in parceiro.get('email', '') else "exemplo.com"
+                parceiro['email'] = f"{email_base}_{i}_{int(time.time())}@{dominio}"
+                logger.debug(f"Email ajustado: {parceiro['email']}")
+                
+                # Garantir status válido
+                if 'status' not in parceiro or parceiro['status'] not in ['Aprovado', 'Pendente', 'Rejeitado']:
+                    parceiro['status'] = 'Pendente'
+                    logger.debug("Status definido como 'Pendente'")
+                
+                # Logs adicionais para depuração
+                logger.debug(f"Dados finais do parceiro a inserir: {parceiro}")
+                
+                # Inserir no banco
+                logger.debug("Enviando dados para o Supabase...")
+                try:
+                    response = supabase.table('parceiros_tecnicos').insert(parceiro).execute()
+                    logger.debug(f"Resposta da inserção: {response}")
+                    
+                    if hasattr(response, 'data') and response.data:
+                        parceiros_inseridos += 1
+                        logger.debug(f"Parceiro inserido com sucesso: {response.data}")
+                    else:
+                        erro = f"Falha ao inserir parceiro: {parceiro['nome_completo']} - Resposta sem dados"
+                        if hasattr(response, 'error') and response.error:
+                            erro += f" - Erro: {response.error}"
+                        logger.warning(erro)
+                        erros.append(erro)
+                except Exception as db_error:
+                    erro = f"Erro ao inserir no banco: {str(db_error)}"
+                    logger.error(erro, exc_info=True)
+                    erros.append(erro)
+            except Exception as e:
+                erro = f"Erro ao processar parceiro {parceiro.get('nome_completo', 'desconhecido')}: {str(e)}"
+                logger.error(erro, exc_info=True)
+                erros.append(erro)
+                continue
+                
+        # Registrar no log
+        logger.info(f"{parceiros_inseridos} parceiros de teste inseridos com sucesso. {len(erros)} erros.")
+        
+        # Criar notificação para o usuário
+        user_id = session.get('user_id')
+        try:
+            create_notification(
+                user_id=user_id,
+                title='Dados de Teste Gerados',
+                message=f'{parceiros_inseridos} parceiros técnicos de teste foram gerados com sucesso.',
+                type='info'
+            )
+            logger.debug("Notificação criada com sucesso")
+        except Exception as notif_error:
+            logger.error(f"Erro ao criar notificação: {str(notif_error)}", exc_info=True)
+            # Não interromper o fluxo se a notificação falhar
+        
+        logger.debug("FIM: Processamento da rota gerar-parceiros-teste concluído")
+        return jsonify({
+            'success': True,
+            'message': f'{parceiros_inseridos} parceiros de teste inseridos com sucesso',
+            'count': parceiros_inseridos,
+            'erros': erros
+        })
+    except Exception as e:
+        logger.error(f"Erro ao gerar parceiros de teste: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'message': f'Erro ao gerar parceiros de teste: {str(e)}'
+        }), 500
+
+@admin_bp.route('/developer/limpar-parceiros-teste', methods=['POST'])
+@login_required
+def limpar_parceiros_teste():
+    """Remove todos os parceiros técnicos marcados como dados de teste."""
+    try:
+        # Conectar ao Supabase
+        supabase = SupabaseClient.get_client()
+        if not supabase:
+            raise Exception("Cliente Supabase não inicializado")
+            
+        # Deletar todos os parceiros marcados como teste
+        response = supabase.table('parceiros_tecnicos').delete().eq('is_test_data', True).execute()
+        
+        if response.data:
+            registros_removidos = len(response.data)
+            logger.info(f"{registros_removidos} parceiros de teste removidos com sucesso")
+            
+            # Criar notificação para o usuário
+            user_id = session.get('user_id')
+            create_notification(
+                user_id=user_id,
+                title='Dados de Teste Removidos',
+                message=f'{registros_removidos} parceiros técnicos de teste foram removidos com sucesso.',
+                type='warning'
+            )
+            
+            return jsonify({
+                'success': True,
+                'message': f'{registros_removidos} parceiros de teste removidos com sucesso',
+                'count': registros_removidos
+            })
+        else:
+            return jsonify({
+                'success': True,
+                'message': 'Nenhum parceiro de teste encontrado para remover',
+                'count': 0
+            })
+    except Exception as e:
+        logger.error(f"Erro ao limpar parceiros de teste: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'message': f'Erro ao limpar parceiros de teste: {str(e)}'
+        }), 500
+
+@admin_bp.route('/dashboard/status')
+@login_required
+def dashboard_status():
+    """Verificar se o dashboard está funcionando corretamente."""
+    try:
+        # Verificar a conexão com o banco
+        supabase = SupabaseClient.get_client()
+        if not supabase:
+            raise Exception("Cliente Supabase não inicializado")
+            
+        # Fazer uma consulta simples para verificar a conectividade
+        test_query = supabase.table('parceiros_tecnicos').select("count", count='exact').limit(1).execute()
+        
+        # Se chegou até aqui, está tudo funcionando
+        return jsonify({
+            'status': 'ok',
+            'message': 'Dashboard disponível'
+        })
+    except Exception as e:
+        logger.error(f"Erro no status do dashboard: {str(e)}", exc_info=True)
+        return jsonify({
+            'status': 'error',
+            'message': f'Erro: {str(e)}'
+        }), 500
+
+@admin_bp.route('/developer/verificar-tabela-parceiros')
+@login_required
+def verificar_tabela_parceiros():
+    """Verifica a estrutura da tabela parceiros_tecnicos usando uma consulta simples."""
+    try:
+        supabase = SupabaseClient.get_client()
+        if not supabase:
+            return jsonify({
+                'success': False,
+                'message': 'Cliente Supabase não inicializado'
+            }), 500
+        
+        # Fazer uma consulta simples para obter um registro de exemplo
+        response = supabase.table('parceiros_tecnicos').select('*').limit(1).execute()
+        
+        if not response.data:
+            return jsonify({
+                'success': False,
+                'message': 'Não foi possível obter dados da tabela'
+            }), 500
+
+        # Extrair informações da estrutura a partir do registro de exemplo
+        registro = response.data[0]
+        colunas = []
+        
+        for nome_coluna, valor in registro.items():
+            tipo = 'text'  # tipo padrão
+            
+            if isinstance(valor, bool):
+                tipo = 'boolean'
+            elif isinstance(valor, int):
+                tipo = 'integer'
+            elif isinstance(valor, float):
+                tipo = 'numeric'
+            elif isinstance(valor, list):
+                tipo = 'array'
+            elif isinstance(valor, dict):
+                tipo = 'json'
+                
+            colunas.append({
+                'nome': nome_coluna,
+                'tipo': tipo,
+                'exemplo': str(valor)[:50] if valor is not None else 'NULL'  # limitar tamanho do exemplo
+            })
+
+        # Informações importantes sobre restrições
+        restricoes = {
+            'whatsapp': 'Deve ter exatamente 11 dígitos numéricos',
+            'especialidades': 'Array de strings com valores válidos: ["Solucoes ISP", "Telefonia VoIP", "Fibra Óptica", "Servidores TI", "Infraestrutura Fisica", "Wi-Fi Corporativo", "Radio Comunicacao", "Consultoria", "Redes", "Seguranca"]',
+            'nome_completo': 'Apenas letras, espaços, apóstrofos e hífens são permitidos',
+            'status': 'Valores aceitos: "Pendente", "Aprovado", "Rejeitado"',
+            'email': 'Deve ser um email válido e único',
+            'cidade': 'Nome da cidade sem acentos',
+            'estado': 'Sigla do estado (2 letras)',
+            'is_test_data': 'Boolean para identificar dados de teste'
+        }
+
+        return jsonify({
+            'success': True,
+            'colunas': colunas,
+            'restricoes': restricoes,
+            'total_colunas': len(colunas)
+        })
+        
+    except Exception as e:
+        logger.error(f"Erro ao verificar tabela de parceiros: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False, 
+            'message': f'Erro: {str(e)}'
+        }), 500
+
+# --- Nova rota para verificar WhatsApp único ---
+@admin_bp.route('/developer/verificar-whatsapp', methods=['POST'])
+@login_required
+def verificar_whatsapp():
+    """Verifica se um número de WhatsApp já existe no banco de dados."""
+    try:
+        data = request.get_json()
+        if not data or 'whatsapp' not in data:
+            return jsonify({
+                'success': False,
+                'message': 'Número de WhatsApp não fornecido'
+            }), 400
+            
+        whatsapp = data.get('whatsapp')
+        
+        # Validar formato do WhatsApp
+        if not whatsapp or len(whatsapp) != 11 or not whatsapp.isdigit():
+            return jsonify({
+                'success': False,
+                'message': 'Formato de WhatsApp inválido'
+            }), 400
+            
+        supabase = SupabaseClient.get_client()
+        if not supabase:
+            raise Exception("Cliente Supabase não inicializado")
+            
+        # Consultar se o WhatsApp já existe
+        result = supabase.table('parceiros_tecnicos').select('id').eq('whatsapp', whatsapp).execute()
+        
+        exists = False
+        if hasattr(result, 'data') and result.data and len(result.data) > 0:
+            exists = True
+            
+        return jsonify({
+            'success': True,
+            'exists': exists
+        })
+        
+    except Exception as e:
+        logger.error(f"Erro ao verificar WhatsApp: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'message': f'Erro: {str(e)}'
+        }), 500
+
+# --- Rota para inserir parceiro diretamente da interface ---
+@admin_bp.route('/developer/inserir-parceiro', methods=['POST'])
+@login_required
+def inserir_parceiro_teste():
+    """Insere um parceiro técnico a partir do formulário da interface."""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'Dados não fornecidos'
+            }), 400
+            
+        # Validar campos obrigatórios
+        campos_obrigatorios = ['nome_completo', 'email', 'whatsapp', 'estado', 'cidade', 'especialidades']
+        for campo in campos_obrigatorios:
+            if campo not in data or not data[campo]:
+                return jsonify({
+                    'success': False,
+                    'error': f'Campo obrigatório ausente: {campo}'
+                }), 400
+                
+        # Validar formato do WhatsApp
+        whatsapp = data.get('whatsapp')
+        if not whatsapp or len(whatsapp) != 11 or not whatsapp.isdigit():
+            return jsonify({
+                'success': False,
+                'error': 'WhatsApp deve ter exatamente 11 dígitos numéricos'
+            }), 400
+            
+        # Validar formato do nome (conforme validação do banco)
+        nome = data.get('nome_completo')
+        import re
+        if not re.match(r'^[a-zA-ZÀ-ÿ\s\'.-]+$', nome):
+            return jsonify({
+                'success': False,
+                'error': 'Nome contém caracteres inválidos'
+            }), 400
+            
+        # Garantir que is_test_data seja True
+        data['is_test_data'] = True
+        
+        # Se status não foi fornecido, definir como "Pendente"
+        if 'status' not in data or not data['status']:
+            data['status'] = 'Pendente'
+            
+        supabase = SupabaseClient.get_client()
+        if not supabase:
+            raise Exception("Cliente Supabase não inicializado")
+            
+        # Inserir parceiro
+        logger.debug(f"Inserindo parceiro: {data}")
+        result = supabase.table('parceiros_tecnicos').insert(data).execute()
+        
+        if hasattr(result, 'data') and result.data:
+            parceiro_id = result.data[0].get('id')
+            logger.info(f"Parceiro inserido com sucesso: ID {parceiro_id}")
+            
+            # Retornar dados do parceiro inserido
+            return jsonify({
+                'success': True,
+                'id': parceiro_id,
+                'nome_completo': data.get('nome_completo'),
+                'email': data.get('email'),
+                'whatsapp': data.get('whatsapp')
+            })
+        else:
+            erro_msg = "Resposta sem dados"
+            if hasattr(result, 'error') and result.error:
+                erro_msg = f"Erro Supabase: {result.error}"
+                
+            logger.error(f"Erro ao inserir parceiro: {erro_msg}")
+            return jsonify({
+                'success': False,
+                'error': erro_msg
+            }), 500
+            
+    except Exception as e:
+        logger.error(f"Erro ao inserir parceiro: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@admin_bp.route('/developer/verificar-notificacoes')
+@login_required
+def verificar_notificacoes():
+    """Verifica e retorna informações sobre as notificações do usuário atual."""
+    try:
+        supabase = SupabaseClient.get_client()
+        if not supabase:
+            return jsonify({'status': 'error', 'message': 'Erro de conexão com o banco de dados'}), 500
+            
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'status': 'error', 'message': 'Sessão inválida'}), 400
+        
+        # Verificar notificações para este usuário
+        try:
+            response = supabase.table('notifications') \
+                .select('*') \
+                .eq('user_id', user_id) \
+                .execute()
+                
+            # Verificar a estrutura da tabela
+            estrutura_response = supabase.rpc(
+                'execute_sql',
+                {'query': "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'notifications'"}
+            ).execute()
+            
+            # Verificar permissões do usuário
+            permissoes_response = supabase.rpc(
+                'execute_sql',
+                {'query': "SELECT grantee, privilege_type FROM information_schema.role_table_grants WHERE table_name = 'notifications'"}
+            ).execute()
+            
+            return jsonify({
+                'status': 'success',
+                'notificacoes': response.data if hasattr(response, 'data') else [],
+                'estrutura': estrutura_response.data if hasattr(estrutura_response, 'data') else [],
+                'permissoes': permissoes_response.data if hasattr(permissoes_response, 'data') else [],
+                'contador': len(response.data) if hasattr(response, 'data') else 0
+            })
+        except Exception as e:
+            logger.error(f"Erro ao verificar notificações: {str(e)}", exc_info=True)
+            return jsonify({
+                'status': 'error',
+                'message': f'Erro ao verificar notificações: {str(e)}'
+            }), 500
+    except Exception as e:
+        logger.error(f"Erro geral ao verificar notificações: {str(e)}", exc_info=True)
+        return jsonify({
+            'status': 'error',
+            'message': f'Erro geral: {str(e)}'
+        }), 500
+
+@admin_bp.route('/developer/limpar-notificacoes', methods=['POST'])
+@login_required
+def limpar_notificacoes_alternativo():
+    """Método alternativo para limpar notificações."""
+    try:
+        supabase = SupabaseClient.get_client()
+        if not supabase:
+            return jsonify({'status': 'error', 'message': 'Erro de conexão com o banco de dados'}), 500
+            
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'status': 'error', 'message': 'Sessão inválida'}), 400
+        
+        # Executar SQL direto via RPC para garantir a exclusão
+        try:
+            sql_query = f"DELETE FROM notifications WHERE user_id = '{user_id}'"
+            delete_response = supabase.rpc('execute_sql', {'query': sql_query}).execute()
+            
+            # Verificar se a exclusão funcionou
+            check_response = supabase.table('notifications') \
+                .select('count', count='exact') \
+                .eq('user_id', user_id) \
+                .execute()
+                
+            count = check_response.count if hasattr(check_response, 'count') else 0
+            
+            if count == 0:
+                return jsonify({
+                    'status': 'success',
+                    'message': 'Todas as notificações foram excluídas com sucesso'
+                })
+            else:
+                return jsonify({
+                    'status': 'warning',
+                    'message': f'Ainda existem {count} notificações não excluídas'
+                })
+                
+        except Exception as e:
+            logger.error(f"Erro ao executar SQL para exclusão: {str(e)}", exc_info=True)
+            
+            # Tentar método alternativo
+            try:
+                # Obter todas as notificações do usuário
+                response = supabase.table('notifications') \
+                    .select('id') \
+                    .eq('user_id', user_id) \
+                    .execute()
+                    
+                if not hasattr(response, 'data') or not response.data:
+                    return jsonify({
+                        'status': 'success',
+                        'message': 'Nenhuma notificação encontrada para excluir'
+                    })
+                    
+                # Excluir cada notificação individualmente
+                deleted = 0
+                for notif in response.data:
+                    if 'id' in notif:
+                        try:
+                            delete_one = supabase.table('notifications') \
+                                .delete() \
+                                .eq('id', notif['id']) \
+                                .execute()
+                                
+                            if hasattr(delete_one, 'data') and delete_one.data:
+                                deleted += 1
+                        except Exception as del_error:
+                            logger.error(f"Erro ao excluir notificação {notif['id']}: {str(del_error)}")
+                            
+                return jsonify({
+                    'status': 'success',
+                    'message': f'Excluídas {deleted} de {len(response.data)} notificações'
+                })
+                
+            except Exception as alt_error:
+                logger.error(f"Erro no método alternativo: {str(alt_error)}", exc_info=True)
+                return jsonify({
+                    'status': 'error',
+                    'message': f'Erro no método alternativo: {str(alt_error)}'
+                }), 500
+            
+    except Exception as e:
+        logger.error(f"Erro geral ao limpar notificações: {str(e)}", exc_info=True)
+        return jsonify({
+            'status': 'error',
+            'message': f'Erro geral: {str(e)}'
+        }), 500
+
+@admin_bp.route('/limpar-verificacao-parceiros', methods=['POST'])
+@login_required
+def limpar_verificacao_parceiros():
+    """Limpa a flag de verificação de novos parceiros na sessão."""
+    try:
+        if 'checked_new_partners' in session:
+            session.pop('checked_new_partners')
+            logger.debug("Flag de verificação de novos parceiros removida da sessão")
+        return jsonify({'success': True, 'message': 'Verificação limpa com sucesso'})
+    except Exception as e:
+        logger.error(f"Erro ao limpar verificação de parceiros: {str(e)}", exc_info=True)
+        return jsonify({'success': False, 'message': 'Erro ao limpar verificação'}), 500

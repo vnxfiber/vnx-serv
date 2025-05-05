@@ -15,52 +15,6 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <!-- Seção de Dados de Teste -->
-                    <div class="mb-4">
-                        <h6 class="text-muted mb-3">Dados de Teste</h6>
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <div class="card bg-light">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Gerar Parceiros</h6>
-                                        <div class="mb-3">
-                                            <label class="form-label">Quantidade</label>
-                                            <input type="number" class="form-control" id="numParceiros" value="10" min="1" max="100">
-                                        </div>
-                                        <button class="btn btn-primary" onclick="gerarDadosTeste('parceiros')">
-                                            <i class="fas fa-users me-2"></i>Gerar
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card bg-light">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Gerar Notificações</h6>
-                                        <div class="mb-3">
-                                            <label class="form-label">Quantidade</label>
-                                            <input type="number" class="form-control" id="numNotificacoes" value="5" min="1" max="50">
-                                        </div>
-                                        <button class="btn btn-primary" onclick="gerarDadosTeste('notificacoes')">
-                                            <i class="fas fa-bell me-2"></i>Gerar
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card bg-light">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Limpar Dados</h6>
-                                        <p class="small text-muted mb-3">Remove todos os dados de teste do banco</p>
-                                        <button class="btn btn-danger" onclick="limparDadosTeste()">
-                                            <i class="fas fa-trash me-2"></i>Limpar
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Seção de Logs -->
                     <div class="mb-4">
                         <h6 class="text-muted mb-3">Logs e Depuração</h6>
@@ -188,41 +142,6 @@ function toggleDebugMode(checkbox) {
         body: JSON.stringify({ debug: debugMode })
     });
     logToConsole(`Modo debug ${debugMode ? 'ativado' : 'desativado'}`);
-}
-
-function gerarDadosTeste(tipo) {
-    const quantidade = document.getElementById(tipo === 'parceiros' ? 'numParceiros' : 'numNotificacoes').value;
-    fetch(`/admin/developer/gerar-dados`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ tipo, quantidade })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            logToConsole(`Dados de teste gerados: ${quantidade} ${tipo}`);
-        } else {
-            logToConsole(`Erro ao gerar dados: ${data.error}`, 'error');
-        }
-    });
-}
-
-function limparDadosTeste() {
-    if (!confirm('Tem certeza que deseja limpar todos os dados de teste?')) return;
-    
-    fetch('/admin/developer/limpar-dados', {
-        method: 'POST'
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            logToConsole('Dados de teste removidos com sucesso');
-        } else {
-            logToConsole(`Erro ao limpar dados: ${data.error}`, 'error');
-        }
-    });
 }
 
 function configurarLogs() {
@@ -362,10 +281,35 @@ function verificarRotas() {
 
 function logToConsole(message, type = 'info') {
     const consoleOutput = document.getElementById('consoleOutput');
+    if (!consoleOutput) {
+        console.error('Elemento consoleOutput não encontrado');
+        return;
+    }
+    
     const timestamp = new Date().toLocaleTimeString();
     const logEntry = document.createElement('div');
-    logEntry.className = `log-entry text-${type === 'error' ? 'danger' : 'light'}`;
-    logEntry.innerHTML = `[${timestamp}] ${message}`;
+    
+    // Definir classes com base no tipo
+    let textClass = 'text-light';
+    let icon = 'info-circle';
+    
+    switch(type) {
+        case 'error':
+            textClass = 'text-danger';
+            icon = 'times-circle';
+            break;
+        case 'warning':
+            textClass = 'text-warning';
+            icon = 'exclamation-triangle';
+            break;
+        case 'success':
+            textClass = 'text-success';
+            icon = 'check-circle';
+            break;
+    }
+    
+    logEntry.className = `log-entry ${textClass} mb-1`;
+    logEntry.innerHTML = `[${timestamp}] <i class="fas fa-${icon} me-1"></i> ${message}`;
     consoleOutput.appendChild(logEntry);
     consoleOutput.scrollTop = consoleOutput.scrollHeight;
 }

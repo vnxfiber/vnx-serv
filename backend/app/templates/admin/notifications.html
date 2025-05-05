@@ -2,220 +2,153 @@
 
 {% block title %}Notificações{% endblock %}
 
-{% block content %}
-<div class="container-fluid">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">Notificações</h4>
-        <div class="btn-group">
-            <button class="btn btn-sm btn-outline-secondary me-2" onclick="markAllAsRead()">
-                <i class="fas fa-check-double"></i> Marcar todas como lidas
-            </button>
-            <button class="btn btn-sm btn-outline-danger" onclick="clearAllNotifications()">
-                <i class="fas fa-trash"></i> Limpar Notificações
-            </button>
-        </div>
-    </div>
-
-    <!-- Notifications List -->
-    <div class="notifications-list">
-        {% if notifications %}
-            {% for notification in notifications %}
-                <div class="notification-item card mb-2 {% if not notification.read %}unread{% endif %}" 
-                     data-id="{{ notification.id }}">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h6 class="notification-title mb-1">
-                                    <i class="fas fa-{{ notification.type|default('info')|notification_icon }} me-2 text-{{ notification.type|default('info') }}"></i>
-                                    {{ notification.title }}
-                                </h6>
-                                <p class="notification-message mb-1">{{ notification.message }}</p>
-                                <small class="text-muted">{{ notification.created_at|datetime }}</small>
-                            </div>
-                            {% if not notification.read %}
-                                <button class="btn btn-sm btn-link text-muted" 
-                                        onclick="markAsRead('{{ notification.id }}')"
-                                        title="Marcar como lida">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        {% else %}
-            <div class="text-center py-5">
-                <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
-                <p class="text-muted">Nenhuma notificação encontrada.</p>
-            </div>
-        {% endif %}
-    </div>
-</div>
-{% endblock %}
-
 {% block extra_css %}
 <style>
+    /* Estilos personalizados para a página de notificações */
     .notifications-list {
-        max-width: 800px;
-        margin: 0 auto;
+        position: relative;
     }
 
     .notification-item {
+        position: relative;
         transition: all 0.3s ease;
-        border-left: 4px solid transparent;
     }
 
     .notification-item.unread {
-        background-color: rgba(var(--bs-primary-rgb), 0.05);
-        border-left-color: var(--primary-color);
+        border-left: 4px solid #4a6fa5;
+    }
+    
+    .notification-item:hover {
+        transform: translateY(-2px);
+    }
+    
+    .notification-actions {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
     }
 
     .notification-title {
+        color: #333;
         font-weight: 600;
-        color: var(--primary-color);
     }
 
     .notification-message {
         color: #666;
-        font-size: 0.9rem;
     }
-
-    /* Ícones por tipo de notificação */
-    .fa-success { color: var(--success-color); }
-    .fa-danger { color: var(--danger-color); }
-    .fa-warning { color: var(--warning-color); }
-    .fa-info { color: var(--primary-color); }
-
-    /* Estilos personalizados para os toasts */
-    .toast-container {
-        z-index: 1050;
+    
+    .notification-time {
+        color: #999;
+        font-size: 0.8rem;
     }
-
-    .toast {
-        min-width: 300px;
-        backdrop-filter: blur(10px);
-        border: none;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    
+    .notification-type-icon {
+        font-size: 1.5rem;
+        color: #4a6fa5;
     }
-
-    .toast.bg-success {
-        background-color: #28a745 !important;
-        border-left: 4px solid #1e7e34;
+    
+    .notification-type-icon.success {
+        color: #4caf50;
     }
-
-    .toast.bg-danger {
-        background-color: #dc3545 !important;
-        border-left: 4px solid #bd2130;
+    
+    .notification-type-icon.danger {
+        color: #f44336;
     }
-
-    .toast.bg-warning {
-        background-color: #ffc107 !important;
-        border-left: 4px solid #d39e00;
-        color: #000 !important;
+    
+    .notification-type-icon.warning {
+        color: #ff9800;
     }
-
-    .toast.bg-info {
-        background-color: #17a2b8 !important;
-        border-left: 4px solid #138496;
+    
+    .notification-type-icon.info {
+        color: #2196f3;
     }
-
-    .toast-header {
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 0.75rem 1rem;
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #999;
     }
-
-    .toast-header.bg-success {
-        background-color: #28a745 !important;
-    }
-
-    .toast-header.bg-danger {
-        background-color: #dc3545 !important;
-    }
-
-    .toast-header.bg-warning {
-        background-color: #ffc107 !important;
-        color: #000 !important;
-    }
-
-    .toast-header.bg-info {
-        background-color: #17a2b8 !important;
-    }
-
-    .toast-body {
-        padding: 1rem;
-        font-size: 0.9rem;
-        line-height: 1.4;
-    }
-
-    .btn-close-white {
-        filter: brightness(0) invert(1);
-    }
-
-    .toast.bg-warning .btn-close-white {
-        filter: none;
+    
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
     }
 </style>
 {% endblock %}
 
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bell me-2"></i> Notificações
+                    </h5>
+                    <div>
+                        {% if notifications %}
+                        <button class="btn btn-primary btn-sm me-2" onclick="markAllAsRead()">
+                            <i class="fas fa-check-double me-1"></i> Marcar todas como lidas
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="clearAllNotifications()">
+                            <i class="fas fa-trash me-1"></i> Limpar notificações
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="notifications-list">
+                        {% if notifications %}
+                        {% for notification in notifications %}
+                        <div class="notification-item card mb-2 {% if not notification.read %}unread{% endif %}"
+                             data-id="{{ notification.id }}">
+                            <div class="card-body d-flex">
+                                <div class="notification-type-icon me-3 {{ notification.type }}">
+                                    <i class="fas fa-{{ notification.type|notification_icon }}"></i>
+                                </div>
+                                <div class="notification-content flex-grow-1">
+                                    <h6 class="notification-title mb-1">
+                                        {{ notification.title }}
+                                        {% if not notification.read %}
+                                        <span class="badge bg-primary ms-2">Nova</span>
+                                        {% endif %}
+                                    </h6>
+                                    <p class="notification-message mb-1">{{ notification.message }}</p>
+                                    <p class="notification-time text-muted mb-0">{{ notification.created_at|datetime }}</p>
+                                </div>
+                                <div class="notification-actions">
+                                    {% if not notification.read %}
+                                    <button class="btn btn-sm btn-outline-primary" 
+                                            onclick="markAsRead('{{ notification.id }}')">
+                                        <i class="fas fa-check"></i> Marcar como lida
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-bell-slash"></i>
+                            <h5>Nenhuma notificação</h5>
+                            <p>Você não tem notificações no momento</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
 {% block extra_js %}
 <script>
-    // Função para atualizar o contador de notificações
-    async function updateNotificationBadge() {
-        try {
-            const response = await fetch('/admin/notifications/count');
-            const data = await response.json();
-            
-            const badge = document.getElementById('notificationBadge');
-            if (badge) {
-                badge.textContent = data.count;
-                if (data.count > 0) {
-                    badge.classList.add('show');
-                } else {
-                    badge.classList.remove('show');
-                }
-            }
-        } catch (error) {
-            console.error('Erro ao atualizar badge:', error);
-        }
-    }
-
-    async function markAsRead(notificationId) {
-        try {
-            const response = await fetch('/admin/notifications/mark-read', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    notification_ids: [notificationId]
-                })
-            });
-
-            if (response.ok) {
-                // Remove a classe unread e o botão de marcar como lida
-                const notification = document.querySelector(`.notification-item[data-id="${notificationId}"]`);
-                if (notification) {
-                    notification.classList.remove('unread');
-                    const button = notification.querySelector('button');
-                    if (button) button.remove();
-                }
-                
-                // Atualiza o contador de notificações no header
-                updateNotificationBadge();
-            } else {
-                showToast('Erro', 'Não foi possível marcar a notificação como lida.', 'danger');
-            }
-        } catch (error) {
-            console.error('Erro:', error);
-            showToast('Erro', 'Ocorreu um erro ao marcar a notificação como lida.', 'danger');
-        }
-    }
-
-    async function markAllAsRead() {
-        if (!confirm('Deseja marcar todas as notificações como lidas?')) {
-            return;
-        }
+    let markingInProgress = false;
+    
+    async function markAsRead(id) {
+        if (markingInProgress) return; // Evitar cliques múltiplos
+        markingInProgress = true;
         
         try {
             const response = await fetch('/admin/notifications/mark-read', {
@@ -224,28 +157,77 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    notification_ids: []
+                    notification_ids: [id]
                 })
             });
 
             if (response.ok) {
-                // Remove a classe unread e os botões de todas as notificações
-                document.querySelectorAll('.notification-item.unread').forEach(notification => {
-                    notification.classList.remove('unread');
-                    const button = notification.querySelector('button');
-                    if (button) button.remove();
-                });
-                
-                // Atualiza o contador de notificações no header
-                updateNotificationBadge();
-                
-                showToast('Sucesso', 'Todas as notificações foram marcadas como lidas.', 'success');
+                const data = await response.json();
+                if (data.success) {
+                    // Atualizar UI
+                    const notificationItem = document.querySelector(`.notification-item[data-id="${id}"]`);
+                    if (notificationItem) {
+                        notificationItem.classList.remove('unread');
+                        const badge = notificationItem.querySelector('.badge');
+                        if (badge) badge.remove();
+                        
+                        const actionBtn = notificationItem.querySelector('.notification-actions button');
+                        if (actionBtn) actionBtn.remove();
+                    }
+                } else {
+                    showToast('Não foi possível marcar a notificação como lida.', 'danger');
+                }
             } else {
-                showToast('Erro', 'Não foi possível marcar as notificações como lidas.', 'danger');
+                showToast('Erro ao marcar a notificação como lida.', 'danger');
             }
         } catch (error) {
-            console.error('Erro:', error);
-            showToast('Erro', 'Ocorreu um erro ao marcar as notificações como lidas.', 'danger');
+            console.error('Erro ao marcar notificação como lida:', error);
+            showToast('Ocorreu um erro ao marcar a notificação como lida.', 'danger');
+        } finally {
+            markingInProgress = false;
+        }
+    }
+
+    async function markAllAsRead() {
+        if (markingInProgress) return; // Evitar cliques múltiplos
+        markingInProgress = true;
+        
+        try {
+            const response = await fetch('/admin/notifications/mark-read', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    notification_ids: [] // Array vazio marca todas
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    // Atualizar UI para todas as notificações
+                    document.querySelectorAll('.notification-item.unread').forEach(item => {
+                        item.classList.remove('unread');
+                        const badge = item.querySelector('.badge');
+                        if (badge) badge.remove();
+                        
+                        const actionBtn = item.querySelector('.notification-actions button');
+                        if (actionBtn) actionBtn.remove();
+                    });
+                    
+                    showToast('Todas as notificações foram marcadas como lidas.', 'success');
+                } else {
+                    showToast('Não foi possível marcar as notificações como lidas.', 'danger');
+                }
+            } else {
+                showToast('Erro ao marcar as notificações como lidas.', 'danger');
+            }
+        } catch (error) {
+            console.error('Erro ao marcar todas notificações como lidas:', error);
+            showToast('Ocorreu um erro ao marcar as notificações como lidas.', 'danger');
+        } finally {
+            markingInProgress = false;
         }
     }
 
@@ -254,97 +236,85 @@
             return;
         }
         
-        try {
-            const response = await fetch('/admin/notifications/clear-all', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            console.log('Resposta do servidor:', data);
-
-            // Remove todas as notificações da lista
-            const notificationsList = document.querySelector('.notifications-list');
-            notificationsList.innerHTML = `
-                <div class="text-center py-5">
-                    <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
-                    <p class="text-muted">Nenhuma notificação encontrada.</p>
+        // Mostrar indicador de carregamento
+        const notificationsList = document.querySelector('.notifications-list');
+        const originalContent = notificationsList.innerHTML;
+        notificationsList.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Carregando...</span>
                 </div>
-            `;
-            
-            // Atualiza o contador de notificações no header
-            updateNotificationBadge();
-            
-            // Mostra mensagem de sucesso
-            showToast('Sucesso', 'Notificações removidas com sucesso', 'success');
-            
-        } catch (error) {
-            console.error('Erro ao limpar notificações:', error);
-            showToast('Erro', 'Ocorreu um erro ao limpar as notificações', 'danger');
-        }
-    }
-
-    // Função para mostrar toasts de notificação
-    function showToast(title, message, type = 'info') {
-        const toastContainer = document.getElementById('toastContainer') || createToastContainer();
-        
-        const toast = document.createElement('div');
-        toast.className = `toast show bg-${type}`;
-        toast.setAttribute('role', 'alert');
-        toast.setAttribute('aria-live', 'assertive');
-        toast.setAttribute('aria-atomic', 'true');
-        
-        const textColorClass = type === 'warning' ? 'text-dark' : 'text-white';
-        
-        toast.innerHTML = `
-            <div class="toast-header bg-${type} ${textColorClass}">
-                <i class="fas fa-${getToastIcon(type)} me-2"></i>
-                <strong class="me-auto">${title}</strong>
-                <button type="button" class="btn-close ${type !== 'warning' ? 'btn-close-white' : ''}" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body ${textColorClass}">
-                ${message}
+                <p class="text-muted">Excluindo notificações...</p>
             </div>
         `;
         
-        toastContainer.appendChild(toast);
-        
-        // Remove o toast após 5 segundos
-        setTimeout(() => {
-            toast.remove();
-        }, 5000);
+        try {
+            // Primeiro, tentar o método padrão
+            let response = await fetch('/admin/notifications/clear-all', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'
+            });
+            
+            let result = await response.json();
+            console.log("Resposta inicial:", result);
+            
+            if (result.status === 'success') {
+                notificationsList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <h5>Notificações removidas</h5>
+                        <p>Todas as notificações foram excluídas com sucesso.</p>
+                    </div>
+                `;
+                
+                showToast(result.message || 'Notificações removidas com sucesso', 'success');
+                return;
+            }
+            
+            // Se o método padrão falhar, tentar o método alternativo
+            console.log("Tentando método alternativo...");
+            response = await fetch('/admin/developer/limpar-notificacoes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'
+            });
+            
+            result = await response.json();
+            console.log("Resposta alternativa:", result);
+            
+            if (result.status === 'success') {
+                notificationsList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <h5>Notificações removidas</h5>
+                        <p>Todas as notificações foram excluídas com sucesso.</p>
+                    </div>
+                `;
+                showToast(result.message || 'Notificações removidas com sucesso', 'success');
+            } else if (result.status === 'warning') {
+                notificationsList.innerHTML = originalContent;
+                showToast(`Ainda existem ${verifyData.count} notificações. Tentando excluir novamente...`, 'warning');
+                
+                // Tentar uma segunda vez com atraso
+                setTimeout(() => {
+                    clearAllNotifications();
+                }, 1000);
+            } else {
+                throw new Error(result.message || 'Erro ao excluir notificações');
+            }
+            
+        } catch (error) {
+            console.error('Erro ao limpar notificações:', error);
+            notificationsList.innerHTML = originalContent;
+            showToast(`Não foi possível limpar as notificações: ${error.message}`, 'danger');
+        }
     }
-
-    // Função auxiliar para obter o ícone correto para cada tipo de toast
-    function getToastIcon(type) {
-        const icons = {
-            'success': 'check-circle',
-            'danger': 'times-circle',
-            'warning': 'exclamation-triangle',
-            'info': 'info-circle'
-        };
-        return icons[type] || 'info-circle';
-    }
-
-    // Função auxiliar para criar o container de toasts se não existir
-    function createToastContainer() {
-        const container = document.createElement('div');
-        container.id = 'toastContainer';
-        container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-        container.style.zIndex = '1050';
-        document.body.appendChild(container);
-        return container;
-    }
-
-    // Inicializa o contador de notificações quando a página carrega
-    document.addEventListener('DOMContentLoaded', () => {
-        updateNotificationBadge();
-    });
 </script>
 {% endblock %} 

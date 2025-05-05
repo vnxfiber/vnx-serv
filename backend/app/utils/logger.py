@@ -1,36 +1,40 @@
-import logging
 import os
-from datetime import datetime
+import logging
+from logging.handlers import RotatingFileHandler
 
-# Criar diretório de logs se não existir
-log_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'logs')
-if not os.path.exists(log_dir):
-    os.makedirs(log_dir)
+# Configurar o diretório de logs
+log_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'logs')
+os.makedirs(log_dir, exist_ok=True)
 
-# Configurar o logger
+# Criar o logger
 logger = logging.getLogger('app')
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
-# Criar formatador
-formatter = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+# Configurar formato do log
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+# Configurar handler para arquivo
+file_handler = RotatingFileHandler(
+    os.path.join(log_dir, 'app.log'),
+    maxBytes=10485760,  # 10MB
+    backupCount=10
 )
-
-# Handler para arquivo
-log_file = os.path.join(log_dir, f'app.log')
-file_handler = logging.FileHandler(log_file, encoding='utf-8')
 file_handler.setFormatter(formatter)
-file_handler.setLevel(logging.DEBUG)
+logger.addHandler(file_handler)
 
-# Handler para console
+# Configurar handler para console
 console_handler = logging.StreamHandler()
 console_handler.setFormatter(formatter)
-console_handler.setLevel(logging.INFO)
-
-# Adicionar handlers ao logger
-logger.addHandler(file_handler)
 logger.addHandler(console_handler)
 
-# Evitar propagação de logs duplicados
-logger.propagate = False 
+# Função para alterar o nível de log
+def set_log_level(level):
+    """
+    Altera o nível de log.
+    
+    Args:
+        level: Nível de log (logging.DEBUG, logging.INFO, etc.)
+    """
+    logger.setLevel(level)
+    for handler in logger.handlers:
+        handler.setLevel(level) 

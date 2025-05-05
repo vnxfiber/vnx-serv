@@ -493,6 +493,10 @@
                         <a href="{{ url_for('admin.notifications') }}" class="text-decoration-none">
                             <small>Ver todas</small>
                         </a>
+                        <span class="mx-1">•</span>
+                        <a href="#" class="text-decoration-none text-danger" onclick="clearAllNotifications(); return false;">
+                            <small>Limpar todas</small>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -660,7 +664,9 @@
             <div class="card h-100 shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center py-3">
                     <h6 class="card-title mb-0 fw-bold">Distribuição por Status</h6>
-                    <!-- Removo os botões de download e tela cheia -->
+                    <button class="btn btn-sm btn-light" onclick="reloadCharts()" title="Recarregar gráficos">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
                 </div>
                 <div class="card-body pb-1">
                     <div class="chart-container position-relative" style="height: 320px;">
@@ -838,6 +844,13 @@
             {% endif %}
         </div>
     </div>
+
+    <div id="resultadoGeracao" class="mt-3" style="display: none;">
+        <div class="alert alert-info" id="alertaResultado">
+            <i class="fas fa-check-circle me-2"></i>
+            <span id="mensagemSucesso"></span>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
@@ -851,16 +864,21 @@
         const chartsData = document.getElementById('chartsDataContainer');
         const labels = JSON.parse(chartsData.dataset.labels || '[]');
         const cadastros = JSON.parse(chartsData.dataset.cadastros || '[]');
-        const statusData = JSON.parse(chartsData.dataset.status || '{}');
+        const statusData = JSON.parse(chartsData.dataset.status || '[]');
+        
+        console.log("Dados do Status:", statusData);
+        
+        // Mapear os status e valores para o formato esperado
+        const statusLabels = ['Aprovado', 'Pendente', 'Rejeitado'];
 
         // Inicializar gráfico de status (Chart.js)
         const statusCtx = document.getElementById('statusChart').getContext('2d');
         new Chart(statusCtx, {
             type: 'doughnut',
             data: {
-                labels: Object.keys(statusData),
+                labels: statusLabels,
                 datasets: [{
-                    data: Object.values(statusData),
+                    data: statusData.length === 3 ? statusData : [0, 0, 0],
                     backgroundColor: [
                         '#10B981', // Aprovado - Verde
                         '#F59E0B', // Pendente - Amarelo
@@ -879,6 +897,15 @@
                             padding: 20,
                             usePointStyle: true,
                             pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                let value = context.raw || 0;
+                                return `${label}: ${value}`;
+                            }
                         }
                     }
                 },
@@ -1113,22 +1140,81 @@
             }
         } catch (error) {
             console.error('Erro ao marcar notificações como lidas:', error);
-            const toastContainer = document.getElementById('toastContainer') || createToastContainer();
-            const toast = document.createElement('div');
-            toast.className = 'toast show bg-danger text-white';
-            toast.setAttribute('role', 'alert');
-            toast.innerHTML = `
-                <div class="toast-header bg-danger text-white">
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    <strong class="me-auto">Erro</strong>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
-                </div>
-                <div class="toast-body">
-                    Erro ao marcar notificações como lidas. Tente novamente.
+            showToast('Erro ao marcar notificações como lidas. Tente novamente.', 'danger');
+        }
+    }
+
+    // Nova função para limpar todas as notificações
+    async function clearAllNotifications() {
+        if (!confirm('Tem certeza que deseja excluir todas as notificações?')) {
+            return;
+        }
+        
+        try {
+            console.log("Iniciando clearAllNotifications");
+            
+            // Primeiro tenta o método padrão
+            let response = await fetch('/admin/notifications/clear-all', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'
+            });
+            
+            console.log("Status da resposta:", response.status);
+            let result = await response.json();
+            console.log("Resposta do servidor:", result);
+            
+            // Se o método padrão falhar, tenta o método alternativo
+            if (result.status !== 'success' || (response.ok && result.deleted === 0)) {
+                console.log("Tentando método alternativo de exclusão...");
+                response = await fetch('/admin/developer/limpar-notificacoes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
+                });
+                
+                result = await response.json();
+                console.log("Resposta do método alternativo:", result);
+            }
+            
+            if (result.status === 'success') {
+                console.log("Sucesso na exclusão de notificações");
+                // Atualizar interface
+                const badge = document.getElementById('notificationBadge');
+                if (badge) {
+                    badge.textContent = '0';
+                    badge.style.display = 'none';
+                }
+                
+                const dropdownList = document.getElementById('notificationsDropdownList');
+                if (dropdownList) {
+                    dropdownList.innerHTML = `
+                        <div class="text-center py-4">
+                            <i class="fas fa-trash-alt fa-2x text-muted mb-3"></i>
+                            <p class="text-muted mb-0">Todas as notificações foram excluídas</p>
                 </div>
             `;
-            toastContainer.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+                }
+                
+                // Exibir feedback visual
+                showToast(result.message || 'Notificações excluídas com sucesso.', 'success');
+                
+                // Forçar atualização dos contadores
+                await updateNotificationBadge();
+                await updateDashboardCounters();
+            } else {
+                console.warn("Resposta de erro do servidor:", result);
+                throw new Error(result.message || "Erro ao excluir notificações");
+            }
+        } catch (error) {
+            console.error('Erro ao limpar notificações:', error);
+            showToast(`Erro ao excluir notificações: ${error.message}`, 'danger');
         }
     }
 
@@ -1160,9 +1246,25 @@
 
     // Atualizar quando clicar no botão de atualizar
     function refreshDashboard() {
+        // Limpar a flag de verificação para permitir checar novos parceiros novamente
+        fetch('/admin/limpar-verificacao-parceiros', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+        }).then(() => {
         updateDashboardCounters();
         updateNotificationBadge();
         window.location.reload();
+        }).catch(error => {
+            console.error('Erro ao limpar verificação:', error);
+            // Recarregar mesmo se houver erro
+            updateDashboardCounters();
+            updateNotificationBadge();
+            window.location.reload();
+        });
     }
 
     // Função para filtrar dados
@@ -1204,13 +1306,143 @@
         }
     }
 
-    function createToastContainer() {
-        const container = document.createElement('div');
-        container.id = 'toastContainer';
-        container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-        container.style.zIndex = '1050';
-        document.body.appendChild(container);
-        return container;
+    // Função para recarregar os gráficos
+    async function reloadCharts() {
+        try {
+            // Mostrar indicador de carregamento
+            const chartContainers = document.querySelectorAll('.chart-container');
+            chartContainers.forEach(container => {
+                container.innerHTML = `
+                    <div class="d-flex justify-content-center align-items-center h-100">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Buscar dados atualizados via AJAX
+            const response = await fetch('/admin/dashboard/counters', {
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Accept': 'application/json'
+                },
+                credentials: 'same-origin'
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            // Atualizar contadores
+            document.querySelector('[data-card="total"]').textContent = data.total_parceiros;
+            document.querySelector('[data-card="pendentes"]').textContent = data.parceiros_pendentes;
+            document.querySelector('[data-card="aprovados"]').textContent = data.parceiros_aprovados;
+            document.querySelector('[data-card="especialidade"]').textContent = data.especialidade_principal;
+            
+            // Criar novos gráficos
+            setTimeout(() => {
+                // Atualizar gráfico de distribuição por status
+                if (window.statusChart) {
+                    window.statusChart.destroy();
+                }
+                
+                const statusCtx = document.getElementById('statusChart').getContext('2d');
+                window.statusChart = new Chart(statusCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Aprovado', 'Pendente', 'Rejeitado'],
+                        datasets: [{
+                            data: data.dados_status,
+                            backgroundColor: ['#4caf50', '#ff9800', '#f44336'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 20
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.parsed;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = Math.round((value / total) * 100);
+                                        return `${context.label}: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Mostrar mensagem de sucesso
+                showToast('Gráficos atualizados com sucesso.', 'success');
+            }, 500);
+            
+        } catch (error) {
+            console.error('Erro ao recarregar gráficos:', error);
+            showToast('Erro ao atualizar gráficos: ' + error.message, 'danger');
+        }
+    }
+
+    // Função auxiliar para tratar erros de API
+    function handleApiError(error, context) {
+        console.error(`Erro ${context}:`, error);
+        showToast(`Erro ${context}: ${error.message || 'Erro desconhecido'}`, 'danger');
+    }
+
+    // Função para atualizar quando clicar em aprovar/rejeitar
+    async function updatePartnerStatus(id, status) {
+        try {
+            const response = await fetch(`/admin/parceiro/${id}/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: `status=${status}`
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // Atualizar a interface
+            const statusCell = document.querySelector(`#partner-${id} .status-cell`);
+            if (statusCell) {
+                statusCell.innerHTML = getStatusBadge(status);
+            }
+
+            // Atualizar contadores
+            updateDashboardCounters();
+
+            // Atualizar notificações
+            updateNotificationBadge();
+            
+            // Mostrar feedback visual
+            showToast(`Parceiro ${status.toLowerCase()} com sucesso!`, 'success');
+        } catch (error) {
+            handleApiError(error, 'ao atualizar status');
+        }
+    }
+
+    // Renderizar badges de status
+    function getStatusBadge(status) {
+        const statusMap = {
+            'Aprovado': '<span class="badge bg-success">Aprovado</span>',
+            'Pendente': '<span class="badge bg-warning text-dark">Pendente</span>',
+            'Rejeitado': '<span class="badge bg-danger">Rejeitado</span>'
+        };
+        return statusMap[status] || `<span class="badge bg-secondary">${status}</span>`;
     }
 </script>
 {% endblock %} 

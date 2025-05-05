@@ -2,175 +2,200 @@
 
 {% block title %}Modo Desenvolvedor{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Estilos específicos para a página de desenvolvedor */
+    .logs-container {
+        font-family: monospace;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
+    
+    pre code {
+        font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    
+    /* Garanta que todos os alertas tenham um z-index alto para ficarem visíveis */
+    .alert {
+        z-index: 1030;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Ferramentas de Desenvolvimento</h5>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="debugMode" onchange="toggleDebugMode(this)">
-                        <label class="form-check-label" for="debugMode">Modo Debug</label>
-                    </div>
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-code me-2"></i> Ferramentas de Desenvolvimento</h5>
                 </div>
                 <div class="card-body">
-                    <!-- Seção de Dados de Teste -->
-                    <div class="mb-4">
-                        <h6 class="text-muted mb-3">Dados de Teste</h6>
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <div class="card bg-light">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Gerar Parceiros</h6>
-                                        <div class="mb-3">
-                                            <label class="form-label">Quantidade</label>
-                                            <input type="number" class="form-control" id="numParceiros" value="10" min="1" max="100">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i> Atenção: Estas ferramentas são destinadas apenas para desenvolvimento e testes.
                                         </div>
+                    
+                    <div class="row mt-4">
+                        <!-- Painel de Debug -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-secondary text-white">
+                                    <h6 class="mb-0"><i class="fas fa-bug me-2"></i> Controle de Debug</h6>
+                                        </div>
+                                    <div class="card-body">
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="debugModeSwitch">
+                                        <label class="form-check-label" for="debugModeSwitch">Ativar modo debug</label>
+                                        </div>
+                                    <div class="mb-3">
+                                        <button class="btn btn-sm btn-outline-secondary me-2" onclick="testarDB()">
+                                            <i class="fas fa-database me-1"></i> Testar Conexão DB
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="verificarEstrutura()">
+                                            <i class="fas fa-table me-1"></i> Verificar Estrutura
+                                        </button>
+                                    </div>
+                                    <div id="resultadoTeste" class="alert mt-3" style="display: none;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                        <!-- Geração de Dados de Teste -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-info text-white">
+                                    <h6 class="mb-0"><i class="fas fa-vial me-2"></i> Dados de Teste</h6>
+                                        </div>
+                                <div class="card-body">
+                                        <div class="mb-3">
+                                        <button class="btn btn-sm btn-primary me-2" onclick="abrirModalGerarDados()">
+                                            <i class="fas fa-plus-circle me-1"></i> Gerar Dados
+                                            </button>
+                                        <button class="btn btn-sm btn-danger me-2" onclick="limparDadosTeste()">
+                                            <i class="fas fa-trash me-1"></i> Limpar Dados de Teste
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="verificarTabelaParceiros()">
+                                            <i class="fas fa-table me-1"></i> Verificar Tabela Parceiros
+                                            </button>
+                                        </div>
+                                    <div id="resultadoDados" class="alert mt-3" style="display: none;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                        <!-- Formulário para inserir parceiro de teste -->
+                        <div class="col-md-12 mb-4">
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0"><i class="fas fa-user-plus me-2"></i> Inserir Parceiro de Teste</h6>
+                                </div>
+                                    <div class="card-body">
+                                    <form id="formParceiroTeste" onsubmit="enviarParceiro(event)">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="nomeParceiro" class="form-label">Nome Completo</label>
+                                                <input type="text" class="form-control" id="nomeParceiro" name="nome_completo" value="Paulo Silva" required>
+                                                <small class="text-muted">Apenas letras, espaços, apóstrofos, pontos e hifens</small>
+                                    </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="emailParceiro" class="form-label">Email</label>
+                                                <input type="email" class="form-control" id="emailParceiro" name="email" value="teste@exemplo.com" required>
+                                                <small class="text-muted">Deve ser um email único</small>
+                                </div>
+                            </div>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="whatsappParceiro" class="form-label">WhatsApp (11 dígitos)</label>
+                                                <input type="text" class="form-control" id="whatsappParceiro" name="whatsapp" pattern="[0-9]{11}" title="Digite exatamente 11 dígitos numéricos" placeholder="99999999999" required>
+                                                <small class="text-muted">Formato: DDD + número (apenas números, exatamente 11 dígitos, deve ser único)</small>
+                                    </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="cidadeParceiro" class="form-label">Cidade</label>
+                                                <input type="text" class="form-control" id="cidadeParceiro" name="cidade" value="Sao Luis" required>
+                                                <small class="text-muted">Evite acentos para maior compatibilidade</small>
+                                </div>
+                            </div>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="estadoParceiro" class="form-label">Estado</label>
+                                                <select class="form-select" id="estadoParceiro" name="estado" required>
+                                                    <option value="MA" selected>Maranhão</option>
+                                                    <option value="PI">Piauí</option>
+                                                    <option value="CE">Ceará</option>
+                                                    <option value="PA">Pará</option>
+                                                    <option value="PE">Pernambuco</option>
+                                                </select>
+                                    </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="especialidadesParceiro" class="form-label">Especialidades</label>
+                                                <select class="form-select" id="especialidadesParceiro" name="especialidades" multiple required>
+                                                    <option value="Solucoes ISP" selected>Soluções ISP</option>
+                                                    <option value="Telefonia VoIP">Telefonia VoIP</option>
+                                                    <option value="Fibra Óptica">Fibra Óptica</option>
+                                                    <option value="Servidores TI">Servidores TI</option>
+                                                    <option value="Infraestrutura Fisica">Infraestrutura Física</option>
+                                                    <option value="Wi-Fi Corporativo">Wi-Fi Corporativo</option>
+                                                    <option value="Radio Comunicacao">Rádio Comunicação</option>
+                                                    <option value="Consultoria">Consultoria</option>
+                                                </select>
+                                                <small class="text-muted">Segure CTRL para selecionar múltiplas opções</small>
+                                </div>
+                            </div>
+                                        <div class="mb-3">
+                                            <label for="experienciaParceiro" class="form-label">Experiência</label>
+                                            <textarea class="form-control" id="experienciaParceiro" name="experiencia" rows="3">Testando instalacao e configuracao de equipamentos de rede.</textarea>
+                        </div>
                                         <div class="form-check mb-3">
-                                            <input class="form-check-input" type="checkbox" id="gerarExperiencia" checked>
-                                            <label class="form-check-label" for="gerarExperiencia">
-                                                Incluir Experiência Profissional
+                                            <input class="form-check-input" type="checkbox" id="isTestData" name="is_test_data" checked>
+                                            <label class="form-check-label" for="isTestData">
+                                                Marcar como dado de teste (facilita remoção posterior)
                                             </label>
-                                        </div>
-                                        <button class="btn btn-primary" onclick="gerarDadosTeste('parceiros')">
-                                            <i class="fas fa-users me-2"></i>Gerar
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card bg-light">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Gerar Notificações</h6>
-                                        <div class="mb-3">
-                                            <label class="form-label">Quantidade</label>
-                                            <input type="number" class="form-control" id="numNotificacoes" value="5" min="1" max="50">
-                                        </div>
-                                        <button class="btn btn-primary" onclick="gerarDadosTeste('notificacoes')">
-                                            <i class="fas fa-bell me-2"></i>Gerar
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card bg-light">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Limpar Dados</h6>
-                                        <p class="small text-muted mb-3">Remove todos os dados de teste do banco</p>
-                                        <button class="btn btn-danger" onclick="limparDadosTeste()">
-                                            <i class="fas fa-trash me-2"></i>Limpar
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
-
-                    <!-- Seção de Logs -->
-                    <div class="mb-4">
-                        <h6 class="text-muted mb-3">Logs e Depuração</h6>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="card bg-light">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Logs do Sistema</h6>
-                                        <div class="mb-3">
-                                            <select class="form-select mb-2" id="logLevel">
-                                                <option value="DEBUG">Debug</option>
-                                                <option value="INFO">Info</option>
-                                                <option value="WARNING">Warning</option>
-                                                <option value="ERROR">Error</option>
-                                            </select>
-                                        </div>
-                                        <div class="d-flex gap-2">
-                                            <button class="btn btn-primary" onclick="configurarLogs()">
-                                                <i class="fas fa-cog me-2"></i>Configurar
-                                            </button>
-                                            <button class="btn btn-secondary" onclick="visualizarLogs()">
-                                                <i class="fas fa-eye me-2"></i>Visualizar
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="card bg-light">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Console do Navegador</h6>
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input" type="checkbox" id="consoleDebug">
-                                            <label class="form-check-label" for="consoleDebug">Ativar Debug no Console</label>
-                                        </div>
-                                        <div class="form-check mb-3">
-                                            <input class="form-check-input" type="checkbox" id="networkDebug">
-                                            <label class="form-check-label" for="networkDebug">Monitorar Requisições</label>
-                                        </div>
-                                        <button class="btn btn-primary" onclick="configurarConsole()">
-                                            <i class="fas fa-terminal me-2"></i>Aplicar
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Seção de Diagnóstico -->
-                    <div class="mb-4">
-                        <h6 class="text-muted mb-3">Diagnóstico do Sistema</h6>
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <div class="card bg-light">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Banco de Dados</h6>
-                                        <button class="btn btn-primary mb-2 w-100" onclick="testarConexaoDB()">
-                                            <i class="fas fa-database me-2"></i>Testar Conexão
-                                        </button>
-                                        <button class="btn btn-info w-100" onclick="verificarEstrutura()">
-                                            <i class="fas fa-table me-2"></i>Verificar Estrutura
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card bg-light">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Cache</h6>
-                                        <button class="btn btn-primary mb-2 w-100" onclick="verificarCache()">
-                                            <i class="fas fa-memory me-2"></i>Verificar Cache
-                                        </button>
-                                        <button class="btn btn-warning w-100" onclick="limparCache()">
-                                            <i class="fas fa-broom me-2"></i>Limpar Cache
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card bg-light">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Sistema</h6>
-                                        <button class="btn btn-primary mb-2 w-100" onclick="verificarSessoes()">
-                                            <i class="fas fa-users me-2"></i>Verificar Sessões
-                                        </button>
-                                        <button class="btn btn-info w-100" onclick="verificarRotas()">
-                                            <i class="fas fa-route me-2"></i>Listar Rotas
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Console de Logs -->
-                    <div class="mb-4">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="text-muted mb-0">Console</h6>
-                            <button class="btn btn-sm btn-outline-secondary" onclick="limparConsole()">
-                                <i class="fas fa-eraser me-2"></i>Limpar
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save me-1"></i> Inserir Parceiro de Teste
                             </button>
+                                    </form>
+                                    
+                                    <!-- Elementos para exibir resultados -->
+                                    <div id="alertaResultado" class="alert mt-3" style="display: none;"></div>
+                                    <div id="mensagemResultado" class="mt-3" style="display: none;"></div>
                         </div>
-                        <div class="bg-dark text-light p-3 rounded" style="height: 300px; overflow-y: auto;" id="consoleOutput">
-                            <div class="text-muted">Console iniciado. Aguardando logs...</div>
+                        </div>
+                    </div>
+
+                        <!-- Visualização de Logs -->
+                        <div class="col-md-12 mb-4">
+                            <div class="card">
+                                <div class="card-header bg-dark text-white">
+                                    <h6 class="mb-0"><i class="fas fa-list-alt me-2"></i> Logs do Sistema</h6>
+                        </div>
+                        <div class="card-body">
+                                    <div class="mb-3">
+                                        <button class="btn btn-sm btn-outline-dark me-2" onclick="visualizarLogs()">
+                                            <i class="fas fa-sync-alt me-1"></i> Atualizar Logs
+                                        </button>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" id="showDebugLogs" checked>
+                                            <label class="form-check-label" for="showDebugLogs">Debug</label>
+                                </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" id="showInfoLogs" checked>
+                                            <label class="form-check-label" for="showInfoLogs">Info</label>
+                            </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" id="showWarningLogs" checked>
+                                            <label class="form-check-label" for="showWarningLogs">Warning</label>
+                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" id="showErrorLogs" checked>
+                                            <label class="form-check-label" for="showErrorLogs">Error</label>
+                    </div>
+                            </div>
+                                    <div class="logs-container mt-3 bg-dark text-light p-3 rounded" style="max-height: 300px; overflow-y: auto;">
+                                        <pre id="logsContent" class="mb-0"><code>Carregando logs...</code></pre>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -178,220 +203,646 @@
         </div>
     </div>
 </div>
+  </div>
+</div>
+
+<!-- Modal para geração de dados -->
+<div class="modal fade" id="modalGerarDados" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-database me-2"></i> Gerar Dados de Teste</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+                <form id="formGerarDados">
+                    <div class="mb-3">
+                        <label for="tipoDados" class="form-label">Tipo de Dados</label>
+                        <select class="form-select" id="tipoDados" required>
+                            <option value="parceiros" selected>Parceiros Técnicos</option>
+                            <option value="notificacoes">Notificações</option>
+                        </select>
+            </div>
+                    <div class="mb-3">
+                        <label for="quantidadeDados" class="form-label">Quantidade</label>
+                        <input type="number" class="form-control" id="quantidadeDados" min="1" max="50" value="5" required>
+          </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="gerarExperiencia" checked>
+                        <label class="form-check-label" for="gerarExperiencia">
+                            Gerar dados de experiência profissional
+                        </label>
+        </div>
+                </form>
+      </div>
+      <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="gerarDados()">Gerar Dados</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
+<!-- Carregar a biblioteca DevTools -->
+<script src="{{ url_for('static', filename='js/developer-tools.js') }}"></script>
+
 <script>
-let debugMode = false;
-
-function toggleDebugMode(checkbox) {
-    debugMode = checkbox.checked;
-    fetch('/admin/developer/toggle-debug', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ debug: debugMode })
+document.addEventListener('DOMContentLoaded', function() {
+        // Verificar status do modo debug
+        fetch('/admin/developer/status')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('debugModeSwitch').checked = data.debug;
+            })
+            .catch(error => console.error('Erro ao verificar status do modo debug:', error));
+            
+        // Event listener para o switch de debug
+        document.getElementById('debugModeSwitch').addEventListener('change', function(e) {
+            toggleDebugMode(e.target.checked);
+        });
+        
+        // Inicializar logs
+        visualizarLogs();
+        
+        // Inicializar as ferramentas do desenvolvedor
+        if (window.DevTools) {
+            console.log('Inicializando DevTools...');
+            DevTools.verificarElementosHTML();
+            
+            // Substituir a função local pela função robusta do DevTools
+            window.mostrarAlertaOriginal = window.mostrarAlerta;
+            window.mostrarAlerta = function(elementId, mensagem, tipo) {
+                return DevTools.mostrarAlerta(elementId, mensagem, tipo);
+            };
+            
+            // Também substituir a função de envio de parceiro
+            const form = document.getElementById('formParceiroTeste');
+            if (form) {
+                form.removeEventListener('submit', enviarParceiro);
+                form.addEventListener('submit', function(event) {
+                    DevTools.enviarParceiro(event);
+                });
+                console.log('Event listener do formulário substituído por versão robusta');
+        }
+    } else {
+            console.warn('DevTools não encontrado, usando funções locais de fallback...');
+            // Verificar elementos necessários com a versão local
+            verificarElementosNecessarios();
+        }
+        
+        // Adicionar validação para WhatsApp único
+        document.getElementById('whatsappParceiro').addEventListener('blur', function() {
+            validarWhatsAppUnico(this.value);
+        });
     });
-    logToConsole(`Modo debug ${debugMode ? 'ativado' : 'desativado'}`);
-}
-
-function gerarDadosTeste(tipo) {
-    const quantidade = document.getElementById(tipo === 'parceiros' ? 'numParceiros' : 'numNotificacoes').value;
-    const gerarExperiencia = tipo === 'parceiros' ? document.getElementById('gerarExperiencia').checked : false;
     
-    fetch(`/admin/developer/gerar-dados`, {
+    // Verificar se WhatsApp já existe no banco
+    function validarWhatsAppUnico(whatsapp) {
+        if (whatsapp.length !== 11 || !/^\d+$/.test(whatsapp)) {
+            return; // Não é um número válido ainda, não validar
+        }
+        
+        fetch('/admin/developer/verificar-whatsapp', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ tipo, quantidade, gerarExperiencia })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            logToConsole(`Dados de teste gerados: ${quantidade} ${tipo}${tipo === 'parceiros' && gerarExperiencia ? ' com experiência profissional' : ''}`);
+            body: JSON.stringify({ whatsapp: whatsapp })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const input = document.getElementById('whatsappParceiro');
+            if (data.exists) {
+                input.setCustomValidity('Este número já está cadastrado');
+                input.classList.add('is-invalid');
+                // Mostrar feedback visual
+                if (!input.nextElementSibling || !input.nextElementSibling.classList.contains('invalid-feedback')) {
+                    const feedback = document.createElement('div');
+                    feedback.className = 'invalid-feedback';
+                    feedback.textContent = 'Este número já está cadastrado no sistema.';
+                    input.parentNode.insertBefore(feedback, input.nextSibling);
+                }
         } else {
-            logToConsole(`Erro ao gerar dados: ${data.error}`, 'error');
-        }
-    });
-}
-
-function limparDadosTeste() {
-    if (!confirm('Tem certeza que deseja limpar todos os dados de teste?')) return;
+                input.setCustomValidity('');
+                input.classList.remove('is-invalid');
+                // Remover feedback se existir
+                if (input.nextElementSibling && input.nextElementSibling.classList.contains('invalid-feedback')) {
+                    input.nextElementSibling.remove();
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao verificar WhatsApp:', error);
+        });
+    }
     
-    fetch('/admin/developer/limpar-dados', {
-        method: 'POST'
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            logToConsole('Dados de teste removidos com sucesso');
+    // Função para verificar e criar elementos necessários (fallback se DevTools não estiver disponível)
+    function verificarElementosNecessarios() {
+        console.log('Verificando elementos necessários...');
+        
+        // Lista de elementos essenciais
+        const elementosNecessarios = [
+            'resultadoTeste',
+            'resultadoDados',
+            'alertaResultado',
+            'mensagemResultado'
+        ];
+        
+        elementosNecessarios.forEach(id => {
+            if (!document.getElementById(id)) {
+                console.warn(`Elemento #${id} não encontrado. Criando dinamicamente...`);
+                
+                // Criar o elemento
+                const elemento = document.createElement('div');
+                elemento.id = id;
+                elemento.className = 'alert mt-3';
+                elemento.style.display = 'none';
+                
+                // Adicionar ao DOM na localização apropriada
+                let container;
+                
+                if (id === 'resultadoTeste') {
+                    // Buscar container de Debug
+                    const debugCard = document.querySelector('.card-header.bg-secondary');
+                    container = debugCard ? debugCard.closest('.card').querySelector('.card-body') : null;
+                } else if (id === 'resultadoDados') {
+                    // Buscar container de Dados de Teste
+                    const testDataCard = document.querySelector('.card-header.bg-info');
+                    container = testDataCard ? testDataCard.closest('.card').querySelector('.card-body') : null;
         } else {
-            logToConsole(`Erro ao limpar dados: ${data.error}`, 'error');
+                    // Buscar container do formulário
+                    const form = document.querySelector('form#formParceiroTeste');
+                    container = form ? form.closest('.card-body') : null;
+                }
+                
+                // Se não encontrou, usa o primeiro card-body ou o body
+                if (!container) {
+                    container = document.querySelector('.card-body') || document.body;
+                }
+                
+                container.appendChild(elemento);
+                console.log(`Elemento #${id} criado com sucesso!`);
         }
     });
 }
 
-function configurarLogs() {
-    const level = document.getElementById('logLevel').value;
-    fetch('/admin/developer/configurar-logs', {
+    // Função para alternar modo debug
+    function toggleDebugMode(enabled) {
+        fetch('/admin/developer/toggle-debug', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ level })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            logToConsole(`Nível de log configurado para: ${level}`);
+            body: JSON.stringify({ debug: enabled })
+        })
+        .then(response => {
+            if (response.ok) {
+                mostrarAlerta('resultadoTeste', `Modo debug ${enabled ? 'ativado' : 'desativado'} com sucesso!`, 'success');
         } else {
-            logToConsole(`Erro ao configurar logs: ${data.error}`, 'error');
+                mostrarAlerta('resultadoTeste', 'Erro ao alterar modo debug.', 'danger');
         }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            mostrarAlerta('resultadoTeste', 'Erro ao alterar modo debug: ' + error, 'danger');
     });
 }
 
-function visualizarLogs() {
-    fetch('/admin/developer/visualizar-logs')
-    .then(response => response.json())
-    .then(data => {
-        if (data.logs) {
-            data.logs.forEach(log => logToConsole(log));
-        } else {
-            logToConsole('Nenhum log encontrado');
-        }
-    });
-}
-
-function configurarConsole() {
-    const consoleDebug = document.getElementById('consoleDebug').checked;
-    const networkDebug = document.getElementById('networkDebug').checked;
-    
-    fetch('/admin/developer/configurar-console', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ consoleDebug, networkDebug })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            logToConsole('Configurações do console atualizadas');
-        } else {
-            logToConsole(`Erro ao configurar console: ${data.error}`, 'error');
-        }
-    });
-}
-
-function testarConexaoDB() {
+    // Função para testar conexão com o banco de dados
+    function testarDB() {
+        mostrarAlerta('resultadoTeste', 'Testando conexão...', 'info');
+        
     fetch('/admin/developer/testar-db')
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            logToConsole('Conexão com banco de dados OK');
+                    mostrarAlerta('resultadoTeste', `Conexão com o banco de dados estabelecida com sucesso! Total de usuários: ${data.total_users}`, 'success');
         } else {
-            logToConsole(`Erro na conexão: ${data.error}`, 'error');
+                    mostrarAlerta('resultadoTeste', `Erro ao conectar ao banco de dados: ${data.error}`, 'danger');
         }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                mostrarAlerta('resultadoTeste', 'Erro ao testar conexão: ' + error, 'danger');
     });
 }
 
+    // Função para verificar estrutura do banco
 function verificarEstrutura() {
+        mostrarAlerta('resultadoTeste', 'Verificando estrutura...', 'info');
+        
     fetch('/admin/developer/verificar-estrutura')
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            logToConsole('Estrutura do banco de dados verificada');
+                    let mensagem = '<p>Estrutura verificada:</p><ul>';
             data.tabelas.forEach(tabela => {
-                logToConsole(`Tabela ${tabela.nome}: ${tabela.status}`);
+                        mensagem += `<li>${tabela.nome}: ${tabela.status}</li>`;
+                    });
+                    mensagem += '</ul>';
+                    
+                    document.getElementById('resultadoTeste').innerHTML = mensagem;
+                    document.getElementById('resultadoTeste').className = 'alert alert-success mt-3';
+                    document.getElementById('resultadoTeste').style.display = 'block';
+        } else {
+                    mostrarAlerta('resultadoTeste', `Erro ao verificar estrutura: ${data.error}`, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                mostrarAlerta('resultadoTeste', 'Erro ao verificar estrutura: ' + error, 'danger');
             });
-        } else {
-            logToConsole(`Erro ao verificar estrutura: ${data.error}`, 'error');
-        }
-    });
-}
-
-function verificarCache() {
-    fetch('/admin/developer/verificar-cache')
+    }
+    
+    // Função para visualizar logs
+    function visualizarLogs() {
+        document.getElementById('logsContent').textContent = 'Carregando logs...';
+        
+        fetch('/admin/developer/visualizar-logs')
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            logToConsole('Status do cache:');
-            logToConsole(`Uso: ${data.uso}%`);
-            logToConsole(`Itens: ${data.itens}`);
-        } else {
-            logToConsole(`Erro ao verificar cache: ${data.error}`, 'error');
-        }
-    });
-}
-
-function limparCache() {
-    fetch('/admin/developer/limpar-cache', { method: 'POST' })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            logToConsole('Cache limpo com sucesso');
-        } else {
-            logToConsole(`Erro ao limpar cache: ${data.error}`, 'error');
-        }
-    });
-}
-
-function verificarSessoes() {
-    fetch('/admin/developer/verificar-sessoes')
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            logToConsole(`Sessões ativas: ${data.total}`);
-            data.sessoes.forEach(sessao => {
-                logToConsole(`Usuário: ${sessao.usuario}, Última atividade: ${sessao.ultima_atividade}`);
+                    // Filtrar logs conforme configuração
+                    let logs = data.logs;
+                    
+                    if (!document.getElementById('showDebugLogs').checked) {
+                        logs = logs.filter(log => !log.toLowerCase().includes('[debug]'));
+                    }
+                    
+                    if (!document.getElementById('showInfoLogs').checked) {
+                        logs = logs.filter(log => !log.toLowerCase().includes('[info]'));
+                    }
+                    
+                    if (!document.getElementById('showWarningLogs').checked) {
+                        logs = logs.filter(log => !log.toLowerCase().includes('[warning]'));
+                    }
+                    
+                    if (!document.getElementById('showErrorLogs').checked) {
+                        logs = logs.filter(log => !log.toLowerCase().includes('[error]'));
+                    }
+                    
+                    document.getElementById('logsContent').textContent = logs.join('\n');
+                } else {
+                    document.getElementById('logsContent').textContent = 'Erro ao carregar logs: ' + data.error;
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                document.getElementById('logsContent').textContent = 'Erro ao carregar logs: ' + error;
             });
-        } else {
-            logToConsole(`Erro ao verificar sessões: ${data.error}`, 'error');
-        }
-    });
-}
-
-function verificarRotas() {
-    fetch('/admin/developer/listar-rotas')
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            logToConsole('Rotas registradas:');
-            data.rotas.forEach(rota => {
-                logToConsole(`${rota.metodo} ${rota.url} -> ${rota.funcao}`);
+    }
+    
+    // Função para abrir modal de geração de dados
+    function abrirModalGerarDados() {
+        const modal = new bootstrap.Modal(document.getElementById('modalGerarDados'));
+        modal.show();
+    }
+    
+    // Função para gerar dados de teste
+    function gerarDados() {
+        const tipo = document.getElementById('tipoDados').value;
+        const quantidade = parseInt(document.getElementById('quantidadeDados').value, 10);
+        const gerarExperiencia = document.getElementById('gerarExperiencia').checked;
+        
+        // Esconder o modal
+        bootstrap.Modal.getInstance(document.getElementById('modalGerarDados')).hide();
+        
+        // Mostrar mensagem de carregamento
+        mostrarAlerta('resultadoDados', 'Gerando dados...', 'info');
+        
+        if (tipo === 'parceiros') {
+            // Lista de especialidades válidas
+            const especialidadesValidas = [
+                "Solucoes ISP", "Telefonia VoIP", "Fibra Óptica", "Servidores TI",
+                "Infraestrutura Fisica", "Wi-Fi Corporativo", "Radio Comunicacao",
+            "Consultoria"
+        ];
+        
+            // Estados válidos
+            const estadosValidos = ["MA", "PI", "CE", "PA", "PE"];
+            
+            // Função para gerar um item aleatório de um array
+            const itemAleatorio = (array) => array[Math.floor(Math.random() * array.length)];
+            
+            // Função para gerar um número de WhatsApp único
+            const gerarWhatsApp = (index) => {
+                // Garantir números diferentes usando o índice e timestamp
+                const timestamp = new Date().getTime().toString().slice(-4);
+                const base = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+                return `98${base}${index}${timestamp}`.slice(0, 11);
+            };
+            
+            // Função para selecionar 1-3 especialidades aleatórias
+            const selecionarEspecialidades = () => {
+                const quantidade = Math.floor(Math.random() * 3) + 1; // 1 a 3 especialidades
+                const selecionadas = [];
+                
+                for (let i = 0; i < quantidade; i++) {
+                    const esp = itemAleatorio(especialidadesValidas);
+                    if (!selecionadas.includes(esp)) {
+                        selecionadas.push(esp);
+                    }
+                }
+                
+                // Garantir pelo menos uma especialidade
+                if (selecionadas.length === 0) {
+                    selecionadas.push("Solucoes ISP");
+                }
+                
+                return selecionadas;
+            };
+            
+            // Gerar array de parceiros de teste
+            const parceiros = [];
+            for (let i = 0; i < quantidade; i++) {
+                // Gerar ID único para este parceiro
+                const uniqueId = `${Math.floor(Math.random() * 9999)}_${i}_${new Date().getTime()}`;
+                
+                // Gerar dados básicos para cada parceiro
+                parceiros.push({
+                    nome_completo: `Teste Parceiro ${uniqueId}`.substring(0, 80),
+                    email: `teste${uniqueId}@exemplo.com`.substring(0, 100),
+                    whatsapp: gerarWhatsApp(i),
+                    cidade: 'Sao Luis',
+                    estado: itemAleatorio(estadosValidos),
+                    especialidades: selecionarEspecialidades(),
+                    experiencia: gerarExperiencia ? 
+                        'Parceiro gerado automaticamente para testes. Experiência em instalação e configuração de equipamentos de rede, FTTH e roteadores.' : 
+                        'Parceiro de teste sem experiência registrada.',
+                    is_test_data: true,
+                    status: 'Pendente'
+                });
+            }
+            
+            console.log('Parceiros a serem criados:', parceiros);
+            
+            // Enviar para a rota correta de gerar parceiros teste
+        fetch('/admin/developer/gerar-parceiros-teste', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+                body: JSON.stringify({
+                    parceiros: parceiros
+                })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                    mostrarAlerta('resultadoDados', data.message, 'success');
+                    console.log('Resposta do servidor:', data);
+                    
+                if (data.erros && data.erros.length > 0) {
+                        console.warn('Erros encontrados:', data.erros);
+                        // Adicionar detalhes dos erros na mensagem
+                        const detalheErros = document.createElement('div');
+                        detalheErros.className = 'mt-3 small';
+                        detalheErros.innerHTML = `<p class="text-warning">Avisos (${data.erros.length}):</p><ul>`;
+                        data.erros.slice(0, 5).forEach(erro => {
+                            detalheErros.innerHTML += `<li>${erro}</li>`;
+                        });
+                        if (data.erros.length > 5) {
+                            detalheErros.innerHTML += `<li>... e mais ${data.erros.length - 5} avisos</li>`;
+                        }
+                        detalheErros.innerHTML += '</ul>';
+                        document.getElementById('resultadoDados').appendChild(detalheErros);
+                    }
+                    } else {
+                    mostrarAlerta('resultadoDados', 'Erro: ' + data.message, 'danger');
+                    console.error('Erro do servidor:', data);
+                    }
+                })
+                .catch(error => {
+                console.error('Erro:', error);
+                mostrarAlerta('resultadoDados', 'Erro ao gerar parceiros: ' + error, 'danger');
             });
-        } else {
-            logToConsole(`Erro ao listar rotas: ${data.error}`, 'error');
+                            } else {
+            // Para outros tipos de dados, manter a implementação original
+            fetch('/admin/developer/gerar-dados', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    tipo: tipo,
+                    quantidade: quantidade,
+                    gerar_experiencia: gerarExperiencia
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarAlerta('resultadoDados', data.message, 'success');
+            } else {
+                    mostrarAlerta('resultadoDados', 'Erro: ' + data.message, 'danger');
+            }
+        })
+        .catch(error => {
+                console.error('Erro:', error);
+                mostrarAlerta('resultadoDados', 'Erro ao gerar dados: ' + error, 'danger');
+            });
         }
-    });
-}
+    }
+    
+    // Função para limpar dados de teste
+    function limparDadosTeste() {
+        if (!confirm('Tem certeza que deseja limpar todos os dados de teste? Esta ação não pode ser desfeita.')) {
+            return;
+        }
 
-function logToConsole(message, type = 'info') {
-    const consoleOutput = document.getElementById('consoleOutput');
-    const timestamp = new Date().toLocaleTimeString();
-    const logEntry = document.createElement('div');
-    logEntry.className = `log-entry text-${type === 'error' ? 'danger' : 'light'}`;
-    logEntry.innerHTML = `[${timestamp}] ${message}`;
-    consoleOutput.appendChild(logEntry);
-    consoleOutput.scrollTop = consoleOutput.scrollHeight;
-}
-
-function limparConsole() {
-    const consoleOutput = document.getElementById('consoleOutput');
-    consoleOutput.innerHTML = '<div class="text-muted">Console limpo.</div>';
-}
-
-// Inicialização
-document.addEventListener('DOMContentLoaded', function() {
-    // Verificar estado atual do modo debug
-    fetch('/admin/developer/status')
+        mostrarAlerta('resultadoDados', 'Limpando dados...', 'info');
+        
+        fetch('/admin/developer/limpar-dados', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                mostrarAlerta('resultadoDados', 'Dados de teste removidos com sucesso!', 'success');
+            } else {
+                mostrarAlerta('resultadoDados', 'Erro ao limpar dados: ' + data.error, 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            mostrarAlerta('resultadoDados', 'Erro ao limpar dados: ' + error, 'danger');
+        });
+    }
+    
+    // Função para verificar a estrutura da tabela parceiros_tecnicos
+function verificarTabelaParceiros() {
+        mostrarAlerta('resultadoDados', 'Verificando estrutura da tabela parceiros_tecnicos...', 'info');
+        
+    fetch('/admin/developer/verificar-tabela-parceiros')
     .then(response => response.json())
     .then(data => {
-        document.getElementById('debugMode').checked = data.debug || false;
-        debugMode = data.debug || false;
-    });
-});
+            if (data.success) {
+                    let html = '<div class="p-3 bg-light border rounded"><h6>Estrutura da tabela parceiros_tecnicos:</h6>';
+                    
+                    if (data.colunas && data.colunas.length > 0) {
+                        html += '<table class="table table-sm"><thead><tr><th>Coluna</th><th>Tipo</th><th>Restrições</th></tr></thead><tbody>';
+                        data.colunas.forEach(col => {
+                            html += `<tr><td>${col.nome || 'N/A'}</td><td>${col.tipo || 'N/A'}</td><td>${col.restricoes || ''}</td></tr>`;
+                        });
+                        html += '</tbody></table>';
+                    } else {
+                        html += '<p class="text-warning">Nenhuma informação de coluna encontrada</p>';
+                    }
+                    
+                    if (data.erros_comuns) {
+                        html += '<div class="mt-3"><h6>Possíveis problemas:</h6><ul>';
+                        Object.entries(data.erros_comuns).forEach(([campo, erro]) => {
+                            html += `<li><strong>${campo}:</strong> ${erro}</li>`;
+                        });
+                        html += '</ul></div>';
+                    }
+                
+                html += '</div>';
+                
+                    document.getElementById('resultadoDados').innerHTML = html;
+                    document.getElementById('resultadoDados').className = 'alert alert-info mt-3';
+                    document.getElementById('resultadoDados').style.display = 'block';
+            } else {
+                    mostrarAlerta('resultadoDados', 'Erro ao verificar estrutura: ' + (data.message || 'Erro desconhecido'), 'danger');
+            }
+        })
+        .catch(error => {
+                console.error('Erro:', error);
+                mostrarAlerta('resultadoDados', 'Erro ao verificar tabela: ' + error, 'danger');
+            });
+    }
+    
+    // Função para enviar formulário do parceiro
+    function enviarParceiro(event) {
+        event.preventDefault();
+        
+        // Mostrar mensagem de carregamento
+        mostrarAlerta('alertaResultado', 'Enviando dados...', 'info');
+        
+        // Obter dados do formulário
+        const form = document.getElementById('formParceiroTeste');
+        const formData = new FormData(form);
+        
+        // Converter para JSON
+        const dadosParceiro = {};
+        formData.forEach((valor, chave) => {
+            if (chave === 'especialidades') {
+                // Pegar múltiplos valores selecionados
+                const select = document.getElementById('especialidadesParceiro');
+                const selectedOptions = Array.from(select.selectedOptions).map(option => option.value);
+                dadosParceiro[chave] = selectedOptions;
+            } else if (chave === 'is_test_data') {
+                dadosParceiro[chave] = true; // Sempre true para o checkbox
+        } else {
+                dadosParceiro[chave] = valor;
+            }
+        });
+        
+        // Garantir que is_test_data seja true mesmo se o checkbox não estiver marcado
+        if (!dadosParceiro.hasOwnProperty('is_test_data')) {
+            dadosParceiro['is_test_data'] = true;
+        }
+        
+        // Enviar para o backend
+        fetch('/admin/developer/inserir-parceiro', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dadosParceiro)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                mostrarAlerta('alertaResultado', 'Parceiro inserido com sucesso!', 'success');
+                
+                // Limpar o formulário ou preparar para nova entrada
+                document.getElementById('whatsappParceiro').value = '';
+                document.getElementById('emailParceiro').value = `teste.${Math.floor(Math.random() * 100000)}@exemplo.com`;
+                
+                // Mostrar detalhes do parceiro inserido
+                let detalhes = `<div class="mt-3 p-3 bg-light rounded">
+                    <h6>Parceiro inserido:</h6>
+                    <p><strong>ID:</strong> ${data.id}<br>
+                    <strong>Nome:</strong> ${data.nome_completo}<br>
+                    <strong>Email:</strong> ${data.email}<br>
+                    <strong>WhatsApp:</strong> ${data.whatsapp}</p>
+                </div>`;
+                
+                document.getElementById('mensagemResultado').innerHTML = detalhes;
+                document.getElementById('mensagemResultado').style.display = 'block';
+        } else {
+                mostrarAlerta('alertaResultado', `Erro ao inserir parceiro: ${data.error}`, 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            mostrarAlerta('alertaResultado', 'Erro ao enviar dados: ' + error, 'danger');
+        });
+    }
+    
+    // Função auxiliar para mostrar alertas - versão melhorada
+    function mostrarAlerta(elementId, mensagem, tipo) {
+        // Verificar se o elemento existe, se não, criar
+        let elemento = document.getElementById(elementId);
+        if (!elemento) {
+            console.warn(`Elemento #${elementId} não encontrado. Criando...`);
+            elemento = document.createElement('div');
+            elemento.id = elementId;
+            elemento.className = 'alert mt-3';
+            elemento.style.display = 'none';
+            
+            // Encontrar o container apropriado para adicionar o elemento
+            let container;
+            
+            // Tentar encontrar containers específicos com navegação mais precisa
+            if (elementId === 'resultadoTeste') {
+                const debugCard = document.querySelector('.card-header.bg-secondary');
+                container = debugCard ? debugCard.closest('.card').querySelector('.card-body') : null;
+            } else if (elementId === 'resultadoDados') {
+                const testDataCard = document.querySelector('.card-header.bg-info');
+                container = testDataCard ? testDataCard.closest('.card').querySelector('.card-body') : null;
+        } else {
+                const form = document.querySelector('form#formParceiroTeste');
+                container = form ? form.closest('.card-body') : null;
+            }
+            
+            // Fallback para o body se não encontrar container específico
+            if (!container) {
+                container = document.querySelector('.card-body') || document.body;
+            }
+            
+            container.appendChild(elemento);
+            console.log(`Elemento #${elementId} criado e adicionado ao DOM`);
+        }
+        
+        // Agora é seguro definir as propriedades
+        elemento.innerHTML = mensagem;
+        elemento.className = `alert alert-${tipo} mt-3`;
+        elemento.style.display = 'block';
+        
+        // Scroll até o alerta se não estiver visível
+        if (!isElementInViewport(elemento)) {
+            elemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        return elemento;
+    }
+    
+    // Função auxiliar para verificar se um elemento está visível na viewport
+    function isElementInViewport(el) {
+        const rect = el.getBoundingClientRect();
+        return (
+            rect.top >= 0 &&
+            rect.left >= 0 &&
+            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+        );
+}
 </script>
 {% endblock %} 

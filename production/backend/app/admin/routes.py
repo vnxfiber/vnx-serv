@@ -939,65 +939,9 @@ def terms():
 @admin_bp.route('/criar-dados-teste')
 @login_required
 def criar_dados_teste():
-    try:
-        supabase = SupabaseClient.get_client()
-        if not supabase:
-            raise Exception("Cliente Supabase não inicializado")
-
-        # Dados de exemplo
-        estados_cidades = [
-            ('MA', 'São Luís'),
-            ('MA', 'Imperatriz'),
-            ('PI', 'Teresina'),
-            ('CE', 'Fortaleza'),
-            ('PE', 'Recife')
-        ]
-
-        especialidades_lista = [
-            ['Fibra Óptica', 'Servidores TI'],
-            ['Wi-Fi Corporativo', 'Infraestrutura Fisica'],
-            ['Solucoes ISP', 'Telefonia VoIP'],
-            ['Radio Comunicacao', 'Consultoria'],
-            ['Fibra Óptica', 'Consultoria', 'Solucoes ISP']
-        ]
-
-        status_opcoes = ['Pendente', 'Aprovado', 'Rejeitado']
-        
-        # Data base para simular cadastros em diferentes datas
-        data_base = datetime.now() - timedelta(days=60)
-
-        # Criar 10 registros
-        for i in range(10):
-            estado, cidade = estados_cidades[i % len(estados_cidades)]
-            especialidades = especialidades_lista[i % len(especialidades_lista)]
-            status = status_opcoes[i % len(status_opcoes)]
-            
-            # Simular diferentes datas de cadastro
-            data_cadastro = data_base + timedelta(days=i*6)
-            
-            dados = {
-                'nome_completo': f'Técnico Teste {i+1}',
-                'estado': estado,
-                'cidade': cidade,
-                'especialidades': especialidades,
-                'experiencia': f'Profissional com {random.randint(2, 15)} anos de experiência em {", ".join(especialidades)}.',
-                'whatsapp': f'(98) 9{random.randint(8000,9999)}-{random.randint(1000,9999)}',
-                'email': f'tecnico{i+1}@teste.com',
-                'portfolio_link': f'https://portfolio-tecnico{i+1}.com.br',
-                'status': status,
-                'created_at': data_cadastro.isoformat()
-            }
-
-            response = supabase.table('parceiros_tecnicos').insert(dados).execute()
-            logger.debug(f"Registro {i+1} criado: {response}")
-
-        flash('10 registros de teste criados com sucesso!', 'success')
-        return redirect(url_for('admin.dashboard'))
-
-    except Exception as e:
-        logger.error(f"Erro ao criar dados de teste: {str(e)}", exc_info=True)
-        flash(f'Erro ao criar dados de teste: {str(e)}', 'danger')
-        return redirect(url_for('admin.dashboard'))
+    """Funcionalidade removida."""
+    flash('A funcionalidade de geração de dados de teste foi removida', 'warning')
+    return redirect(url_for('admin.dashboard'))
 
 @admin_bp.route('/parceiros')
 @login_required
@@ -1570,93 +1514,133 @@ def toggle_debug():
 @admin_bp.route('/developer/gerar-dados', methods=['POST'])
 @login_required
 def gerar_dados_teste():
-    """Gera dados de teste no banco de dados."""
+    """Funcionalidade removida."""
+    return jsonify({
+        'success': False,
+        'message': 'Funcionalidade de geração de dados de teste foi removida'
+    }), 404
+
+@admin_bp.route('/developer/gerar-parceiros-teste', methods=['POST'])
+@login_required
+def gerar_parceiros_teste():
+    """Gera parceiros técnicos de teste para desenvolvimento e testes."""
     try:
+        # Validar dados da requisição
         data = request.get_json()
-        tipo = data.get('tipo')
-        quantidade = int(data.get('quantidade', 10))
-        
+        if not data or 'parceiros' not in data:
+            return jsonify({
+                'success': False,
+                'message': 'Dados inválidos na requisição'
+            }), 400
+            
+        parceiros = data.get('parceiros', [])
+        if not parceiros or not isinstance(parceiros, list):
+            return jsonify({
+                'success': False,
+                'message': 'Lista de parceiros inválida'
+            }), 400
+            
+        if len(parceiros) > 20:
+            return jsonify({
+                'success': False,
+                'message': 'Número máximo de parceiros excedido (máx: 20)'
+            }), 400
+            
+        # Conectar ao Supabase
         supabase = SupabaseClient.get_client()
         if not supabase:
             raise Exception("Cliente Supabase não inicializado")
             
-        if tipo == 'parceiros':
-            # Dados de exemplo para parceiros
-            estados_cidades = [
-                ('MA', 'São Luís'), ('MA', 'Imperatriz'),
-                ('PI', 'Teresina'), ('CE', 'Fortaleza'),
-                ('PE', 'Recife')
-            ]
+        # Converter dados e inserir no banco
+        parceiros_inseridos = 0
+        for parceiro in parceiros:
+            # Marcar como dado de teste
+            parceiro['is_test_data'] = True
             
-            especialidades = [
-                ['Fibra Óptica', 'Servidores TI'],
-                ['Wi-Fi Corporativo', 'Infraestrutura Fisica'],
-                ['Solucoes ISP', 'Telefonia VoIP'],
-                ['Radio Comunicacao', 'Consultoria']
-            ]
-            
-            status_opcoes = ['Pendente', 'Aprovado', 'Rejeitado']
-            
-            for i in range(quantidade):
-                estado, cidade = estados_cidades[i % len(estados_cidades)]
-                dados = {
-                    'nome_completo': f'Técnico Teste {i+1}',
-                    'email': f'tecnico{i+1}@teste.com',
-                    'whatsapp': f'(98) 9{random.randint(8000,9999)}-{random.randint(1000,9999)}',
-                    'estado': estado,
-                    'cidade': cidade,
-                    'especialidades': especialidades[i % len(especialidades)],
-                    'status': status_opcoes[i % len(status_opcoes)],
-                    'created_at': (datetime.now() - timedelta(days=i)).isoformat()
-                }
-                supabase.table('parceiros_tecnicos').insert(dados).execute()
+            # Inserir no banco
+            response = supabase.table('parceiros_tecnicos').insert(parceiro).execute()
+            if response.data:
+                parceiros_inseridos += 1
+                logger.debug(f"Parceiro de teste inserido: {parceiro['nome_completo']}")
+            else:
+                logger.warning(f"Falha ao inserir parceiro de teste: {parceiro['nome_completo']}")
                 
-        elif tipo == 'notificacoes':
-            user_id = session.get('user_id')
-            tipos = ['info', 'success', 'warning', 'danger']
-            titulos = [
-                'Novo Parceiro', 'Atualização do Sistema',
-                'Alerta de Segurança', 'Manutenção Programada'
-            ]
-            
-            for i in range(quantidade):
-                tipo = tipos[i % len(tipos)]
-                titulo = titulos[i % len(titulos)]
-                dados = {
-                    'user_id': user_id,
-                    'title': f'{titulo} #{i+1}',
-                    'message': f'Esta é uma notificação de teste do tipo {tipo}',
-                    'type': tipo,
-                    'read': False,
-                    'created_at': (datetime.now() - timedelta(minutes=i*30)).isoformat()
-                }
-                supabase.table('notifications').insert(dados).execute()
+        # Registrar no log
+        logger.info(f"{parceiros_inseridos} parceiros de teste inseridos com sucesso")
         
-        return jsonify({'success': True})
+        # Criar notificação para o usuário
+        user_id = session.get('user_id')
+        create_notification(
+            user_id=user_id,
+            title='Dados de Teste Gerados',
+            message=f'{parceiros_inseridos} parceiros técnicos de teste foram gerados com sucesso.',
+            type='info'
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': f'{parceiros_inseridos} parceiros de teste inseridos com sucesso',
+            'count': parceiros_inseridos
+        })
     except Exception as e:
-        logger.error(f"Erro ao gerar dados de teste: {str(e)}", exc_info=True)
-        return jsonify({'success': False, 'error': str(e)}), 500
+        logger.error(f"Erro ao gerar parceiros de teste: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'message': f'Erro ao gerar parceiros de teste: {str(e)}'
+        }), 500
 
 @admin_bp.route('/developer/limpar-dados', methods=['POST'])
 @login_required
 def limpar_dados_teste():
-    """Remove todos os dados de teste do banco de dados."""
+    """Funcionalidade removida."""
+    return jsonify({
+        'success': False,
+        'message': 'Funcionalidade de limpeza de dados de teste foi removida'
+    }), 404
+
+@admin_bp.route('/developer/limpar-parceiros-teste', methods=['POST'])
+@login_required
+def limpar_parceiros_teste():
+    """Remove todos os parceiros técnicos marcados como dados de teste."""
     try:
+        # Conectar ao Supabase
         supabase = SupabaseClient.get_client()
         if not supabase:
             raise Exception("Cliente Supabase não inicializado")
             
-        # Remover parceiros de teste
-        supabase.table('parceiros_tecnicos').delete().ilike('email', '%@teste.com').execute()
+        # Deletar todos os parceiros marcados como teste
+        response = supabase.table('parceiros_tecnicos').delete().eq('is_test_data', True).execute()
         
-        # Remover notificações de teste
-        user_id = session.get('user_id')
-        supabase.table('notifications').delete().eq('user_id', user_id).execute()
-        
-        return jsonify({'success': True})
+        if response.data:
+            registros_removidos = len(response.data)
+            logger.info(f"{registros_removidos} parceiros de teste removidos com sucesso")
+            
+            # Criar notificação para o usuário
+            user_id = session.get('user_id')
+            create_notification(
+                user_id=user_id,
+                title='Dados de Teste Removidos',
+                message=f'{registros_removidos} parceiros técnicos de teste foram removidos com sucesso.',
+                type='warning'
+            )
+            
+            return jsonify({
+                'success': True,
+                'message': f'{registros_removidos} parceiros de teste removidos com sucesso',
+                'count': registros_removidos
+            })
+        else:
+            return jsonify({
+                'success': True,
+                'message': 'Nenhum parceiro de teste encontrado para remover',
+                'count': 0
+            })
     except Exception as e:
-        logger.error(f"Erro ao limpar dados de teste: {str(e)}", exc_info=True)
-        return jsonify({'success': False, 'error': str(e)}), 500
+        logger.error(f"Erro ao limpar parceiros de teste: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'message': f'Erro ao limpar parceiros de teste: {str(e)}'
+        }), 500
 
 @admin_bp.route('/developer/configurar-logs', methods=['POST'])
 @login_required
@@ -1809,13 +1793,17 @@ def verificar_sessoes():
 def listar_rotas():
     """Lista todas as rotas registradas no sistema."""
     try:
+        from flask import current_app
         rotas = []
-        for rule in admin_bp.url_map.iter_rules():
-            rotas.append({
-                'url': rule.rule,
-                'metodo': ','.join(rule.methods),
-                'funcao': rule.endpoint
-            })
+        
+        for rule in current_app.url_map.iter_rules():
+            # Filtrar apenas as rotas do admin
+            if rule.rule.startswith('/admin'):
+                rotas.append({
+                    'url': rule.rule,
+                    'metodo': ','.join(rule.methods),
+                    'funcao': rule.endpoint
+                })
         
         return jsonify({
             'success': True,

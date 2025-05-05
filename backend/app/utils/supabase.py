@@ -1,16 +1,26 @@
-from supabase import create_client
-import os
+from supabase import create_client, Client
+import logging
+
+# Importar o logger
+from .logger import logger
 
 class SupabaseClient:
-    def __init__(self):
-        self.supabase_url = os.getenv('SUPABASE_URL')
-        self.supabase_key = os.getenv('SUPABASE_KEY')
-        self.client = None
-        
-        if self.supabase_url and self.supabase_key:
-            self.client = create_client(self.supabase_url, self.supabase_key)
-    
-    def get_client(self):
-        if not self.client:
-            raise Exception("Cliente Supabase não inicializado. Verifique as variáveis de ambiente SUPABASE_URL e SUPABASE_KEY")
-        return self.client 
+    _instance = None
+    _client = None
+
+    @classmethod
+    def get_client(cls):
+        if cls._client is None:
+            try:
+                logger.debug("Inicializando cliente Supabase...")
+                cls._client = create_client(
+                    'https://cwrxdjfmxntmplwdbnpg.supabase.co',
+                    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3cnhkamZteG50bXBsd2RibnBnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NjAwMjQzOSwiZXhwIjoyMDYxNTc4NDM5fQ.wUCecHTnyEwSVoH_-ruIV4fIGibr0vNkGZPbTVBM8uY'
+                )
+                # Teste de conexão
+                test = cls._client.table('admin_users').select("*").limit(1).execute()
+                logger.debug(f"Teste de conexão Supabase bem-sucedido: {test}")
+            except Exception as e:
+                logger.error(f"Erro ao inicializar Supabase: {str(e)}", exc_info=True)
+                cls._client = None
+        return cls._client 
