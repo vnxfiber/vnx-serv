@@ -4,3 +4,264 @@ globs:
 alwaysApply: true
 ---
 - REPONDA SO EM PORTUGUES
+
+# Guia de Desenvolvimento - VNX Fiber Service
+
+Este guia estabelece os padrões de código e práticas recomendadas para manter consistência, legibilidade e qualidade nos projetos frontend e backend da empresa.
+
+---
+
+## 1. Estrutura de Pastas
+
+```
+/frontend
+  /assets
+  /components
+  /pages
+  index.html
+  styles.css
+  script.js
+
+/backend
+  /app
+    __init__.py
+    routes.py
+    models.py
+    services.py
+  /config
+    settings.py
+  main.py
+```
+
+---
+
+## 2. HTML - Boas Práticas
+
+- Utilize **tags semânticas** (`<header>`, `<main>`, `<section>`, `<article>`, `<footer>`)
+- Use **indentação de 2 espaços**
+- Nunca use tags ou atributos obsoletos (`<center>`, `align`)
+- Sempre feche todas as tags
+- Use `alt` nas imagens
+
+**Exemplo:**
+```html
+<section class="hero">
+  <h1>Bem-vindo à VNX Fiber</h1>
+  <p>Seu parceiro em telecom e TI</p>
+</section>
+```
+
+---
+
+## 3. CSS - Boas Práticas
+
+- Organização por componentes ou páginas
+- Use **nomes de classes descritivos** e com convenção `kebab-case`
+- Priorize `rem` ou `%` ao invés de `px`
+- Evite `!important`
+- Separe estilo em arquivos `.css` ou use preprocessadores como SCSS (se necessário)
+
+**Exemplo:**
+```css
+.hero-title {
+  font-size: 2rem;
+  color: #003366;
+}
+```
+
+---
+
+## 4. JavaScript - Boas Práticas
+
+- Use `const` e `let` (nunca `var`)
+- Código modular (separar funções em arquivos diferentes)
+- Funções devem ter nomes verbosos e descritivos
+- Evite manipulação direta do DOM se estiver usando frameworks
+- Use async/await e sempre trate erros
+
+**Exemplo:**
+```javascript
+const fetchData = async () => {
+  try {
+    const response = await fetch('/api/data');
+    const result = await response.json();
+    renderData(result);
+  } catch (error) {
+    console.error('Erro ao buscar dados:', error);
+  }
+}
+```
+
+---
+
+## 5. Python (Backend) - Boas Práticas
+
+- Use **PEP8** como base de estilo
+- Nome de variáveis e funções em `snake_case`
+- Classes em `CamelCase`
+- Organize por camadas: routes, services, models
+- Use docstrings nas funções e classes
+- Evite lógica de negócio em rotas
+- Utilize ambientes virtuais (`venv`) e `.env` para variáveis sensíveis
+
+**Exemplo:**
+```python
+class UserService:
+    """Serviços relacionados ao usuário."""
+
+    @staticmethod
+    def get_user_by_id(user_id: int) -> dict:
+        user = UserModel.query.get(user_id)
+        return user.to_dict() if user else {}
+```
+
+---
+
+## 6. Regras para Commits
+
+- Escreva mensagens curtas e significativas
+- Prefixos recomendados:
+  - `feat:` nova funcionalidade
+  - `fix:` correção de bug
+  - `refactor:` melhoria no código
+  - `style:` ajustes de estilo
+  - `docs:` documentação
+  - `chore:` tarefas auxiliares
+
+**Exemplo:**
+```
+feat: adicionar rota de criação de serviço
+```
+
+---
+
+## 7. Plugins recomendados para Cursor IDE
+
+- Prettier (formatação de código)
+- ESLint (JavaScript)
+- Python Linter (Pylint ou Flake8)
+- Auto Rename Tag / Auto Close Tag (HTML)
+- Live Server
+- GitLens
+- .env support
+
+---
+
+## 8. Regras Gerais
+
+- Sempre comente trechos complexos
+- Nomeie variáveis e funções com clareza
+- Nunca deixe código morto (comentado sem motivo)
+- Faça revisões de código entre pares (code review)
+- Documente novas funcionalidades no Notion ou README do projeto
+
+---
+
+## 9. Segurança
+
+- Nunca exponha dados sensíveis no frontend
+- Use HTTPS sempre que possível
+- Faça validações no backend (não confie no frontend)
+- Gere tokens únicos para autenticação (JWT, por exemplo)
+
+---
+
+## 10. Checklist para Pull Request
+
+- [ ] Código limpo e revisado
+- [ ] Testado localmente
+- [ ] Sem credenciais no código
+- [ ] Funcionalidade documentada
+
+---
+
+## 11. Banco de Dados - PostgreSQL
+
+### **Nomenclatura**
+
+- Tabelas: `snake_case` e no plural — `clientes`, `ordens_servico`
+- Colunas: `snake_case` e no singular — `nome`, `data_criacao`
+- Chaves primárias: `id` (tipo serial ou UUID)
+- Chaves estrangeiras: `nome_tabela_id` — ex: `cliente_id`
+
+### **Tipos de Dados**
+
+- Use tipos nativos sempre que possível (`INTEGER`, `VARCHAR`, `TEXT`, `BOOLEAN`, `TIMESTAMP`)
+- Use `UUID` como `PRIMARY KEY` para dados sensíveis ou expostos publicamente
+
+### **Relacionamentos**
+
+- Sempre use **chaves estrangeiras** com `ON DELETE CASCADE` ou `SET NULL` conforme a regra do negócio
+- Utilize `JOIN` corretamente ao invés de múltiplas subqueries
+
+### **Índices**
+
+- Crie índices em colunas frequentemente usadas em `WHERE`, `JOIN` e `ORDER BY`
+- Evite excesso de índices — cada índice consome recursos
+
+### **Normalização**
+
+- Normalize até a 3ª forma normal, salvo exceções estratégicas
+- Evite duplicidade de dados
+
+### **Scripts e Migrations**
+
+- Use ferramentas como **Alembic** (Python) para controle de migrations
+- Migrations devem ser versionadas em repositório
+
+### **Exemplo de criação de tabela com boas práticas**
+
+```sql
+CREATE TABLE clientes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  nome VARCHAR(100) NOT NULL,
+  email VARCHAR(100) UNIQUE NOT NULL,
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE ordens_servico (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  cliente_id UUID REFERENCES clientes(id) ON DELETE CASCADE,
+  descricao TEXT NOT NULL,
+  status VARCHAR(50) DEFAULT 'pendente',
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### **Segurança**
+
+- Use roles com permissões mínimas necessárias
+- Nunca exponha o `user` do banco com acesso total ao frontend
+- Use variáveis de ambiente para armazenar dados sensíveis
+---
+
+## 12. Bibliotecas Recomendadas
+
+### **Frontend**
+
+- **Axios** – Cliente HTTP para requisições assíncronas
+- **Day.js** ou **date-fns** – Manipulação de datas
+- **Lodash** – Utilitários para manipulação de arrays, objetos e strings
+- **SweetAlert2** – Alertas personalizados e modernos
+- **Bootstrap** ou **Tailwind CSS** – Frameworks CSS para estilos rápidos e responsivos
+- **Chart.js** ou **Recharts** – Gráficos e visualizações de dados
+
+### **Backend (Python)**
+
+- **Flask** – Microframework para construção de APIs
+- **FastAPI** – Framework moderno, rápido e com suporte a tipagem e OpenAPI
+- **SQLAlchemy** – ORM para manipulação do banco de dados
+- **Alembic** – Gerenciamento de migrations (SQLAlchemy)
+- **Pydantic** – Validação e serialização de dados (FastAPI)
+- **Requests** – Cliente HTTP simples para comunicação externa
+- **Celery** – Para tarefas assíncronas/background
+- **python-dotenv** – Leitura de variáveis de ambiente de arquivos `.env`
+
+### **Banco de Dados**
+
+- **pgAdmin** – Interface gráfica para PostgreSQL
+- **DBeaver** – Cliente universal para bancos, suporta PostgreSQL
+- **PostgREST** – Geração de API RESTful diretamente de um schema PostgreSQL
+
+**Dica:** Sempre documente as bibliotecas utilizadas em um `requirements.txt` ou `pyproject.toml` (para Python) e `package.json` (para JS).
+
